@@ -28,6 +28,25 @@ def test_readme_reports_the_contract_status():
     )
     assert expected in text.splitlines()
 
+def test_readme_reports_the_round_three_status():
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    lines = text.splitlines()
+    standing = (
+        "- Contract, PG-7 and PG-8 now stand in full form in CONTRACT.md "
+        "under the Round 3 obligations, and their standing is not "
+        "claimed here, as Round 3 has not closed."
+    )
+    assert standing in lines
+    slice_line = (
+        "- Slice 4 is built and in review. It carries the field day "
+        "loader that names every malformed field, the stolen record "
+        "report that walks the record progression of one window across "
+        "a field of recorded runs, and the fieldday command, with a "
+        "synthetic example field day and its golden report under examples."
+    )
+    assert slice_line in lines
+    assert text.count("built and in review") == 1
+
 def test_ci_runs_the_same_gate_as_the_local_gate():
     text = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     live = "\n".join(line.split("#", 1)[0] for line in text.splitlines())
