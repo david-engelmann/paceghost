@@ -10,7 +10,7 @@ def test_agents_carries_the_canonical_marker():
 
 def test_readme_states_the_closed_round_count():
     text = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert re.search(r"Closed perfection rounds, 3 of 100", text)
+    assert re.search(r"Closed perfection rounds, 4 of 100", text)
 
 def test_contract_carries_the_setup_obligations():
     text = (ROOT / "CONTRACT.md").read_text(encoding="utf-8")
@@ -50,13 +50,14 @@ def test_readme_reports_the_round_four_status():
     text = (ROOT / "README.md").read_text(encoding="utf-8")
     lines = text.splitlines()
     standing = (
-        "- Contract, PG-9 and PG-10 now stand in full form in CONTRACT.md "
-        "under the Round 4 obligations, and their standing is not "
-        "claimed here, as Round 4 has not closed."
+        "- Contract, PG-9 and PG-10 met. They stand in full form in "
+        "CONTRACT.md with the Round 4 repair amendments, and Round 4 "
+        "closed on the merged slice 5 after three reviews, a repair "
+        "pass, and an approving re-review."
     )
     assert standing in lines
     slice_line = (
-        "- Slice 5 is built and in review. It carries the ladder "
+        "- Slice 5 has landed. It carries the ladder "
         "loader that names every malformed field in a ladder file, the "
         "ladder report that reads one field day as it stood at each "
         "window in a list and closes with a summary line over the "
@@ -64,7 +65,7 @@ def test_readme_reports_the_round_four_status():
         "example ladder and its golden report under examples."
     )
     assert slice_line in lines
-    assert text.count("built and in review") == 1
+    assert text.count("built and in review") == 0
 
 def test_ci_runs_the_same_gate_as_the_local_gate():
     text = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
