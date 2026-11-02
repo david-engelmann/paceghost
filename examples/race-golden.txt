@@ -1,0 +1,5 @@
+plan ahead by 60 seconds
+draft ahead by 120 seconds
+polish ahead by 180 seconds
+window, the live run finished inside its window with 480 seconds to spare
+finish ahead by 180 seconds
