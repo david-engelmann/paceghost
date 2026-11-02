@@ -8,13 +8,13 @@ Racing games solved motivation decades ago. You do not race strangers. You race 
 
 ## Status
 
-Seeded in October 2026. Setup has landed and the build has not started. Part of the Spectacle line in the 39 repo storefront perfection programme.
+Seeded in October 2026. Setup has landed, and slice 2 is built and in review. Part of the Spectacle line in the 39 repo storefront perfection programme.
 
 ## Programme status
 
 - Closed perfection rounds, 0 of 100. A round counts only when a full cycle of work, audit, review, red team, and approval has closed. Seeding and setup are not rounds.
-- Contract, SETUP-1 to SETUP-4 met by the setup slice. The first slice obligations PG-1 to PG-4 stand in stub form in CONTRACT.md and are not yet met.
-- The first slice is the window clock plus a ghost replayed from recorded runs stored locally, one past window raced end to end.
+- Contract, SETUP-1 to SETUP-4 met by the setup slice. The first slice obligations PG-1 to PG-4 stand in full form in CONTRACT.md. They are not reported as met until the round closes.
+- Slice 2 carries the recorded run loader that names every malformed field, the ghost rule, the race report, the ghost change report, and the show, ghost, and race commands, with two synthetic example runs and a golden race report under examples.
 - Local gate, python3 scripts/codepoint_scan.py and python3 -m pytest tests -q. CI runs the same commands.
 
 ## Licence

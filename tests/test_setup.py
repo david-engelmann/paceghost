@@ -17,7 +17,17 @@ def test_contract_carries_the_setup_obligations():
     for oid in ("SETUP-1", "SETUP-2", "SETUP-3", "SETUP-4", "PG-1"):
         assert oid in text, oid
 
+def test_readme_reports_the_contract_status():
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    expected = (
+        "- Contract, SETUP-1 to SETUP-4 met by the setup slice. "
+        "The first slice obligations PG-1 to PG-4 stand in full form "
+        "in CONTRACT.md. They are not reported as met until the round closes."
+    )
+    assert expected in text.splitlines()
+
 def test_ci_runs_the_same_gate_as_the_local_gate():
     text = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
-    assert "codepoint_scan.py" in text
-    assert "pytest" in text
+    live = "\n".join(line.split("#", 1)[0] for line in text.splitlines())
+    assert "python3 scripts/codepoint_scan.py" in live
+    assert "python3 -m pytest tests -q" in live

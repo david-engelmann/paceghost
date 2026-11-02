@@ -1,0 +1,12 @@
+{
+  "task": "draft the weekly summary",
+  "window_seconds": 1800,
+  "runner": "operator",
+  "recorded_at": "2026-01-04",
+  "total_seconds": 1500,
+  "splits": [
+    {"phase": "plan", "elapsed_seconds": 300},
+    {"phase": "draft", "elapsed_seconds": 900},
+    {"phase": "polish", "elapsed_seconds": 1500}
+  ]
+}
