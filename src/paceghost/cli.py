@@ -1,13 +1,15 @@
 """The paceghost command line surface.
 
-Six commands read recorded runs from local files and print reports.
+Seven commands read recorded runs from local files and print reports.
 The show command prints one run or its defects, the ghost command
 prints the standing ghost for a task, and the race command prints a
 live run raced against a ghost. The season command prints the season
 report for a field of runs against a ghost, and the board command
 prints the live board for a run carrying timed reads. The fieldday
 command prints the stolen record report for a field day of runs
-inside one window. Nothing here touches the network.
+inside one window. The ladder command prints the ladder report for
+a field day read through a list of windows. Nothing here touches
+the network.
 """
 
 import argparse
@@ -21,6 +23,7 @@ from paceghost.runs import (
     window_line,
 )
 from paceghost.fieldday import field_day_report, load_field_day_file
+from paceghost.ladder import ladder_report, load_ladder_file
 from paceghost.season import board_report, load_field_file, season_report
 
 
@@ -150,6 +153,25 @@ def _command_fieldday(args):
     return 0
 
 
+def _load_ladder_or_print_defects(path):
+    ladder, defects = load_ladder_file(path)
+    if defects:
+        print("invalid ladder")
+        for defect in defects:
+            print(f"defect {defect}")
+        return None
+    return ladder
+
+
+def _command_ladder(args):
+    ladder = _load_ladder_or_print_defects(args.file)
+    if ladder is None:
+        return 1
+    for line in ladder_report(ladder):
+        print(line)
+    return 0
+
+
 def _command_race(args):
     ghost = _load_or_print_defects(args.ghost_file)
     live = _load_or_print_defects(args.live_file)
@@ -197,6 +219,11 @@ def main(argv=None):
     )
     fieldday.add_argument("file")
     fieldday.set_defaults(handler=_command_fieldday)
+    ladder = commands.add_parser(
+        "ladder", help="print the ladder report for a field day and its windows"
+    )
+    ladder.add_argument("file")
+    ladder.set_defaults(handler=_command_ladder)
     args = parser.parse_args(argv)
     return args.handler(args)
 
