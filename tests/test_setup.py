@@ -45,7 +45,26 @@ def test_readme_reports_the_round_three_status():
         "synthetic example field day and its golden report under examples."
     )
     assert slice_line in lines
-    assert "built and in review" not in text
+
+def test_readme_reports_the_round_four_status():
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    lines = text.splitlines()
+    standing = (
+        "- Contract, PG-9 and PG-10 now stand in full form in CONTRACT.md "
+        "under the Round 4 obligations, and their standing is not "
+        "claimed here, as Round 4 has not closed."
+    )
+    assert standing in lines
+    slice_line = (
+        "- Slice 5 is built and in review. It carries the ladder "
+        "loader that names every malformed field in a ladder file, the "
+        "ladder report that reads one field day as it stood at each "
+        "window in a list and closes with a summary line over the "
+        "closing holders, and the ladder command, with a synthetic "
+        "example ladder and its golden report under examples."
+    )
+    assert slice_line in lines
+    assert text.count("built and in review") == 1
 
 def test_ci_runs_the_same_gate_as_the_local_gate():
     text = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")

@@ -1,0 +1,21 @@
+field day, window 600 seconds, 4 runs, operator operator
+record at 300 seconds, operator at a projection of 420
+record at 600 seconds, dawn fork at a projection of 400
+finish, record held by dawn fork at a projection of 400
+record stolen from operator at 600 seconds by dawn fork, margin 20 at the close
+field day, window 900 seconds, 4 runs, operator operator
+record at 300 seconds, operator at a projection of 630
+record at 600 seconds, dawn fork at a projection of 600
+record at 700 seconds, operator at a projection of 552.857143
+record at 900 seconds, night fork at a projection of 470
+finish, record held by night fork at a projection of 470
+record stolen from operator at 900 seconds by night fork, margin 82.857143 at the close
+field day, window 1800 seconds, 4 runs, operator operator
+record at 300 seconds, operator at a projection of 1260
+record at 600 seconds, dawn fork at a projection of 1200
+record at 700 seconds, operator at a projection of 1105.714286
+record at 900 seconds, night fork at a projection of 940
+record at 1500 seconds, night fork at a projection of 840
+finish, record held by night fork at a projection of 840
+record stolen from operator at 900 seconds by night fork, margin 300 at the close
+ladder, the closing holder differs from the first window at 900 seconds, 1800 seconds

@@ -9,6 +9,8 @@ every outcome line the close can produce.
 
 import json
 
+import pytest
+
 from paceghost.fieldday import (
     field_day_report,
     load_field_day_file,
@@ -520,3 +522,16 @@ def test_a_projection_renders_at_full_precision_below_the_rounding_bound():
         "record at 700 seconds, operator at a projection of 1105.714286"
         in lines
     )
+
+
+# The report on a value the loader refuses, the discipline of FIX-PG-8
+def test_the_report_raises_a_value_error_when_the_operator_names_no_run():
+    day = {
+        "window_seconds": 1800,
+        "operator": "ghost",
+        "runs": [timed("operator", [(300, 150)]), timed("fork", [(600, 320)])],
+    }
+    with pytest.raises(
+        ValueError, match="the operator names no run among the runs"
+    ):
+        field_day_report(day)

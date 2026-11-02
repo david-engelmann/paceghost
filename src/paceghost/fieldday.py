@@ -82,6 +82,17 @@ def load_field_day_text(text):
         return None, ["input is not valid JSON"]
     if not isinstance(data, dict):
         return None, ["input is not a JSON object"]
+    return _load_field_day_data(data)
+
+
+def _load_field_day_data(data):
+    """Validate one parsed field day object, naming every defect.
+
+    Returns a pair of the field day and the defect list, with the
+    same contract as the text entry point. The ladder loader of
+    PG-10 runs this validation over the day a ladder file embeds,
+    so one validation serves both shapes.
+    """
     defects = []
     window = None
     if "window_seconds" not in data:
@@ -146,24 +157,48 @@ def field_day_report(day):
     and the holder keeps the record while it stands at the record
     figure, so an equal figure alone never moves the record.
     """
-    window = Fraction(day["window_seconds"])
-    runs = day["runs"]
-    operator = day["operator"]
-    operator_index = next(
-        index for index, run in enumerate(runs) if run["runner"] == operator
+    lines, _holder = _record_walk(
+        day["runs"], day["operator"], day["window_seconds"], None
     )
+    return lines
+
+
+def _record_walk(runs, operator, window_value, horizon):
+    """Walk the record progression and return its lines and holder.
+
+    Returns a pair of the report lines and the index of the holder
+    at the close, or None for the holder when no record stands.
+    The window value scales every projection and stands in the
+    first line. The horizon bounds the reads the walk reads, so a
+    read whose elapsed value is greater than the horizon takes no
+    part, and a horizon of None reads every read in the runs. The
+    field day report reads with no horizon, and the ladder reading
+    of PG-9 reads each window section through this same walk with
+    the window standing as its horizon. Handed a value the loader
+    would refuse, in which the operator names no run among the
+    runs, the walk raises a ValueError naming that precondition,
+    in the discipline of FIX-PG-8, and never a bare StopIteration.
+    """
+    window = Fraction(window_value)
+    operator_index = None
+    for index, run in enumerate(runs):
+        if run["runner"] == operator:
+            operator_index = index
+            break
+    if operator_index is None:
+        raise ValueError("the operator names no run among the runs")
     reads_by_run = []
     marks = set()
     for run in runs:
         by_elapsed = {}
         for read in run.get("reads", []):
             elapsed = Fraction(read["elapsed_seconds"])
-            if elapsed > 0:
+            if elapsed > 0 and (horizon is None or elapsed <= horizon):
                 by_elapsed[elapsed] = Fraction(read["usage"])
                 marks.add(elapsed)
         reads_by_run.append(by_elapsed)
     lines = [
-        f"field day, window {format_seconds(day['window_seconds'])} "
+        f"field day, window {format_seconds(window_value)} "
         f"seconds, {len(runs)} runs, operator {operator}"
     ]
     standing = [None] * len(runs)
@@ -205,7 +240,7 @@ def field_day_report(day):
             emitted = (holder, record)
     if holder is None:
         lines.append("finish, no record was set")
-        return lines
+        return lines, None
     record = standing[holder]
     lines.append(
         f"finish, record held by {runs[holder]['runner']} "
@@ -239,4 +274,4 @@ def field_day_report(day):
         lines.append(
             f"record never held by {operator}, whose run projected no figure"
         )
-    return lines
+    return lines, holder
