@@ -1,0 +1,41 @@
+{
+  "task": "draft the weekly summary",
+  "window_seconds": 1800,
+  "runner": "operator",
+  "recorded_at": "2026-01-11",
+  "total_seconds": 1400,
+  "usage": 1090,
+  "budget": 1200,
+  "splits": [
+    {
+      "phase": "plan",
+      "elapsed_seconds": 320
+    },
+    {
+      "phase": "draft",
+      "elapsed_seconds": 880
+    },
+    {
+      "phase": "polish",
+      "elapsed_seconds": 1400
+    }
+  ],
+  "reads": [
+    {
+      "elapsed_seconds": 0,
+      "usage": 0
+    },
+    {
+      "elapsed_seconds": 300,
+      "usage": 210
+    },
+    {
+      "elapsed_seconds": 700,
+      "usage": 430
+    },
+    {
+      "elapsed_seconds": 1200,
+      "usage": 760
+    }
+  ]
+}

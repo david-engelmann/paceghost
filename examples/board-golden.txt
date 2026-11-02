@@ -1,0 +1,5 @@
+read 0 at 0 seconds, usage 0, projects no figure
+read 1 at 300 seconds, usage 210, projection 1260, past the ghost usage, past the budget
+read 2 at 700 seconds, usage 430, projection 1105.714286, inside the ghost usage, inside the budget
+read 3 at 1200 seconds, usage 760, projection 1140, inside the ghost usage, inside the budget
+finish, actual usage 1090 against a last projection of 1140, inside the ghost usage, inside the budget, the board called it

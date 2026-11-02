@@ -1,0 +1,22 @@
+season for task draft the weekly summary
+model birch
+runs raced 2
+inside window 2
+inside budget 1
+total usage 2170
+mean usage 1085
+head to head against the ghost, wins 2 of 2
+model cedar
+runs raced 2
+inside window 2
+inside budget 2
+total usage 2300
+mean usage 1150
+head to head against the ghost, wins 1 of 2
+model atlas
+runs raced 3
+inside window 2
+inside budget 2
+total usage 3290
+mean usage 1096.666667
+head to head against the ghost, wins 1 of 3

@@ -1,9 +1,12 @@
 """The paceghost command line surface.
 
-Three commands read recorded runs from local files and print reports.
+Five commands read recorded runs from local files and print reports.
 The show command prints one run or its defects, the ghost command
 prints the standing ghost for a task, and the race command prints a
-live run raced against a ghost. Nothing here touches the network.
+live run raced against a ghost. The season command prints the season
+report for a field of runs against a ghost, and the board command
+prints the live board for a run carrying timed reads. Nothing here
+touches the network.
 """
 
 import argparse
@@ -16,6 +19,7 @@ from paceghost.runs import (
     select_ghost,
     window_line,
 )
+from paceghost.season import board_report, load_field_file, season_report
 
 
 def run_summary_lines(run):
@@ -78,6 +82,53 @@ def _command_ghost(args):
     return 0
 
 
+def _load_field_or_print_defects(path):
+    runs, defects = load_field_file(path)
+    if defects:
+        print("invalid field")
+        for defect in defects:
+            print(f"defect {defect}")
+        return None
+    return runs
+
+
+def _command_season(args):
+    runs = _load_field_or_print_defects(args.field_file)
+    if runs is None:
+        return 1
+    ghost = _load_or_print_defects(args.ghost_file)
+    if ghost is None:
+        return 1
+    if "usage" not in ghost:
+        print("ghost record carries no usage")
+        return 1
+    if runs[0]["task"] != ghost["task"]:
+        print("runs do not share one task")
+        return 1
+    for line in season_report(runs, ghost):
+        print(line)
+    return 0
+
+
+def _command_board(args):
+    run = _load_or_print_defects(args.file)
+    ghost = _load_or_print_defects(args.ghost_file)
+    if run is None or ghost is None:
+        return 1
+    if "reads" not in run:
+        print("run carries no timed reads")
+        return 1
+    if "usage" not in ghost:
+        print("ghost record carries no usage")
+        return 1
+    if run["task"] != ghost["task"]:
+        print("runs do not share one task")
+        return 1
+    for line in board_report(run, ghost):
+        print(line)
+    return 0
+
+
 def _command_race(args):
     ghost = _load_or_print_defects(args.ghost_file)
     live = _load_or_print_defects(args.live_file)
@@ -108,6 +159,18 @@ def main(argv=None):
     race.add_argument("ghost_file")
     race.add_argument("live_file")
     race.set_defaults(handler=_command_race)
+    season = commands.add_parser(
+        "season", help="print the season report for a field of runs"
+    )
+    season.add_argument("field_file")
+    season.add_argument("ghost_file")
+    season.set_defaults(handler=_command_season)
+    board = commands.add_parser(
+        "board", help="print the live board for a run carrying timed reads"
+    )
+    board.add_argument("file")
+    board.add_argument("ghost_file")
+    board.set_defaults(handler=_command_board)
     args = parser.parse_args(argv)
     return args.handler(args)
 
