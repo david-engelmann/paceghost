@@ -2,7 +2,8 @@
 
 Every function in this module is a pure function of its inputs, and the
 loader never raises on malformed content. The obligations this module
-carries are PG-1 to PG-4 in CONTRACT.md, in the full form section.
+carries are PG-1 to PG-4 in CONTRACT.md, in the full form section,
+plus the Round 2 run extension the season and the board read.
 """
 
 import datetime
@@ -61,75 +62,82 @@ def format_seconds(value):
     return f"{number:.6f}".rstrip("0").rstrip(".")
 
 
-def _check_text_field(data, name, defects):
+def _check_text_field(data, name, defects, prefix=""):
     if name not in data:
-        defects.append(f"missing field {name}")
+        defects.append(f"{prefix}missing field {name}")
         return None
     value = data[name]
     if not isinstance(value, str):
-        defects.append(f"field {name} has the wrong type")
+        defects.append(f"{prefix}field {name} has the wrong type")
         return None
     if value == "":
-        defects.append(f"field {name} is empty")
+        defects.append(f"{prefix}field {name} is empty")
         return None
     if _holds_unpaired_surrogate(value):
-        defects.append(f"field {name} holds an unpaired surrogate")
+        defects.append(f"{prefix}field {name} holds an unpaired surrogate")
         return None
     return value
 
 
-def _load_splits(data, defects):
+def _load_splits(data, defects, prefix=""):
     """Validate the splits field and return the clean splits, if any."""
     if "splits" not in data:
-        defects.append("missing field splits")
+        defects.append(f"{prefix}missing field splits")
         return None
     raw = data["splits"]
     if not isinstance(raw, list):
-        defects.append("field splits has the wrong type")
+        defects.append(f"{prefix}field splits has the wrong type")
         return None
     if len(raw) == 0:
-        defects.append("field splits is empty")
+        defects.append(f"{prefix}field splits is empty")
         return None
     clean = []
     last_valid = None
     for index, entry in enumerate(raw):
         if not isinstance(entry, dict):
-            defects.append(f"split {index} is not an object")
+            defects.append(f"{prefix}split {index} is not an object")
             continue
         phase = None
         elapsed = None
         if "phase" not in entry:
-            defects.append(f"split {index} is missing field phase")
+            defects.append(f"{prefix}split {index} is missing field phase")
         elif not isinstance(entry["phase"], str):
-            defects.append(f"split {index} field phase has the wrong type")
+            defects.append(
+                f"{prefix}split {index} field phase has the wrong type"
+            )
         elif entry["phase"] == "":
-            defects.append(f"split {index} field phase is empty")
+            defects.append(f"{prefix}split {index} field phase is empty")
         elif _holds_unpaired_surrogate(entry["phase"]):
             defects.append(
-                f"split {index} field phase holds an unpaired surrogate"
+                f"{prefix}split {index} field phase holds "
+                "an unpaired surrogate"
             )
         else:
             phase = entry["phase"]
         if "elapsed_seconds" not in entry:
-            defects.append(f"split {index} is missing field elapsed_seconds")
+            defects.append(
+                f"{prefix}split {index} is missing field elapsed_seconds"
+            )
         elif not _is_number(entry["elapsed_seconds"]):
             defects.append(
-                f"split {index} field elapsed_seconds has the wrong type"
+                f"{prefix}split {index} field elapsed_seconds "
+                "has the wrong type"
             )
         elif not _is_finite_number(entry["elapsed_seconds"]):
             defects.append(
-                f"split {index} field elapsed_seconds is not a finite number"
+                f"{prefix}split {index} field elapsed_seconds "
+                "is not a finite number"
             )
         elif entry["elapsed_seconds"] < 0:
             defects.append(
-                f"split {index} field elapsed_seconds is negative"
+                f"{prefix}split {index} field elapsed_seconds is negative"
             )
         else:
             elapsed = entry["elapsed_seconds"]
             if last_valid is not None and elapsed <= last_valid:
                 defects.append(
-                    f"split {index} field elapsed_seconds is not greater "
-                    "than the previous split"
+                    f"{prefix}split {index} field elapsed_seconds "
+                    "is not greater than the previous split"
                 )
                 elapsed = None
             else:
@@ -139,6 +147,185 @@ def _load_splits(data, defects):
     if len(clean) != len(raw):
         return None
     return clean
+
+
+def _load_usage_value(data, name, defects, prefix):
+    """Validate one optional usage figure and return it, if sound.
+
+    A budget must be positive and a usage figure must sit at or after
+    zero. An absent field is not a defect here, because the Round 2
+    extension fields are optional on a plain run.
+    """
+    if name not in data:
+        return None
+    value = data[name]
+    if not _is_number(value):
+        defects.append(f"{prefix}field {name} has the wrong type")
+        return None
+    if not _is_finite_number(value):
+        defects.append(f"{prefix}field {name} is not a finite number")
+        return None
+    if name == "budget" and value <= 0:
+        defects.append(f"{prefix}field budget must be positive")
+        return None
+    if name == "usage" and value < 0:
+        defects.append(f"{prefix}field usage is negative")
+        return None
+    return value
+
+
+def _load_reads(data, defects, prefix):
+    """Validate the reads field and return the clean reads, if any."""
+    if "reads" not in data:
+        return None
+    raw = data["reads"]
+    if not isinstance(raw, list):
+        defects.append(f"{prefix}field reads has the wrong type")
+        return None
+    if len(raw) == 0:
+        defects.append(f"{prefix}field reads is empty")
+        return None
+    clean = []
+    last_elapsed = None
+    last_usage = None
+    for index, entry in enumerate(raw):
+        if not isinstance(entry, dict):
+            defects.append(f"{prefix}read {index} is not an object")
+            continue
+        elapsed = None
+        usage = None
+        if "elapsed_seconds" not in entry:
+            defects.append(
+                f"{prefix}read {index} is missing field elapsed_seconds"
+            )
+        elif not _is_number(entry["elapsed_seconds"]):
+            defects.append(
+                f"{prefix}read {index} field elapsed_seconds "
+                "has the wrong type"
+            )
+        elif not _is_finite_number(entry["elapsed_seconds"]):
+            defects.append(
+                f"{prefix}read {index} field elapsed_seconds "
+                "is not a finite number"
+            )
+        elif entry["elapsed_seconds"] < 0:
+            defects.append(
+                f"{prefix}read {index} field elapsed_seconds is negative"
+            )
+        else:
+            elapsed = entry["elapsed_seconds"]
+            if last_elapsed is not None and elapsed <= last_elapsed:
+                defects.append(
+                    f"{prefix}read {index} field elapsed_seconds "
+                    "is not greater than the previous read"
+                )
+                elapsed = None
+            else:
+                last_elapsed = elapsed
+        if "usage" not in entry:
+            defects.append(f"{prefix}read {index} is missing field usage")
+        elif not _is_number(entry["usage"]):
+            defects.append(
+                f"{prefix}read {index} field usage has the wrong type"
+            )
+        elif not _is_finite_number(entry["usage"]):
+            defects.append(
+                f"{prefix}read {index} field usage is not a finite number"
+            )
+        elif entry["usage"] < 0:
+            defects.append(f"{prefix}read {index} field usage is negative")
+        else:
+            usage = entry["usage"]
+            if last_usage is not None and usage < last_usage:
+                defects.append(
+                    f"{prefix}read {index} field usage "
+                    "is less than the previous read"
+                )
+                usage = None
+            else:
+                last_usage = usage
+        if elapsed is not None and usage is not None:
+            clean.append({"elapsed_seconds": elapsed, "usage": usage})
+    if len(clean) != len(raw):
+        return None
+    return clean
+
+
+def _load_run_data(data, defects, prefix=""):
+    """Validate one parsed run object, appending every defect found.
+
+    Returns the clean run, or None when this run drew any defect. The
+    prefix stands before every phrase, empty for a single run file
+    and naming the run index inside a field.
+    """
+    before = len(defects)
+    task = _check_text_field(data, "task", defects, prefix)
+    runner = _check_text_field(data, "runner", defects, prefix)
+    window = None
+    if "window_seconds" not in data:
+        defects.append(f"{prefix}missing field window_seconds")
+    elif not _is_number(data["window_seconds"]):
+        defects.append(f"{prefix}field window_seconds has the wrong type")
+    elif not _is_finite_number(data["window_seconds"]):
+        defects.append(
+            f"{prefix}field window_seconds is not a finite number"
+        )
+    elif data["window_seconds"] <= 0:
+        defects.append(f"{prefix}field window_seconds must be positive")
+    else:
+        window = data["window_seconds"]
+    recorded_at = None
+    if "recorded_at" not in data:
+        defects.append(f"{prefix}missing field recorded_at")
+    elif not isinstance(data["recorded_at"], str):
+        defects.append(f"{prefix}field recorded_at has the wrong type")
+    elif not _RECORDED_AT_SHAPE.fullmatch(data["recorded_at"]):
+        defects.append(f"{prefix}field recorded_at is not an ISO date")
+    else:
+        try:
+            datetime.date.fromisoformat(data["recorded_at"])
+            recorded_at = data["recorded_at"]
+        except ValueError:
+            defects.append(f"{prefix}field recorded_at is not an ISO date")
+    splits = _load_splits(data, defects, prefix)
+    if "total_seconds" in data:
+        carried = data["total_seconds"]
+        if not _is_number(carried):
+            defects.append(f"{prefix}field total_seconds has the wrong type")
+        elif not _is_finite_number(carried):
+            defects.append(
+                f"{prefix}field total_seconds is not a finite number"
+            )
+        elif splits is not None and carried != splits[-1]["elapsed_seconds"]:
+            defects.append(
+                f"{prefix}field total_seconds does not equal "
+                "the final split"
+            )
+    usage = _load_usage_value(data, "usage", defects, prefix)
+    budget = _load_usage_value(data, "budget", defects, prefix)
+    reads = _load_reads(data, defects, prefix)
+    if "reads" in data:
+        if "usage" not in data:
+            defects.append(f"{prefix}missing field usage")
+        if "budget" not in data:
+            defects.append(f"{prefix}missing field budget")
+    if len(defects) > before:
+        return None
+    run = {
+        "task": task,
+        "window_seconds": window,
+        "runner": runner,
+        "recorded_at": recorded_at,
+        "splits": splits,
+        "total_seconds": splits[-1]["elapsed_seconds"],
+    }
+    if "usage" in data:
+        run["usage"] = usage
+    if "budget" in data:
+        run["budget"] = budget
+    if "reads" in data:
+        run["reads"] = reads
+    return run
 
 
 def load_run_text(text):
@@ -154,53 +341,9 @@ def load_run_text(text):
     if not isinstance(data, dict):
         return None, ["input is not a JSON object"]
     defects = []
-    task = _check_text_field(data, "task", defects)
-    runner = _check_text_field(data, "runner", defects)
-    window = None
-    if "window_seconds" not in data:
-        defects.append("missing field window_seconds")
-    elif not _is_number(data["window_seconds"]):
-        defects.append("field window_seconds has the wrong type")
-    elif not _is_finite_number(data["window_seconds"]):
-        defects.append("field window_seconds is not a finite number")
-    elif data["window_seconds"] <= 0:
-        defects.append("field window_seconds must be positive")
-    else:
-        window = data["window_seconds"]
-    recorded_at = None
-    if "recorded_at" not in data:
-        defects.append("missing field recorded_at")
-    elif not isinstance(data["recorded_at"], str):
-        defects.append("field recorded_at has the wrong type")
-    elif not _RECORDED_AT_SHAPE.fullmatch(data["recorded_at"]):
-        defects.append("field recorded_at is not an ISO date")
-    else:
-        try:
-            datetime.date.fromisoformat(data["recorded_at"])
-            recorded_at = data["recorded_at"]
-        except ValueError:
-            defects.append("field recorded_at is not an ISO date")
-    splits = _load_splits(data, defects)
-    if "total_seconds" in data:
-        carried = data["total_seconds"]
-        if not _is_number(carried):
-            defects.append("field total_seconds has the wrong type")
-        elif not _is_finite_number(carried):
-            defects.append("field total_seconds is not a finite number")
-        elif splits is not None and carried != splits[-1]["elapsed_seconds"]:
-            defects.append(
-                "field total_seconds does not equal the final split"
-            )
+    run = _load_run_data(data, defects)
     if defects:
         return None, defects
-    run = {
-        "task": task,
-        "window_seconds": window,
-        "runner": runner,
-        "recorded_at": recorded_at,
-        "splits": splits,
-        "total_seconds": splits[-1]["elapsed_seconds"],
-    }
     return run, []
 
 
