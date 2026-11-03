@@ -74,29 +74,35 @@ fn test_ci_runs_the_same_gate_as_the_local_gate() {
         .lines()
         .map(|line| line.split('#').next().unwrap_or("").to_string())
         .collect();
-    assert!(live
-        .iter()
-        .any(|line| line.contains("python3 scripts/codepoint_scan.py")));
-    assert!(live
-        .iter()
-        .any(|line| line.contains("python3 -m pytest tests -q")));
-    // Added with the port review repairs, by addition only. The port
-    // gate of PORT-7 stands in CI beside the cargo test step.
     assert!(live.iter().any(|line| line.contains("cargo test")));
     assert!(live.iter().any(|line| line.contains("cargo fmt --check")));
     assert!(live
         .iter()
         .any(|line| line.contains("cargo clippy --all-targets -- -D warnings")));
+    // Adjusted with the removal slice of PORT-10, as the named
+    // mechanical consequence of the Python gate leaving CI. The
+    // two pins that read the Python commands in CI are replaced by
+    // pins that read their absence, so the cargo gate stands alone
+    // under guard rather than merely unopposed.
+    assert!(!live
+        .iter()
+        .any(|line| line.contains("python3 scripts/codepoint_scan.py")));
+    assert!(!live
+        .iter()
+        .any(|line| line.contains("python3 -m pytest tests -q")));
+    assert!(!live.iter().any(|line| line.contains("setup-python")));
 }
 
-// Added by the Rust port slice, not a translation. The port status
-// line must stand in the README so the programme status the port
-// reports is pinned where a reader of the repo finds it. The line
-// is worded so the Round 4 pin above, which counts the plain phrase
-// the brief suggested zero times across the README, still holds.
+// Added by the Rust port slice, not a translation, and adjusted
+// with the removal slice of PORT-10 to the landed wording. The
+// port status line must stand in the README so the programme
+// status the port reports is pinned where a reader of the repo
+// finds it. The line is worded so the Round 4 pin above, which
+// counts the plain phrase the brief suggested zero times across
+// the README, still holds.
 #[test]
 fn test_readme_reports_the_rust_port_status() {
-    let line = "- The Rust port has been built and is in review. It carries the same behavior as the Python package, checked against the same goldens.";
+    let line = "- The Rust port has landed. It carries the behavior the Python package carried, checked against the same goldens, and the Python tree stands removed under PORT-10.";
     assert_eq!(
         readme_lines()
             .iter()

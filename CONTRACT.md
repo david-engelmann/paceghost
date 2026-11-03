@@ -216,3 +216,7 @@ The nesting boundary of PORT-3 is pinned at the figure the console entry point r
 ### PORT-9, the scan covers the Rust tree
 
 Amending the suffix list FIX-PG-6 states, the codepoint scan counts every file whose suffix is .rs beside the suffixes the earlier text names, so the typography gate covers the Rust tree the port adds. A scan pin plants a tree whose only dash stands in a Rust file and reads the scan failing there.
+
+### PORT-10, the Python tree is removed
+
+The removal slice of the port checkpoint takes the Python tree out of the repo. The Python package under src, the Python test corpus under tests, pyproject.toml, and the Python codepoint scan script under scripts are removed, with any Python maker the tree carries, and nothing else moves. The cargo suite is the only gate from this slice on, and the continuous integration file runs the cargo commands alone. The codepoint scan lives in the crate, as a library reading over a tree and a thin binary printing the line the script printed, and the scan pins stand in the cargo suite against the library reading. The Python implementation remains in the git history at the port checkpoint as the spec of record, and the examples and goldens stand unchanged as data. A Python file standing in the tree after this slice, outside history and data, is a defect of the removal.
