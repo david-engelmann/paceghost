@@ -1,46 +1,21 @@
 //! Pins for the codepoint scan scope stated in SETUP-3 as amended
 //! by FIX-PG-6.
 //!
-//! Translated from tests/test_scan.py. The scan is run as a
-//! subprocess against a planted tree, because the rule is about
-//! which files on disk the scan opens, and only a real run against a
-//! real tree can pin that. Each planted tree carries the scan script
-//! itself under scripts, which is where the scan looks for its own
-//! root.
+//! Translated from tests/test_scan.py, and rewritten with the
+//! removal slice of PORT-10 to read the library scan directly
+//! instead of running the Python script as a subprocess, because
+//! the scan lives in the crate now. The rule is still about which
+//! files on disk the scan opens, so each pin plants a real tree
+//! and reads the counts the library returns for it.
 
-use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::path::PathBuf;
 
-fn root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-}
+use paceghost::scan::{report_line, scan_tree};
 
 fn plant_tree(tag: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("paceghost-scan-{}-{}", std::process::id(), tag));
-    let scripts = dir.join("scripts");
-    std::fs::create_dir_all(&scripts).expect("the planted tree is created");
-    std::fs::copy(
-        root().join("scripts").join("codepoint_scan.py"),
-        scripts.join("codepoint_scan.py"),
-    )
-    .expect("the scan script is planted");
+    std::fs::create_dir_all(&dir).expect("the planted tree is created");
     dir
-}
-
-struct ScanResult {
-    code: i32,
-    stdout: String,
-}
-
-fn run_scan(root: &Path) -> ScanResult {
-    let output = Command::new("python3")
-        .arg(root.join("scripts").join("codepoint_scan.py"))
-        .output()
-        .expect("the scan runs");
-    ScanResult {
-        code: output.status.code().expect("the scan exits with a status"),
-        stdout: String::from_utf8(output.stdout).expect("the scan prints text"),
-    }
 }
 
 const EM_DASH: &str = "\u{2014}";
@@ -50,10 +25,11 @@ const EN_DASH: &str = "\u{2013}";
 fn test_a_clean_planted_tree_passes() {
     let root = plant_tree("clean");
     std::fs::write(root.join("notes.md"), "plain text\n").expect("the note writes");
-    let result = run_scan(&root);
-    assert_eq!(result.code, 0);
-    assert!(result.stdout.contains("U+2014=0"));
-    assert!(result.stdout.contains("U+2013=0"));
+    let counts = scan_tree(&root);
+    assert!(counts.is_clean());
+    assert_eq!(counts.em_dashes, 0);
+    assert_eq!(counts.en_dashes, 0);
+    assert_eq!(report_line(&counts), "codepoint scan U+2014=0 U+2013=0");
 }
 
 #[test]
@@ -64,9 +40,9 @@ fn test_a_dash_in_an_extensionless_file_fails_the_scan() {
         format!("licence text {} more text\n", EM_DASH),
     )
     .expect("the licence writes");
-    let result = run_scan(&root);
-    assert_eq!(result.code, 1);
-    assert!(result.stdout.contains("U+2014=1"));
+    let counts = scan_tree(&root);
+    assert!(!counts.is_clean());
+    assert_eq!(counts.em_dashes, 1);
 }
 
 #[test]
@@ -77,9 +53,9 @@ fn test_a_dash_in_a_python_file_fails_the_scan() {
         format!("# a comment {} here\n", EN_DASH),
     )
     .expect("the module writes");
-    let result = run_scan(&root);
-    assert_eq!(result.code, 1);
-    assert!(result.stdout.contains("U+2013=1"));
+    let counts = scan_tree(&root);
+    assert!(!counts.is_clean());
+    assert_eq!(counts.en_dashes, 1);
 }
 
 #[test]
@@ -92,10 +68,10 @@ fn test_dashes_inside_an_ignored_directory_pass_the_scan() {
         format!("{} and {}\n", EM_DASH, EN_DASH),
     )
     .expect("the planted file writes");
-    let result = run_scan(&root);
-    assert_eq!(result.code, 0);
-    assert!(result.stdout.contains("U+2014=0"));
-    assert!(result.stdout.contains("U+2013=0"));
+    let counts = scan_tree(&root);
+    assert!(counts.is_clean());
+    assert_eq!(counts.em_dashes, 0);
+    assert_eq!(counts.en_dashes, 0);
 }
 
 #[test]
@@ -108,7 +84,7 @@ fn test_a_dash_in_a_rust_file_fails_the_scan() {
         format!("// a comment {} here\n", EM_DASH),
     )
     .expect("the module writes");
-    let result = run_scan(&root);
-    assert_eq!(result.code, 1);
-    assert!(result.stdout.contains("U+2014=1"));
+    let counts = scan_tree(&root);
+    assert!(!counts.is_clean());
+    assert_eq!(counts.em_dashes, 1);
 }

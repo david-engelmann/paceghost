@@ -13,4 +13,5 @@ pub mod ladder;
 pub mod pynum;
 pub mod pytext;
 pub mod runs;
+pub mod scan;
 pub mod season;

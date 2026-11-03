@@ -56,4 +56,4 @@ Verify claims from the thing itself. A result is read from the file on disk, the
 
 Paceghost is the race against the window. Thirdshift, owned by the Fleet Operations chat, is the fleet that works through it. Paceghost never schedules fleet work and thirdshift never keeps score.
 
-The local gate is python3 scripts/codepoint_scan.py and python3 -m pytest tests -q, and the suite runs offline on recorded runs stored locally. No run record committed to this repo is real. Every fixture is synthetic and written for this repo.
+The local gate is cargo test with cargo fmt --check and cargo clippy --all-targets -- -D warnings, and the suite runs offline on recorded runs stored locally. No run record committed to this repo is real. Every fixture is synthetic and written for this repo.
