@@ -1,0 +1,11 @@
+0
+%%%STDOUT%%%
+usage: paceghost race [-h] ghost_file live_file
+
+positional arguments:
+  ghost_file
+  live_file
+
+options:
+  -h, --help  show this help message and exit
+%%%STDERR%%%

@@ -1,0 +1,107 @@
+//! Pins for the repo setup obligations in CONTRACT.md.
+//!
+//! Translated from tests/test_setup.py, with one addition at the
+//! end pinning the Rust port status line the port slice adds. Each
+//! pin reads a standing file and fails when the setup text drifts
+//! away from the contract, because the setup is part of what later
+//! rounds read to understand what this repo promises.
+
+use std::path::PathBuf;
+
+fn root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+}
+
+fn read(rel: &str) -> String {
+    std::fs::read_to_string(root().join(rel)).unwrap_or_else(|_| panic!("{} reads", rel))
+}
+
+fn readme_lines() -> Vec<String> {
+    read("README.md")
+        .lines()
+        .map(|line| line.to_string())
+        .collect()
+}
+
+#[test]
+fn test_agents_carries_the_canonical_marker() {
+    let text = read("AGENTS.md");
+    assert!(text.contains("<!-- repo annex below this line -->"));
+    assert!(text.contains("39 repo storefront perfection program"));
+}
+
+#[test]
+fn test_readme_states_the_closed_round_count() {
+    assert!(read("README.md").contains("Closed perfection rounds, 4 of 100"));
+}
+
+#[test]
+fn test_contract_carries_the_setup_obligations() {
+    let text = read("CONTRACT.md");
+    for label in ["SETUP-1", "SETUP-2", "SETUP-3", "SETUP-4", "PG-1"] {
+        assert!(text.contains(label), "the contract carries {}", label);
+    }
+}
+
+#[test]
+fn test_readme_reports_the_contract_status() {
+    let expected = "- Contract, SETUP-1 to SETUP-4 and PG-1 to PG-8 met. PG-1 to PG-4 stand in full form in CONTRACT.md with the Round 1 repair amendments, and Round 1 closed on the merged slice 2 after three reviews, a repair pass, and an approving re-review. PG-5 and PG-6 stand in full form with the Round 2 repair amendment.";
+    assert!(readme_lines().iter().any(|found| found == expected));
+}
+
+#[test]
+fn test_readme_reports_the_round_three_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-7 and PG-8 met. They stand in full form in CONTRACT.md, and Round 3 closed on the merged slice 4 after three reviews, a repair pass, and an approving re-review.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 4 has landed. It carries the field day loader that names every malformed field, the stolen record report that walks the record progression of one window across a field of recorded runs, and the fieldday command, with a synthetic example field day and its golden report under examples.";
+    assert!(lines.iter().any(|found| found == slice_line));
+}
+
+#[test]
+fn test_readme_reports_the_round_four_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-9 and PG-10 met. They stand in full form in CONTRACT.md with the Round 4 repair amendments, and Round 4 closed on the merged slice 5 after three reviews, a repair pass, and an approving re-review.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 5 has landed. It carries the ladder loader that names every malformed field in a ladder file, the ladder report that reads one field day as it stood at each window in a list and closes with a summary line over the closing holders, and the ladder command, with a synthetic example ladder and its golden report under examples.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+}
+
+#[test]
+fn test_ci_runs_the_same_gate_as_the_local_gate() {
+    let live: Vec<String> = read(".github/workflows/ci.yml")
+        .lines()
+        .map(|line| line.split('#').next().unwrap_or("").to_string())
+        .collect();
+    assert!(live
+        .iter()
+        .any(|line| line.contains("python3 scripts/codepoint_scan.py")));
+    assert!(live
+        .iter()
+        .any(|line| line.contains("python3 -m pytest tests -q")));
+    // Added with the port review repairs, by addition only. The port
+    // gate of PORT-7 stands in CI beside the cargo test step.
+    assert!(live.iter().any(|line| line.contains("cargo test")));
+    assert!(live.iter().any(|line| line.contains("cargo fmt --check")));
+    assert!(live
+        .iter()
+        .any(|line| line.contains("cargo clippy --all-targets -- -D warnings")));
+}
+
+// Added by the Rust port slice, not a translation. The port status
+// line must stand in the README so the programme status the port
+// reports is pinned where a reader of the repo finds it. The line
+// is worded so the Round 4 pin above, which counts the plain phrase
+// the brief suggested zero times across the README, still holds.
+#[test]
+fn test_readme_reports_the_rust_port_status() {
+    let line = "- The Rust port has been built and is in review. It carries the same behavior as the Python package, checked against the same goldens.";
+    assert_eq!(
+        readme_lines()
+            .iter()
+            .filter(|found| found.as_str() == line)
+            .count(),
+        1
+    );
+}

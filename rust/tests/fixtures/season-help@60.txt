@@ -1,0 +1,11 @@
+0
+%%%STDOUT%%%
+usage: paceghost season [-h] field_file ghost_file
+
+positional arguments:
+  field_file
+  ghost_file
+
+options:
+  -h, --help  show this help message and exit
+%%%STDERR%%%

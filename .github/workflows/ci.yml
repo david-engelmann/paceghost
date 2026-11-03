@@ -16,3 +16,9 @@ jobs:
         run: |
           python3 -m pip install pytest -q
           python3 -m pytest tests -q
+      - name: Rust port tests
+        run: cargo test
+      - name: Rust port format check
+        run: cargo fmt --check
+      - name: Rust port clippy
+        run: cargo clippy --all-targets -- -D warnings

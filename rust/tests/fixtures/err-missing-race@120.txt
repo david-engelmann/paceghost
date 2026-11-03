@@ -1,0 +1,5 @@
+2
+%%%STDOUT%%%
+%%%STDERR%%%
+usage: paceghost race [-h] ghost_file live_file
+paceghost race: error: the following arguments are required: live_file

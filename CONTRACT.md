@@ -176,3 +176,43 @@ A report function takes a loaded value, and the loader guarantees the preconditi
 ### FIX-PG-9, on the headers of the test files, closing standards finding Minor 1
 
 A test file carries no unused header constants. A constant stands in a test file only where a test in that file reads it, and an import stands only where a line in the file uses it. The Round 4 command tests defined a module level constant naming the examples directory that no test in the file read, every test writing its ladder under a temporary path instead, and the pathlib import that served only that constant, a vestige of a copied file header rather than a suite convention. The constant and its import stand removed, and no test in the file changes. Test, tests/test_commands_round4.py, whose command tests pass with the constant and its import gone.
+
+## The Rust port
+
+This section states the obligations of the Rust port of paceghost. The port is not a round, and it changes no round count and no earlier obligation. Where this section and an earlier section could be read apart, the earlier sections govern the behavior and this section governs the port.
+
+### PORT-1, the Python behavior is the spec
+
+The landed Python implementation is the behavioral spec of the port. The Rust library and the Rust command line reproduce that behavior exactly, defect phrase for defect phrase, report line for report line, and exit status for exit status, over every input the Python loaders and readings accept or refuse. A divergence between the Rust port and the Python behavior on any input is a defect of the port, and the Python text stands until the port verifies against it.
+
+### PORT-2, the goldens carry over byte for byte
+
+The examples and goldens under examples do not move, and the Rust tests read them from the repo root and pin every golden byte for byte, exactly as the Python tests pin them. No example file changes by one byte for the port.
+
+### PORT-3, the JSON reading mirrors the Python reading
+
+The loaders rest on the JSON reading of the Python json module, and the port carries its own JSON reading in the library that mirrors the semantics the loaders depend on. A repeated object key keeps its last value. A number is classified from its raw literal, so an integer literal too large for a finite double draws the not a finite number defect, a float literal that overflows draws the same defect, and the NaN and Infinity literals the Python reading accepts parse and draw the finite defect where the contract states it. A string is a sequence of code points, so an unpaired surrogate is representable in the port, is detected, and is refused with the defect text the contract states. Input nested too deeply for the Python reading draws the same not valid JSON defect. Each of these semantics is pinned by a unit test in the port against the behavior the Python reading shows on a constructed probe input.
+
+### PORT-4, the arithmetic discipline carries over
+
+Every figure the Python computes on exact values is computed on exact values in the port, and every rendering rule carries over unchanged, the usage and projection rendering of FIX-PG-7 with halves rounding up on the exact value, and the seconds rendering with its full precision fallback for a nonzero figure that rounds to zero at six places.
+
+### PORT-5, the test corpus carries over
+
+The Python test corpus is translated to Rust tests, every golden pinned byte for byte, every defect phrase pinned, and the discriminating pins of FIX-PG-1 to FIX-PG-9 represented. A differential run of the Python command line and the Rust command line over the examples and over synthetic files shows no divergence in printed lines or exit statuses before the port is called verified.
+
+### PORT-6, the Python tree stands until the port verifies
+
+The Python tree stands untouched while the port is built, and the Python gate keeps running beside the cargo gate in the continuous integration file. The port lands as a library first with a thin binary carrying the command line, and the round count in the programme status does not change.
+
+### PORT-7, the style tools stand in the port gate
+
+The port gate runs cargo fmt --check and cargo clippy --all-targets with warnings denied beside cargo test, and the continuous integration file runs the same three cargo commands beside the Python gate. A crate that fails either style tool has not met the port gate, however the test run reads.
+
+### PORT-8, the command line boundary readings
+
+The nesting boundary of PORT-3 is pinned at the figure the console entry point reaches on the programme machine, 9997 containers open at once. A document holding 9997 open containers reads, and a document holding 9998 is refused as not valid JSON. The figure varies when Python runs inside another process, and that variance is a runtime artifact the port does not chase. When the output stream closes early the port exits 1 as the Python does. The traceback text the Python prints in that case carries paths from the running machine and is not reproduced, and the parity claimed for the closed stream is the exit status alone.
+
+### PORT-9, the scan covers the Rust tree
+
+Amending the suffix list FIX-PG-6 states, the codepoint scan counts every file whose suffix is .rs beside the suffixes the earlier text names, so the typography gate covers the Rust tree the port adds. A scan pin plants a tree whose only dash stands in a Rust file and reads the scan failing there.

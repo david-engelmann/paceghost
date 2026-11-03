@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Count U+2014 and U+2013 in the text files of the repo. The scan
-covers files whose suffix is .md, .txt, .py, .json, .toml, .yml, or
-.yaml, and extensionless files such as LICENSE. Zero of each is
-required. Exit 1 when any are found. Files inside ignored environment
-and build directories are skipped."""
+covers files whose suffix is .md, .txt, .py, .json, .toml, .yml,
+.yaml, or .rs, and extensionless files such as LICENSE. The .rs
+suffix stands in the list since the port review repairs, so the
+scan covers the Rust tree, as PORT-9 states by amending the list
+FIX-PG-6 records. Zero of each is required. Exit 1 when any are
+found. Files inside ignored environment and build directories are
+skipped."""
 import pathlib, sys
 root = pathlib.Path(__file__).resolve().parent.parent
 counts = {"U+2014": 0, "U+2013": 0}
@@ -14,7 +17,7 @@ for p in sorted(root.rglob("*")):
     rel = p.relative_to(root)
     if any(part in ignored_dirs or part.endswith(".egg-info") for part in rel.parts[:-1]):
         continue
-    if p.suffix not in {".md", ".txt", ".py", ".json", ".toml", ".yml", ".yaml", ""}:
+    if p.suffix not in {".md", ".txt", ".py", ".json", ".toml", ".yml", ".yaml", ".rs", ""}:
         continue
     text = p.read_text(encoding="utf-8", errors="replace")
     counts["U+2014"] += text.count("\u2014")
