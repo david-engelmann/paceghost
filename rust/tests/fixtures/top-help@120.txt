@@ -1,0 +1,19 @@
+0
+%%%STDOUT%%%
+usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder} ...
+
+Race a recorded run against the ghost of your best run.
+
+positional arguments:
+  {show,ghost,race,season,board,fieldday,ladder}
+    show                print one recorded run
+    ghost               print the standing ghost
+    race                race a live run against a ghost
+    season              print the season report for a field of runs
+    board               print the live board for a run carrying timed reads
+    fieldday            print the stolen record report for a field day
+    ladder              print the ladder report for a field day and its windows
+
+options:
+  -h, --help            show this help message and exit
+%%%STDERR%%%

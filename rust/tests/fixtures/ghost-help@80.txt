@@ -1,0 +1,10 @@
+0
+%%%STDOUT%%%
+usage: paceghost ghost [-h] files [files ...]
+
+positional arguments:
+  files
+
+options:
+  -h, --help  show this help message and exit
+%%%STDERR%%%

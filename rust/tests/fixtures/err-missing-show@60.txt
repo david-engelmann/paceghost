@@ -1,0 +1,5 @@
+2
+%%%STDOUT%%%
+%%%STDERR%%%
+usage: paceghost show [-h] file
+paceghost show: error: the following arguments are required: file

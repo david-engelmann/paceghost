@@ -1,0 +1,84 @@
+[package]
+name = "paceghost"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "rust/src/lib.rs"
+
+[[bin]]
+name = "paceghost"
+path = "rust/src/main.rs"
+
+# The integration tests live beside the library under rust/tests, so
+# each one is named here with its path rather than discovered from a
+# root level tests directory, which belongs to the Python corpus.
+[[test]]
+name = "test_runs"
+path = "rust/tests/test_runs.rs"
+
+[[test]]
+name = "test_season"
+path = "rust/tests/test_season.rs"
+
+[[test]]
+name = "test_board"
+path = "rust/tests/test_board.rs"
+
+[[test]]
+name = "test_fieldday"
+path = "rust/tests/test_fieldday.rs"
+
+[[test]]
+name = "test_ladder"
+path = "rust/tests/test_ladder.rs"
+
+[[test]]
+name = "test_cli"
+path = "rust/tests/test_cli.rs"
+
+[[test]]
+name = "test_cli_widths"
+path = "rust/tests/test_cli_widths.rs"
+
+[[test]]
+name = "test_commands_round2"
+path = "rust/tests/test_commands_round2.rs"
+
+[[test]]
+name = "test_commands_round3"
+path = "rust/tests/test_commands_round3.rs"
+
+[[test]]
+name = "test_commands_round4"
+path = "rust/tests/test_commands_round4.rs"
+
+[[test]]
+name = "test_examples"
+path = "rust/tests/test_examples.rs"
+
+[[test]]
+name = "test_examples_round2"
+path = "rust/tests/test_examples_round2.rs"
+
+[[test]]
+name = "test_examples_round3"
+path = "rust/tests/test_examples_round3.rs"
+
+[[test]]
+name = "test_examples_round4"
+path = "rust/tests/test_examples_round4.rs"
+
+[[test]]
+name = "test_scan"
+path = "rust/tests/test_scan.rs"
+
+[[test]]
+name = "test_setup"
+path = "rust/tests/test_setup.rs"
+
+[dependencies]
+libc = "0.2"
+num-bigint = "0.4"
+num-rational = "0.4"
+num-traits = "0.2"

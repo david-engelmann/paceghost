@@ -72,3 +72,8 @@ def test_ci_runs_the_same_gate_as_the_local_gate():
     live = "\n".join(line.split("#", 1)[0] for line in text.splitlines())
     assert "python3 scripts/codepoint_scan.py" in live
     assert "python3 -m pytest tests -q" in live
+    # Added with the port review repairs, by addition only. The port
+    # gate of PORT-7 stands in CI beside the cargo test step.
+    assert "cargo test" in live
+    assert "cargo fmt --check" in live
+    assert "cargo clippy --all-targets -- -D warnings" in live

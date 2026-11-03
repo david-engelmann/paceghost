@@ -1,0 +1,281 @@
+//! Pins for the command line layout at stated widths, for the
+//! argument byte readings, and for the closed stream exit.
+//!
+//! The layout fixtures under fixtures were produced by the Python
+//! command line at columns 60, 80, and 120 through its console
+//! entry point, and each one is compared byte for byte against the
+//! port dispatching at the same stated width. The byte pins state
+//! the stderr text the Python writes for arguments carrying bytes
+//! the UTF-8 reading cannot place, probed byte for byte against
+//! that surface. The closed stream pin runs the built binary with
+//! its output stream pointed at a device that refuses every write
+//! and reads the exit status the Python dies with there.
+
+use std::path::PathBuf;
+
+use paceghost::cli::{decode_os_arg, dispatch_with_columns};
+use paceghost::pytext::PText;
+
+fn fixtures() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("rust")
+        .join("tests")
+        .join("fixtures")
+}
+
+fn no_file(_bytes: &[u8]) -> Option<String> {
+    None
+}
+
+fn argv(parts: &[&str]) -> Vec<PText> {
+    parts.iter().map(|part| PText::from_text(part)).collect()
+}
+
+fn render(lines: &[String]) -> String {
+    if lines.is_empty() {
+        String::new()
+    } else {
+        lines.join("\n") + "\n"
+    }
+}
+
+fn case_args(case: &str) -> Vec<PText> {
+    match case {
+        "top-help" => argv(&["--help"]),
+        "show-help" => argv(&["show", "--help"]),
+        "ghost-help" => argv(&["ghost", "--help"]),
+        "race-help" => argv(&["race", "--help"]),
+        "season-help" => argv(&["season", "--help"]),
+        "board-help" => argv(&["board", "--help"]),
+        "fieldday-help" => argv(&["fieldday", "--help"]),
+        "ladder-help" => argv(&["ladder", "--help"]),
+        "err-noargs" => argv(&[]),
+        "err-choice" => argv(&["bogus"]),
+        "err-missing-show" => argv(&["show"]),
+        "err-missing-race" => argv(&["race", "onlyone"]),
+        "err-unrecognized" => argv(&["--bogus", "show", "a.json"]),
+        "err-unrecognized-top" => argv(&["--bogus", "show", "a.json"]),
+        "err-help-explicit" => argv(&["--help=x"]),
+        "err-missing-command-after-dashdash" => argv(&["--"]),
+        other => panic!("unknown case {}", other),
+    }
+}
+
+fn read_fixture(case: &str, width: i64) -> (String, String, i32) {
+    let raw = std::fs::read_to_string(fixtures().join(format!("{}@{}.txt", case, width)))
+        .expect("the fixture reads");
+    let (code_text, rest) = raw.split_once('\n').expect("the fixture has a code line");
+    let (stdout, stderr) = rest
+        .strip_prefix("%%%STDOUT%%%\n")
+        .expect("the fixture has a stdout marker")
+        .split_once("%%%STDERR%%%\n")
+        .expect("the fixture has a stderr marker");
+    (
+        stdout.to_string(),
+        stderr.to_string(),
+        code_text.parse().expect("the fixture code parses"),
+    )
+}
+
+const CASES: [&str; 16] = [
+    "top-help",
+    "show-help",
+    "ghost-help",
+    "race-help",
+    "season-help",
+    "board-help",
+    "fieldday-help",
+    "ladder-help",
+    "err-noargs",
+    "err-choice",
+    "err-missing-show",
+    "err-missing-race",
+    "err-unrecognized",
+    "err-unrecognized-top",
+    "err-help-explicit",
+    "err-missing-command-after-dashdash",
+];
+
+#[test]
+fn test_the_layout_matches_the_python_at_three_widths() {
+    for case in CASES {
+        for width in [60i64, 80, 120] {
+            let (want_stdout, want_stderr, want_code) = read_fixture(case, width);
+            let outcome = dispatch_with_columns(&case_args(case), &no_file, width);
+            assert_eq!(outcome.code, want_code, "code for {} at {}", case, width);
+            assert_eq!(
+                render(&outcome.stdout),
+                want_stdout,
+                "stdout for {} at {}",
+                case,
+                width
+            );
+            assert_eq!(
+                render(&outcome.stderr),
+                want_stderr,
+                "stderr for {} at {}",
+                case,
+                width
+            );
+        }
+    }
+}
+
+#[test]
+fn test_a_trailing_separator_leaves_the_command_missing() {
+    let outcome = dispatch_with_columns(&argv(&["--"]), &no_file, 80);
+    assert_eq!(outcome.code, 2);
+    assert_eq!(
+        outcome.stderr[1],
+        "paceghost: error: the following arguments are required: command"
+    );
+    let outcome = dispatch_with_columns(&argv(&["--bogus", "--"]), &no_file, 80);
+    assert_eq!(outcome.code, 2);
+    assert_eq!(
+        outcome.stderr[1],
+        "paceghost: error: the following arguments are required: command"
+    );
+}
+
+#[test]
+fn test_a_separator_with_a_token_after_it_stands_as_the_command_value() {
+    for parts in [&["--", "show"][..], &["--", "-h"][..], &["--", "--"][..]] {
+        let outcome = dispatch_with_columns(&argv(parts), &no_file, 80);
+        assert_eq!(outcome.code, 2);
+        assert_eq!(
+            outcome.stderr[1],
+            "paceghost: error: argument command: invalid choice: '--' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder')"
+        );
+    }
+}
+
+#[test]
+fn test_a_separator_inside_a_command_reads_the_next_token_as_a_value() {
+    let outcome = dispatch_with_columns(&argv(&["show", "--", "--"]), &no_file, 80);
+    assert_eq!(outcome.code, 1);
+    assert_eq!(
+        outcome.stdout,
+        vec![
+            "invalid recorded run".to_string(),
+            "defect file cannot be read".to_string()
+        ]
+    );
+    let outcome = dispatch_with_columns(&argv(&["show", "--", "-h"]), &no_file, 80);
+    assert_eq!(outcome.code, 1);
+    assert_eq!(
+        outcome.stdout,
+        vec![
+            "invalid recorded run".to_string(),
+            "defect file cannot be read".to_string()
+        ]
+    );
+}
+
+#[test]
+fn test_argument_bytes_decode_the_way_surrogateescape_decodes() {
+    let text = decode_os_arg(b"\xff\xfe");
+    assert_eq!(text.0, vec![0xDCFF, 0xDCFE]);
+    let text = decode_os_arg(b"run\xc3\x28.json");
+    assert_eq!(
+        text.0,
+        vec![
+            'r' as u32, 'u' as u32, 'n' as u32, 0xDCC3, '(' as u32, '.' as u32, 'j' as u32,
+            's' as u32, 'o' as u32, 'n' as u32
+        ]
+    );
+    let text = decode_os_arg("runs-\u{e9}.json".as_bytes());
+    assert!(text.eq_str("runs-\u{e9}.json"));
+    let round_trip = paceghost::cli::encode_os_arg(&decode_os_arg(b"bad\xffname\x80.json"));
+    assert_eq!(round_trip, b"bad\xffname\x80.json".to_vec());
+}
+
+#[test]
+fn test_an_invalid_choice_echoes_argument_bytes_as_escape_text() {
+    let outcome = dispatch_with_columns(&[decode_os_arg(b"\xff\xfe")], &no_file, 80);
+    assert_eq!(outcome.code, 2);
+    assert_eq!(
+        outcome.stderr[1],
+        "paceghost: error: argument command: invalid choice: '\\udcff\\udcfe' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder')"
+    );
+}
+
+#[test]
+fn test_an_unrecognized_argument_echoes_bytes_as_escape_text() {
+    let outcome = dispatch_with_columns(
+        &[
+            PText::from_text("show"),
+            PText::from_text("a.json"),
+            decode_os_arg(b"\xff\xfe"),
+        ],
+        &no_file,
+        80,
+    );
+    assert_eq!(outcome.code, 2);
+    assert_eq!(
+        outcome.stderr[1],
+        "paceghost: error: unrecognized arguments: \\udcff\\udcfe"
+    );
+}
+
+#[test]
+fn test_an_explicit_help_argument_echoes_bytes_as_escape_text() {
+    let outcome = dispatch_with_columns(&[decode_os_arg(b"--help=\xff")], &no_file, 80);
+    assert_eq!(outcome.code, 2);
+    assert_eq!(
+        outcome.stderr[1],
+        "paceghost: error: argument -h/--help: ignored explicit argument '\\udcff'"
+    );
+}
+
+#[test]
+fn test_a_file_name_carrying_a_raw_byte_opens() {
+    use std::os::unix::ffi::OsStringExt;
+    let dir = std::env::temp_dir().join(format!("paceghost-bytes-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).expect("the scratch dir is created");
+    let name = std::ffi::OsString::from_vec(b"bad\xffname.json".to_vec());
+    let path = dir.join(&name);
+    let run = "{\"task\": \"draft the weekly summary\", \"runner\": \"operator\", \
+               \"recorded_at\": \"2026-01-04\", \"window_seconds\": 1800, \
+               \"total_seconds\": 300, \
+               \"splits\": [{\"phase\": \"plan\", \"elapsed_seconds\": 300}]}";
+    std::fs::write(&path, run).expect("the run writes");
+    let reader = |bytes: &[u8]| -> Option<String> {
+        let path = PathBuf::from(std::ffi::OsString::from_vec(bytes.to_vec()));
+        let data = std::fs::read(path).ok()?;
+        String::from_utf8(data).ok()
+    };
+    let mut file_arg = dir.as_os_str().as_encoded_bytes().to_vec();
+    file_arg.push(b'/');
+    file_arg.extend_from_slice(b"bad\xffname.json");
+    let outcome = dispatch_with_columns(
+        &[PText::from_text("show"), decode_os_arg(&file_arg)],
+        &reader,
+        80,
+    );
+    assert_eq!(outcome.code, 0);
+    assert_eq!(outcome.stdout[0], "task draft the weekly summary");
+    std::fs::remove_dir_all(&dir).expect("the scratch dir is removed");
+}
+
+#[test]
+fn test_a_closed_output_stream_exits_one() {
+    let binary = env!("CARGO_BIN_EXE_paceghost");
+    let example = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("examples")
+        .join("operator-run.json");
+    let full = std::fs::File::create("/dev/full").expect("the full device opens");
+    let status = std::process::Command::new(binary)
+        .arg("show")
+        .arg(&example)
+        .stdout(full)
+        .stderr(std::process::Stdio::null())
+        .status()
+        .expect("the binary runs");
+    assert_eq!(status.code(), Some(1));
+    let output = std::process::Command::new(binary)
+        .arg("show")
+        .arg(&example)
+        .output()
+        .expect("the binary runs");
+    assert_eq!(output.status.code(), Some(0));
+}
