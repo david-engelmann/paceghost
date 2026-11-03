@@ -206,7 +206,7 @@ pub fn season_report(runs: &[Run], ghost_usage: &Num) -> Vec<String> {
         wins: usize,
     }
     let mut rows: Vec<Row> = Vec::new();
-    for (model, model_runs) in models.into_iter().zip(grouped.into_iter()) {
+    for (model, model_runs) in models.into_iter().zip(grouped) {
         let raced = model_runs.len();
         let mut inside_window = 0usize;
         let mut inside_budget = 0usize;
