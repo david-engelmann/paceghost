@@ -10,6 +10,7 @@ pub mod cli;
 pub mod fieldday;
 pub mod json;
 pub mod ladder;
+pub mod meet;
 pub mod pynum;
 pub mod pytext;
 pub mod rematch;

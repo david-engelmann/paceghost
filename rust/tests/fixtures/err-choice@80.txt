@@ -2,5 +2,6 @@
 %%%STDOUT%%%
 %%%STDERR%%%
 usage: paceghost [-h]
-                 {show,ghost,race,season,board,fieldday,ladder,rematch} ...
-paceghost: error: argument command: invalid choice: 'bogus' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch')
+                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet}
+                 ...
+paceghost: error: argument command: invalid choice: 'bogus' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet')

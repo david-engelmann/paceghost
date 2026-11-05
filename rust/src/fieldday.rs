@@ -250,6 +250,74 @@ pub(crate) fn select_holder<M: Ord>(
     Some((record, new_holder))
 }
 
+/// The events one multi-day walk reads, collected once.
+///
+/// The collection stands beside the walks that read it in
+/// fieldday.rs, so the rematch walk and the meet walk open on
+/// the same collected events.
+pub(crate) struct CollectedEvents {
+    /// The competitor labels in first appearance order across
+    /// the days the collection read.
+    pub labels: Vec<PText>,
+    /// The projection events of each competitor, standing in
+    /// label order, each keyed by the index of the day and the
+    /// elapsed mark of the read that projected them.
+    pub events: Vec<HashMap<(usize, BigRational), BigRational>>,
+    /// Every mark the walks visit, ordered by day and elapsed.
+    pub marks: BTreeSet<(usize, BigRational)>,
+}
+
+/// Collect the events the multi-day walks read.
+///
+/// A runner value standing in more than one day stands as one
+/// competitor, and each read projects under the window of its
+/// own day, a read projecting only when its elapsed value is
+/// positive. Two reads of one competitor at one day and one mark
+/// stand as the later read in run order. This collection opens
+/// the rematch walk and the meet walk alike, standing in one
+/// home in the discipline of FIX-PG-10, so the two readings of
+/// the same days cannot drift apart in which reads project,
+/// under which day's window, and in what mark order.
+pub(crate) fn collect_events<'a>(days: impl Iterator<Item = &'a FieldDay>) -> CollectedEvents {
+    let days: Vec<&FieldDay> = days.collect();
+    let mut labels: Vec<PText> = Vec::new();
+    for day in &days {
+        for run in &day.runs {
+            if !labels.contains(&run.runner) {
+                labels.push(run.runner.clone());
+            }
+        }
+    }
+    let zero = BigRational::from(num_bigint::BigInt::from(0));
+    let mut events: Vec<HashMap<(usize, BigRational), BigRational>> =
+        labels.iter().map(|_| HashMap::new()).collect();
+    let mut marks: BTreeSet<(usize, BigRational)> = BTreeSet::new();
+    for (day_index, day) in days.iter().enumerate() {
+        let window = day.window_seconds.to_rational();
+        for run in &day.runs {
+            let competitor = labels
+                .iter()
+                .position(|label| label == &run.runner)
+                .expect("every runner stands among the labels");
+            if let Some(reads) = &run.reads {
+                for read in reads {
+                    let elapsed = read.elapsed_seconds.to_rational();
+                    if elapsed > zero {
+                        let projection = read.usage.to_rational() * &window / &elapsed;
+                        events[competitor].insert((day_index, elapsed.clone()), projection);
+                        marks.insert((day_index, elapsed));
+                    }
+                }
+            }
+        }
+    }
+    CollectedEvents {
+        labels,
+        events,
+        marks,
+    }
+}
+
 /// Check every figure a day value carries for finiteness.
 ///
 /// The figures are the window, the usage of each run, and the

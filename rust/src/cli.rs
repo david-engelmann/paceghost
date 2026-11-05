@@ -1,6 +1,6 @@
 //! The paceghost command line surface.
 //!
-//! Eight commands read recorded runs from local files and print
+//! Nine commands read recorded runs from local files and print
 //! reports. The show command prints one run or its defects, the
 //! ghost command prints the standing ghost for a task, and the race
 //! command prints a live run raced against a ghost. The season
@@ -10,8 +10,9 @@
 //! record report for a field day of runs inside one window. The
 //! ladder command prints the ladder report for a field day read
 //! through a list of windows. The rematch command prints the
-//! rematch report for two field days read as one progression.
-//! Nothing here touches the network.
+//! rematch report for two field days read as one progression. The
+//! meet command prints the meet report for three or more field
+//! days read as one progression. Nothing here touches the network.
 //!
 //! The dispatch is a pure function of the argument list and a file
 //! reading function, returning the lines each stream carries and
@@ -31,6 +32,7 @@
 
 use crate::fieldday::{field_day_report, load_field_day_text, FieldDay};
 use crate::ladder::{ladder_report, load_ladder_text, Ladder};
+use crate::meet::{load_meet_text, meet_report, Meet};
 use crate::pynum::format_seconds;
 use crate::pytext::PText;
 use crate::rematch::{load_rematch_text, rematch_report, Rematch};
@@ -54,11 +56,11 @@ impl CliOutcome {
     }
 }
 
-const COMMANDS: [&str; 8] = [
-    "show", "ghost", "race", "season", "board", "fieldday", "ladder", "rematch",
+const COMMANDS: [&str; 9] = [
+    "show", "ghost", "race", "season", "board", "fieldday", "ladder", "rematch", "meet",
 ];
 
-const COMMAND_HELPS: [(&str, &str); 8] = [
+const COMMAND_HELPS: [(&str, &str); 9] = [
     ("show", "print one recorded run"),
     ("ghost", "print the standing ghost"),
     ("race", "race a live run against a ghost"),
@@ -73,9 +75,10 @@ const COMMAND_HELPS: [(&str, &str); 8] = [
         "print the ladder report for a field day and its windows",
     ),
     ("rematch", "print the rematch report for two field days"),
+    ("meet", "print the meet report for three or more field days"),
 ];
 
-const CHOICES_HEADER: &str = "{show,ghost,race,season,board,fieldday,ladder,rematch}";
+const CHOICES_HEADER: &str = "{show,ghost,race,season,board,fieldday,ladder,rematch,meet}";
 
 /// The static shape of one subcommand.
 struct Spec {
@@ -118,6 +121,11 @@ fn spec_for(command: &str) -> Spec {
         },
         "rematch" => Spec {
             name: "rematch",
+            positionals: &["file"],
+            variadic: false,
+        },
+        "meet" => Spec {
+            name: "meet",
             positionals: &["file"],
             variadic: false,
         },
@@ -222,6 +230,7 @@ fn sub_parser_info(spec: &Spec) -> ParserInfo {
             "board" => "paceghost board",
             "fieldday" => "paceghost fieldday",
             "rematch" => "paceghost rematch",
+            "meet" => "paceghost meet",
             _ => "paceghost ladder",
         },
         description: None,
@@ -989,7 +998,7 @@ pub fn dispatch_with_columns(
                 out,
                 &main_usage,
                 format!(
-                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch')",
+                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet')",
                     py_repr(token)
                 ),
             );
@@ -1009,7 +1018,7 @@ pub fn dispatch_with_columns(
                     out,
                     &main_usage,
                     format!(
-                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch')",
+                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet')",
                         py_repr(token)
                     ),
                 );
@@ -1151,6 +1160,7 @@ fn run_command(
         "board" => command_board(&positionals[0], &positionals[1], read_file, out),
         "fieldday" => command_fieldday(&positionals[0], read_file, out),
         "rematch" => command_rematch(&positionals[0], read_file, out),
+        "meet" => command_meet(&positionals[0], read_file, out),
         _ => command_ladder(&positionals[0], read_file, out),
     }
 }
@@ -1402,6 +1412,34 @@ fn command_rematch(
     };
     let lines =
         rematch_report(&rematch).expect("a loaded rematch satisfies the report preconditions");
+    out.stdout.extend(lines);
+}
+
+fn load_meet_or_print_defects(
+    path: &PText,
+    read_file: &dyn Fn(&[u8]) -> Option<String>,
+    out: &mut CliOutcome,
+) -> Option<Meet> {
+    let (meet, defects) = match read_file(&encode_os_arg(path)) {
+        None => (None, vec!["file cannot be read".to_string()]),
+        Some(text) => load_meet_text(&text),
+    };
+    if !defects.is_empty() {
+        print_defects(out, "invalid meet", &defects);
+        return None;
+    }
+    meet
+}
+
+fn command_meet(file: &PText, read_file: &dyn Fn(&[u8]) -> Option<String>, out: &mut CliOutcome) {
+    let meet = match load_meet_or_print_defects(file, read_file, out) {
+        None => {
+            out.code = 1;
+            return;
+        }
+        Some(meet) => meet,
+    };
+    let lines = meet_report(&meet).expect("a loaded meet satisfies the report preconditions");
     out.stdout.extend(lines);
 }
 

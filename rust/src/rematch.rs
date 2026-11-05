@@ -13,16 +13,16 @@
 //! Python module stands behind this one, so the contract text is
 //! the spec and the pins in the test suite hold it.
 
-use std::collections::{BTreeSet, HashMap};
 use std::path::Path;
 
-use num_bigint::BigInt;
 use num_rational::BigRational;
 
-use crate::fieldday::{check_finite_figures, load_field_day_data, select_holder, FieldDay};
+use crate::fieldday::{
+    check_finite_figures, collect_events, load_field_day_data, select_holder, CollectedEvents,
+    FieldDay,
+};
 use crate::json::parse_json;
 use crate::pynum::{format_seconds, format_seconds_fraction};
-use crate::pytext::PText;
 use crate::runs::read_text_file;
 use crate::season::format_usage;
 
@@ -110,37 +110,11 @@ pub fn rematch_report(rematch: &Rematch) -> Result<Vec<String>, String> {
     check_finite_figures(&rematch.first.window_seconds, &rematch.first.runs)?;
     check_finite_figures(&rematch.second.window_seconds, &rematch.second.runs)?;
     let days = [&rematch.first, &rematch.second];
-    let mut labels: Vec<PText> = Vec::new();
-    for day in days {
-        for run in &day.runs {
-            if !labels.contains(&run.runner) {
-                labels.push(run.runner.clone());
-            }
-        }
-    }
-    let zero = BigRational::from(BigInt::from(0));
-    let mut events: Vec<HashMap<(usize, BigRational), BigRational>> =
-        labels.iter().map(|_| HashMap::new()).collect();
-    let mut marks: BTreeSet<(usize, BigRational)> = BTreeSet::new();
-    for (day_index, day) in days.iter().enumerate() {
-        let window = day.window_seconds.to_rational();
-        for run in &day.runs {
-            let competitor = labels
-                .iter()
-                .position(|label| label == &run.runner)
-                .expect("every runner stands among the labels");
-            if let Some(reads) = &run.reads {
-                for read in reads {
-                    let elapsed = read.elapsed_seconds.to_rational();
-                    if elapsed > zero {
-                        let projection = read.usage.to_rational() * &window / &elapsed;
-                        events[competitor].insert((day_index, elapsed.clone()), projection);
-                        marks.insert((day_index, elapsed));
-                    }
-                }
-            }
-        }
-    }
+    let CollectedEvents {
+        labels,
+        events,
+        marks,
+    } = collect_events(days.iter().copied());
     let mut lines = vec![format!(
         "rematch, first day window {} seconds, {} runs, second day window {} seconds, {} runs",
         format_seconds(&rematch.first.window_seconds),

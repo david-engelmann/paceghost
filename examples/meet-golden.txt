@@ -1,0 +1,14 @@
+meet, 3 days
+record at 300 seconds on the first day, operator at a projection of 1260
+record at 600 seconds on the first day, dawn fork at a projection of 1200
+record at 700 seconds on the first day, operator at a projection of 1105.714286
+record at 900 seconds on the first day, night fork at a projection of 940
+record at 1500 seconds on the first day, night fork at a projection of 840
+close of the first day, record held by night fork at a projection of 840
+record at 400 seconds on the second day, dawn fork at a projection of 675
+close of the second day, record held by dawn fork at a projection of 675
+record at 450 seconds on the third day, dawn fork at a projection of 560
+close of the third day, record held by dawn fork at a projection of 560
+finish, record held by dawn fork at a projection of 560
+record set on the third day at 450 seconds
+days read, 3
