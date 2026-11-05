@@ -210,6 +210,81 @@ pub fn field_day_report(day: &FieldDay) -> Result<Vec<String>, String> {
     Ok(lines)
 }
 
+/// Select the holder of the record among the standing figures.
+///
+/// Returns the record figure and the index of its holder, or none
+/// when no figure stands. The record is the lowest standing
+/// figure. The standing holder keeps the record while it stands
+/// at the record figure, and otherwise the holder is the
+/// competitor whose figure was set at the earliest mark, the
+/// earlier competitor place breaking a tie at one mark. This is
+/// the tie discipline of PG-7, standing in one home for the field
+/// day walk and the rematch walk alike, the two walks differing
+/// only in the mark their set at figures carry.
+pub(crate) fn select_holder<M: Ord>(
+    standing: &[Option<BigRational>],
+    set_at: &[Option<M>],
+    holder: Option<usize>,
+) -> Option<(BigRational, usize)> {
+    let record = standing.iter().flatten().min()?.clone();
+    let new_holder = match holder {
+        Some(current) if standing[current].as_ref() == Some(&record) => current,
+        _ => {
+            let mut best: Option<usize> = None;
+            for (index, figure) in standing.iter().enumerate() {
+                if figure.as_ref() == Some(&record) {
+                    let take = match best {
+                        None => true,
+                        Some(champion) => {
+                            (set_at[index].as_ref(), index) < (set_at[champion].as_ref(), champion)
+                        }
+                    };
+                    if take {
+                        best = Some(index);
+                    }
+                }
+            }
+            best.expect("a record always has a holder")
+        }
+    };
+    Some((record, new_holder))
+}
+
+/// Check every figure a day value carries for finiteness.
+///
+/// The figures are the window, the usage of each run, and the
+/// elapsed value and the usage of each read, read in that order.
+/// A figure that is not finite under the rule the loaders apply
+/// fails with an error naming the broken precondition, in the
+/// discipline of FIX-PG-10, so no walk converts a figure its
+/// loader would have refused. An integer beyond the range of a
+/// finite double is not finite under that rule, so an oversized
+/// hand built figure names the precondition here instead of
+/// rendering as an infinity in a seconds position.
+pub(crate) fn check_finite_figures(window: &Num, runs: &[DayRun]) -> Result<(), String> {
+    if !window.is_finite() {
+        return Err("the window is not a finite number".to_string());
+    }
+    for run in runs {
+        if let Some(usage) = &run.usage {
+            if !usage.is_finite() {
+                return Err("a run usage value is not a finite number".to_string());
+            }
+        }
+        if let Some(reads) = &run.reads {
+            for read in reads {
+                if !read.elapsed_seconds.is_finite() {
+                    return Err("a read elapsed value is not a finite number".to_string());
+                }
+                if !read.usage.is_finite() {
+                    return Err("a read usage value is not a finite number".to_string());
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 /// Walk the record progression and return its lines and holder.
 ///
 /// Returns a pair of the report lines and the index of the holder at
@@ -230,6 +305,7 @@ pub(crate) fn record_walk(
     window_value: &Num,
     horizon: Option<&BigRational>,
 ) -> Result<(Vec<String>, Option<usize>), String> {
+    check_finite_figures(window_value, runs)?;
     let window = window_value.to_rational();
     let operator_index = match runs.iter().position(|run| &run.runner == operator) {
         Some(index) => index,
@@ -280,30 +356,9 @@ pub(crate) fn record_walk(
                 set_at[index] = Some(mark.clone());
             }
         }
-        let record = match standing.iter().flatten().min() {
-            Some(record) => record.clone(),
+        let (record, new_holder) = match select_holder(&standing, &set_at, holder) {
+            Some(pair) => pair,
             None => continue,
-        };
-        let new_holder = match holder {
-            Some(current) if standing[current].as_ref() == Some(&record) => current,
-            _ => {
-                let mut best: Option<usize> = None;
-                for (index, figure) in standing.iter().enumerate() {
-                    if figure.as_ref() == Some(&record) {
-                        let take = match best {
-                            None => true,
-                            Some(champion) => {
-                                (set_at[index].as_ref(), index)
-                                    < (set_at[champion].as_ref(), champion)
-                            }
-                        };
-                        if take {
-                            best = Some(index);
-                        }
-                    }
-                }
-                best.expect("a record always has a holder")
-            }
         };
         if Some(new_holder) != holder {
             if holder == Some(operator_index) {

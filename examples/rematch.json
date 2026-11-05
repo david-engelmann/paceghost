@@ -1,0 +1,106 @@
+{
+  "first": {
+    "operator": "operator",
+    "runs": [
+      {
+        "reads": [
+          {
+            "elapsed_seconds": 300,
+            "usage": 210
+          },
+          {
+            "elapsed_seconds": 700,
+            "usage": 430
+          },
+          {
+            "elapsed_seconds": 1200,
+            "usage": 760
+          }
+        ],
+        "runner": "operator",
+        "usage": 1090
+      },
+      {
+        "reads": [
+          {
+            "elapsed_seconds": 400,
+            "usage": 300
+          },
+          {
+            "elapsed_seconds": 900,
+            "usage": 470
+          },
+          {
+            "elapsed_seconds": 1500,
+            "usage": 700
+          }
+        ],
+        "runner": "night fork",
+        "usage": 830
+      },
+      {
+        "reads": [
+          {
+            "elapsed_seconds": 600,
+            "usage": 400
+          },
+          {
+            "elapsed_seconds": 1100,
+            "usage": 610
+          }
+        ],
+        "runner": "dawn fork",
+        "usage": 990
+      },
+      {
+        "runner": "quiet fork",
+        "usage": 1500
+      }
+    ],
+    "window_seconds": 1800
+  },
+  "second": {
+    "operator": "operator",
+    "runs": [
+      {
+        "reads": [
+          {
+            "elapsed_seconds": 300,
+            "usage": 190
+          },
+          {
+            "elapsed_seconds": 800,
+            "usage": 400
+          }
+        ],
+        "runner": "operator",
+        "usage": 890
+      },
+      {
+        "reads": [
+          {
+            "elapsed_seconds": 500,
+            "usage": 320
+          },
+          {
+            "elapsed_seconds": 1000,
+            "usage": 560
+          }
+        ],
+        "runner": "night fork",
+        "usage": 1040
+      },
+      {
+        "reads": [
+          {
+            "elapsed_seconds": 400,
+            "usage": 150
+          }
+        ],
+        "runner": "dawn fork",
+        "usage": 700
+      }
+    ],
+    "window_seconds": 1800
+  }
+}

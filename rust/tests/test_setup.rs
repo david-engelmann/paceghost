@@ -65,7 +65,20 @@ fn test_readme_reports_the_round_four_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 5 has landed. It carries the ladder loader that names every malformed field in a ladder file, the ladder report that reads one field day as it stood at each window in a list and closes with a summary line over the closing holders, and the ladder command, with a synthetic example ladder and its golden report under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // Adjusted with the Round 5 slice, as the named mechanical
+    // consequence of the slice standing built and in review. The
+    // count stands at one, the slice 6 status line, and returns
+    // to zero when the round closes and the line is worded as
+    // landed.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
+}
+
+#[test]
+fn test_readme_reports_the_round_five_slice() {
+    let lines = readme_lines();
+    let slice_line = "- Slice 6 is built and in review. It carries the rematch loader that names every malformed field in a rematch file, the rematch report that reads two field days as one record progression and closes by naming where the record changed hands between the days, and the rematch command, with two synthetic example rematches and their golden reports under examples.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 4 of 100"));
 }
 
 #[test]

@@ -12,6 +12,7 @@ pub mod json;
 pub mod ladder;
 pub mod pynum;
 pub mod pytext;
+pub mod rematch;
 pub mod runs;
 pub mod scan;
 pub mod season;

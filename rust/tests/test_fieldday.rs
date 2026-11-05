@@ -9,6 +9,8 @@
 
 use std::path::PathBuf;
 
+use num_bigint::BigInt;
+
 use paceghost::fieldday::{
     field_day_report, load_field_day_file, load_field_day_text, DayRun, FieldDay,
 };
@@ -759,4 +761,85 @@ fn test_the_report_raises_a_value_error_when_the_operator_names_no_run() {
     };
     let error = field_day_report(&day).expect_err("the report names the precondition");
     assert_eq!(error, "the operator names no run among the runs");
+}
+
+// The FIX-PG-10 pins, added with the Round 5 repair. The record
+// walk stands under the rematch reading as well as this one, so
+// the shared guard is pinned on this surface too. On the
+// unrepaired code the non finite cases panic inside the exact
+// conversion and the oversized case renders an infinity in the
+// opening line, so each pin fails there for a real reason.
+
+fn hand_day_with(window: Num, reads: Vec<Read>) -> FieldDay {
+    FieldDay {
+        window_seconds: window,
+        operator: PText::from_text("operator"),
+        runs: vec![DayRun {
+            runner: PText::from_text("operator"),
+            usage: None,
+            reads: Some(reads),
+        }],
+    }
+}
+
+fn ordinary_read() -> Read {
+    Read {
+        elapsed_seconds: Num::from_i64(300),
+        usage: Num::from_i64(150),
+    }
+}
+
+#[test]
+fn test_a_non_finite_window_names_the_precondition() {
+    let day = hand_day_with(Num::from_f64(f64::NAN), vec![ordinary_read()]);
+    let error = field_day_report(&day).expect_err("the report names the precondition");
+    assert_eq!(error, "the window is not a finite number");
+}
+
+#[test]
+fn test_a_non_finite_read_figure_names_the_precondition() {
+    let day = hand_day_with(
+        Num::from_i64(1800),
+        vec![Read {
+            elapsed_seconds: Num::from_f64(f64::NEG_INFINITY),
+            usage: Num::from_i64(150),
+        }],
+    );
+    let error = field_day_report(&day).expect_err("the report names the precondition");
+    assert_eq!(error, "a read elapsed value is not a finite number");
+    let day = hand_day_with(
+        Num::from_i64(1800),
+        vec![Read {
+            elapsed_seconds: Num::from_i64(300),
+            usage: Num::from_f64(f64::INFINITY),
+        }],
+    );
+    let error = field_day_report(&day).expect_err("the report names the precondition");
+    assert_eq!(error, "a read usage value is not a finite number");
+}
+
+#[test]
+fn test_a_non_finite_run_usage_names_the_precondition() {
+    let day = FieldDay {
+        window_seconds: Num::from_i64(1800),
+        operator: PText::from_text("operator"),
+        runs: vec![DayRun {
+            runner: PText::from_text("operator"),
+            usage: Some(Num::from_f64(f64::INFINITY)),
+            reads: Some(vec![ordinary_read()]),
+        }],
+    };
+    let error = field_day_report(&day).expect_err("the report names the precondition");
+    assert_eq!(error, "a run usage value is not a finite number");
+}
+
+#[test]
+fn test_an_oversized_window_names_the_precondition_instead_of_rendering_inf() {
+    let mut value = BigInt::from(1);
+    for _ in 0..400 {
+        value *= 10;
+    }
+    let day = hand_day_with(Num::Int(value), vec![ordinary_read()]);
+    let error = field_day_report(&day).expect_err("the report names the precondition");
+    assert_eq!(error, "the window is not a finite number");
 }

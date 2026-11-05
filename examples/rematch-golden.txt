@@ -1,0 +1,9 @@
+rematch, first day window 1800 seconds, 4 runs, second day window 1800 seconds, 3 runs
+record at 300 seconds on the first day, operator at a projection of 1260
+record at 600 seconds on the first day, dawn fork at a projection of 1200
+record at 700 seconds on the first day, operator at a projection of 1105.714286
+record at 900 seconds on the first day, night fork at a projection of 940
+record at 1500 seconds on the first day, night fork at a projection of 840
+record at 400 seconds on the second day, dawn fork at a projection of 675
+finish, record held by dawn fork at a projection of 675
+record changed hands on the second day at 400 seconds, dawn fork took the record from night fork

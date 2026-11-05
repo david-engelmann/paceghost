@@ -81,6 +81,18 @@ path = "rust/tests/test_scan.rs"
 name = "test_setup"
 path = "rust/tests/test_setup.rs"
 
+[[test]]
+name = "test_rematch"
+path = "rust/tests/test_rematch.rs"
+
+[[test]]
+name = "test_commands_round5"
+path = "rust/tests/test_commands_round5.rs"
+
+[[test]]
+name = "test_examples_round5"
+path = "rust/tests/test_examples_round5.rs"
+
 [dependencies]
 libc = "0.2"
 num-bigint = "0.4"
