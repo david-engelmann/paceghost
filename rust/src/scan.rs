@@ -17,7 +17,7 @@ const SCANNED_SUFFIXES: [&str; 8] = ["md", "txt", "py", "json", "toml", "yml", "
 
 /// The directory names the scan never enters. A directory whose
 /// name ends in .egg-info stands ignored beside these.
-const IGNORED_DIRS: [&str; 7] = [
+const IGNORED_DIRS: [&str; 8] = [
     ".git",
     ".venv",
     "venv",
@@ -25,6 +25,7 @@ const IGNORED_DIRS: [&str; 7] = [
     "build",
     "node_modules",
     "__pycache__",
+    "target",
 ];
 
 const EM_DASH: char = '\u{2014}';

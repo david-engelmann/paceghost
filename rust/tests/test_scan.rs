@@ -75,6 +75,29 @@ fn test_dashes_inside_an_ignored_directory_pass_the_scan() {
 }
 
 #[test]
+fn test_dashes_inside_a_target_directory_pass_the_scan() {
+    // Added with the Round 5 standards repair. A cargo target
+    // directory standing inside a scanned tree stands out of
+    // scope beside the other ignored directories, so the counts
+    // the scan reports never depend on whether the tree was
+    // built in place.
+    let root = plant_tree("target");
+    let target = root.join("target");
+    std::fs::create_dir_all(&target).expect("the target dir is created");
+    std::fs::write(
+        target.join("fingerprint.json"),
+        format!("{{\"note\": \"one {} here\"}}\n", EM_DASH),
+    )
+    .expect("the fingerprint writes");
+    std::fs::write(target.join("artifact"), format!("one {} here\n", EN_DASH))
+        .expect("the artifact writes");
+    let counts = scan_tree(&root);
+    assert!(counts.is_clean());
+    assert_eq!(counts.em_dashes, 0);
+    assert_eq!(counts.en_dashes, 0);
+}
+
+#[test]
 fn test_a_dash_in_a_rust_file_fails_the_scan() {
     // Added with the port review repairs, by addition only. PORT-9
     // extends the scan scope to the Rust tree.
