@@ -1,13 +1,13 @@
 0
 %%%STDOUT%%%
 usage: paceghost [-h]
-                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet}
+                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table}
                  ...
 
 Race a recorded run against the ghost of your best run.
 
 positional arguments:
-  {show,ghost,race,season,board,fieldday,ladder,rematch,meet}
+  {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table}
     show                print one recorded run
     ghost               print the standing ghost
     race                race a live run against a ghost
@@ -22,6 +22,8 @@ positional arguments:
     rematch             print the rematch report for two
                         field days
     meet                print the meet report for three or
+                        more field days
+    table               print the meet table for three or
                         more field days
 
 options:
