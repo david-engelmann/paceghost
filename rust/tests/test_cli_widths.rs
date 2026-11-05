@@ -56,6 +56,7 @@ fn case_args(case: &str) -> Vec<PText> {
         "fieldday-help" => argv(&["fieldday", "--help"]),
         "ladder-help" => argv(&["ladder", "--help"]),
         "rematch-help" => argv(&["rematch", "--help"]),
+        "meet-help" => argv(&["meet", "--help"]),
         "err-noargs" => argv(&[]),
         "err-choice" => argv(&["bogus"]),
         "err-missing-show" => argv(&["show"]),
@@ -84,7 +85,7 @@ fn read_fixture(case: &str, width: i64) -> (String, String, i32) {
     )
 }
 
-const CASES: [&str; 17] = [
+const CASES: [&str; 18] = [
     "top-help",
     "show-help",
     "ghost-help",
@@ -94,6 +95,7 @@ const CASES: [&str; 17] = [
     "fieldday-help",
     "ladder-help",
     "rematch-help",
+    "meet-help",
     "err-noargs",
     "err-choice",
     "err-missing-show",
@@ -159,7 +161,7 @@ fn test_a_separator_with_a_token_after_it_stands_as_the_command_value() {
         assert_eq!(outcome.code, 2);
         assert_eq!(
             outcome.stderr.last().map(|line| line.as_str()),
-            Some("paceghost: error: argument command: invalid choice: '--' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch')")
+            Some("paceghost: error: argument command: invalid choice: '--' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet')")
         );
     }
 }
@@ -210,7 +212,7 @@ fn test_an_invalid_choice_echoes_argument_bytes_as_escape_text() {
     assert_eq!(outcome.code, 2);
     assert_eq!(
         outcome.stderr.last().map(|line| line.as_str()),
-        Some("paceghost: error: argument command: invalid choice: '\\udcff\\udcfe' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch')")
+        Some("paceghost: error: argument command: invalid choice: '\\udcff\\udcfe' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet')")
     );
 }
 
