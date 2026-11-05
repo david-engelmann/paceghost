@@ -32,7 +32,7 @@ fn test_agents_carries_the_canonical_marker() {
 
 #[test]
 fn test_readme_states_the_closed_round_count() {
-    assert!(read("README.md").contains("Closed perfection rounds, 4 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 5 of 100"));
 }
 
 #[test]
@@ -67,18 +67,20 @@ fn test_readme_reports_the_round_four_status() {
     assert!(lines.iter().any(|found| found == slice_line));
     // Adjusted with the Round 5 slice, as the named mechanical
     // consequence of the slice standing built and in review. The
-    // count stands at one, the slice 6 status line, and returns
-    // to zero when the round closes and the line is worded as
+    // count stood at one, the slice 6 status line, and returned
+    // to zero when the round closed and the line was worded as
     // landed.
-    assert_eq!(read("README.md").matches("built and in review").count(), 1);
+    assert_eq!(read("README.md").matches("built and in review").count(), 0);
 }
 
 #[test]
-fn test_readme_reports_the_round_five_slice() {
+fn test_readme_reports_the_round_five_status() {
     let lines = readme_lines();
-    let slice_line = "- Slice 6 is built and in review. It carries the rematch loader that names every malformed field in a rematch file, the rematch report that reads two field days as one record progression and closes by naming where the record changed hands between the days, and the rematch command, with two synthetic example rematches and their golden reports under examples.";
+    let standing = "- Contract, PG-11 and PG-12 met. They stand in full form in CONTRACT.md with the Round 5 repair amendment, and Round 5 closed on the merged slice 6 after three reviews, a repair pass, and an approving re-review.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 6 has landed. It carries the rematch loader that names every malformed field in a rematch file, the rematch report that reads two field days as one record progression and closes by naming where the record changed hands between the days, and the rematch command, with two synthetic example rematches and their golden reports under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 4 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 5 of 100"));
 }
 
 #[test]
