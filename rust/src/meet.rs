@@ -10,8 +10,15 @@
 //! own reads, and it names the closing holder of each day as that
 //! day closes and, at the close of the meet, the holder of the
 //! standing record and the day and mark at which its figure was
-//! set. The obligations this module carries are PG-13 and PG-14
-//! in CONTRACT.md, in the Round 6 section. No Python module stands
+//! set. The meet table reads the same walk competitor by
+//! competitor, accumulating the lowest standing projection of
+//! each competitor, the count of marks after which they held
+//! the record, and their standing projection at the close in
+//! the same mark loop that emits the record lines, so no second
+//! progression stands for the two readings to drift apart on.
+//! The obligations this module carries are PG-13 and PG-14
+//! in CONTRACT.md, in the Round 6 section, and PG-15 and PG-16,
+//! in the Round 7 section. No Python module stands
 //! behind this one, so the contract text is the spec and the pins
 //! in the test suite hold it.
 
@@ -129,7 +136,34 @@ fn close_line(
     }
 }
 
-/// Return the meet lines for one loaded meet.
+/// The per competitor state the meet table reads off the walk.
+///
+/// The lowest standing projection stands with the day and the
+/// mark at which the competitor first stood at that figure, and
+/// the held count is the count of marks after which the
+/// competitor was the holder. A competitor holding no
+/// projecting read in any day holds no lowest figure, and the
+/// two stand and fall together.
+struct CompetitorStanding {
+    lowest: Option<BigRational>,
+    lowest_set: Option<(usize, BigRational)>,
+    held: usize,
+}
+
+/// The outcome of the one progression walk of a meet.
+///
+/// The report lines stand beside the per competitor standings
+/// the same pass accumulated, so the meet report and the meet
+/// table are two readings of one walk and neither walks again.
+struct MeetWalk {
+    lines: Vec<String>,
+    labels: Vec<PText>,
+    standings: Vec<CompetitorStanding>,
+    close: Vec<Option<BigRational>>,
+    marks_walked: usize,
+}
+
+/// Walk the record progression of one loaded meet once.
 ///
 /// The walk reads the days as one field of competitors, a runner
 /// value standing in more than one day standing as one competitor,
@@ -141,17 +175,21 @@ fn close_line(
 /// standing holder while it stands at the figure and otherwise by
 /// the competitor whose figure was set at the earliest mark, the
 /// earlier competitor place breaking a tie at one mark. After the
-/// marks of each day the closing line of that day stands, and the
-/// report closes with the finish line, the line naming the day
-/// and the mark at which the figure the holder stands at was set,
-/// and the count of days read. Handed a meet value built by hand
-/// holding no days, or more days than the ordinal table names,
-/// the report names that precondition as its error, and handed a
-/// day carrying a figure its loader would refuse as not finite it
-/// names the broken precondition as its error, the days checked
-/// in list order, in the discipline of FIX-PG-8 and FIX-PG-10,
-/// and never fails bare.
-pub fn meet_report(meet: &Meet) -> Result<Vec<String>, String> {
+/// marks of each day the closing line of that day stands among
+/// the report lines, and the report closes with the finish line,
+/// the line naming the day and the mark at which the figure the
+/// holder stands at was set, and the count of days read. In the
+/// same pass the walk accumulates, per competitor, the lowest
+/// standing projection held after any mark with the day and mark
+/// at which it was first stood at, and the count of marks after
+/// which the competitor was the holder. Handed a meet value built
+/// by hand holding no days, or more days than the ordinal table
+/// names, the walk names that precondition as its error, and
+/// handed a day carrying a figure its loader would refuse as not
+/// finite it names the broken precondition as its error, the
+/// days checked in list order, in the discipline of FIX-PG-8 and
+/// FIX-PG-10, and never fails bare.
+fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     if meet.days.is_empty() {
         return Err("the meet holds no days".to_string());
     }
@@ -166,9 +204,13 @@ pub fn meet_report(meet: &Meet) -> Result<Vec<String>, String> {
         events,
         marks,
     } = collect_events(meet.days.iter());
+    let marks_walked = marks.len();
     let mut lines = vec![format!("meet, {} days", meet.days.len())];
     let mut standing: Vec<Option<BigRational>> = vec![None; labels.len()];
     let mut set_at: Vec<Option<(usize, BigRational)>> = vec![None; labels.len()];
+    let mut lowest: Vec<Option<BigRational>> = vec![None; labels.len()];
+    let mut lowest_set: Vec<Option<(usize, BigRational)>> = vec![None; labels.len()];
+    let mut held: Vec<usize> = vec![0; labels.len()];
     let mut holder: Option<usize> = None;
     let mut emitted: Option<(usize, BigRational)> = None;
     let mut closed_day = 0usize;
@@ -183,11 +225,24 @@ pub fn meet_report(meet: &Meet) -> Result<Vec<String>, String> {
                 set_at[competitor] = Some((*day_index, mark.clone()));
             }
         }
+        for competitor in 0..labels.len() {
+            if let Some(figure) = &standing[competitor] {
+                let is_lowest = match &lowest[competitor] {
+                    None => true,
+                    Some(current) => figure < current,
+                };
+                if is_lowest {
+                    lowest[competitor] = Some(figure.clone());
+                    lowest_set[competitor] = Some((*day_index, mark.clone()));
+                }
+            }
+        }
         let (record, new_holder) = match select_holder(&standing, &set_at, holder) {
             Some(pair) => pair,
             None => continue,
         };
         holder = Some(new_holder);
+        held[new_holder] += 1;
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
                 "record at {} seconds on the {} day, {} at a projection of {}",
@@ -225,5 +280,72 @@ pub fn meet_report(meet: &Meet) -> Result<Vec<String>, String> {
         }
     }
     lines.push(format!("days read, {}", meet.days.len()));
+    let standings = (0..labels.len())
+        .map(|competitor| CompetitorStanding {
+            lowest: lowest[competitor].clone(),
+            lowest_set: lowest_set[competitor].clone(),
+            held: held[competitor],
+        })
+        .collect();
+    Ok(MeetWalk {
+        lines,
+        labels,
+        standings,
+        close: standing,
+        marks_walked,
+    })
+}
+
+/// Return the meet lines for one loaded meet.
+///
+/// The report is the chronological reading of the one walk, the
+/// record lines at the marks where the holder or the record
+/// figure changes and the closing lines the walk emits.
+pub fn meet_report(meet: &Meet) -> Result<Vec<String>, String> {
+    Ok(meet_walk(meet)?.lines)
+}
+
+/// Return the meet table lines for one loaded meet.
+///
+/// The table reads the one walk competitor by competitor, in
+/// the competitor order of the walk. One line stands for each
+/// competitor, naming their lowest standing projection and the
+/// day and mark at which its figure was set, the count of marks
+/// after which they held the record, and their standing
+/// projection at the close, and a competitor holding no
+/// projecting read in any day stands in the none forms with a
+/// held count of zero. The closing line counts the competitors,
+/// the competitors who held the record after some mark, and
+/// the marks the walk walked. No competitor is ranked or
+/// compared against another, and the order is the competitor
+/// order of the walk alone.
+pub fn meet_table(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut lines = vec![format!("meet table, {} days", meet.days.len())];
+    for (competitor, label) in walk.labels.iter().enumerate() {
+        let standing = &walk.standings[competitor];
+        match (&standing.lowest, &standing.lowest_set, &walk.close[competitor]) {
+            (Some(lowest), Some((set_day, set_mark)), Some(close)) => lines.push(format!(
+                "competitor {}, lowest standing projection {}, set on the {} day at {} seconds, record held after {} marks, standing projection {} at the close",
+                label,
+                format_usage(lowest),
+                ORDINALS[*set_day],
+                format_seconds_fraction(set_mark),
+                standing.held,
+                format_usage(close)
+            )),
+            _ => lines.push(format!(
+                "competitor {}, no standing projection at any mark, record held after {} marks, no standing projection at the close",
+                label, standing.held
+            )),
+        }
+    }
+    let holders = walk.standings.iter().filter(|s| s.held > 0).count();
+    lines.push(format!(
+        "table counts, competitors {}, record holders {}, marks walked {}",
+        walk.labels.len(),
+        holders,
+        walk.marks_walked
+    ));
     Ok(lines)
 }

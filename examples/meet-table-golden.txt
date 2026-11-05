@@ -1,0 +1,6 @@
+meet table, 3 days
+competitor operator, lowest standing projection 750, set on the third day at 600 seconds, record held after 3 marks, standing projection 750 at the close
+competitor night fork, lowest standing projection 720, set on the third day at 500 seconds, record held after 5 marks, standing projection 720 at the close
+competitor dawn fork, lowest standing projection 560, set on the third day at 450 seconds, record held after 8 marks, standing projection 560 at the close
+competitor quiet fork, no standing projection at any mark, record held after 0 marks, no standing projection at the close
+table counts, competitors 4, record holders 3, marks walked 16

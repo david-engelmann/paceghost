@@ -1,5 +1,5 @@
 2
 %%%STDOUT%%%
 %%%STDERR%%%
-usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder,rematch,meet} ...
+usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table} ...
 paceghost: error: unrecognized arguments: --bogus
