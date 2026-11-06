@@ -1,14 +1,16 @@
 # paceghost
 
-Your usage window is a game clock, your best previous run is the ghost, and your own fleet keeps stealing your record.
-
 ## What this is
 
-Racing games solved motivation decades ago. You do not race strangers. You race the ghost of your own best lap. Paceghost brings the ghost to agent work. Every task run records its splits, the phases timed as they complete, and your best comparable run drives beside you as a translucent pace line. Ahead by four minutes. Behind by two. The twist is that the ghost does not stay yours. Background forks from your own fleet run similar tasks while you are in meetings, and when one of them beats the record, it becomes the ghost. Tomorrow you race your own fleet's best work.
+Paceghost is a command line tool that reads recorded task runs from local files and prints reports about them. A recorded run names a task and a runner and carries a usage window, a total time, and timed splits for its phases. The tool runs nothing and schedules nothing. Every report is computed from recordings that already exist on disk, and the same input files always print the same reports.
+
+A file that does not match the recorded shape is refused. The command prints the defects the loader found, naming each malformed field, and exits with status one.
+
+The show command prints one recorded run. The ghost command prints the standing ghost for a task, the recorded run with the lowest total. The race command prints one recorded run against a ghost run, split by split and at the finish. The season command prints a report over a field of recorded runs grouped by model and read against a ghost record, and the board command prints the board for one recorded run that carries timed reads. The fieldday command prints the record progression of the recorded runs of one field day inside one window, and the ladder command prints one field day read through a list of windows. The rematch command prints two field days as one record progression, and the meet command prints three or more field days as one record progression. The table command prints the meet read competitor by competitor, naming the lowest standing projection of each competitor, the count of marks each competitor held the record after, and the standing projection at the close.
 
 ## Status
 
-Seeded in October 2026. Setup has landed, and Rounds 1 to 5 have closed, with all five slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
+Seeded in October 2026. Setup has landed, and Rounds 1 to 7 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
 
 ## Programme status
 
