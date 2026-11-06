@@ -1,0 +1,7 @@
+meet reign, 3 days
+spell, operator, first mark at 300 seconds on the first day, last mark at 400 seconds on the first day, 2 marks
+spell, dawn fork, first mark at 600 seconds on the first day, last mark at 600 seconds on the first day, 1 marks
+spell, operator, first mark at 700 seconds on the first day, last mark at 700 seconds on the first day, 1 marks
+spell, night fork, first mark at 900 seconds on the first day, last mark at 300 seconds on the second day, 5 marks
+spell, dawn fork, first mark at 400 seconds on the second day, last mark at 600 seconds on the third day, 7 marks
+reign counts, marks walked 16, spells 5, holders 3, longest spell 7 marks held by dawn fork
