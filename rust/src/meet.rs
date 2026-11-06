@@ -16,9 +16,13 @@
 //! the record, and their standing projection at the close in
 //! the same mark loop that emits the record lines, so no second
 //! progression stands for the two readings to drift apart on.
-//! The obligations this module carries are PG-13 and PG-14
-//! in CONTRACT.md, in the Round 6 section, and PG-15 and PG-16,
-//! in the Round 7 section. No Python module stands
+//! The reign reading reads the same walk a third way, over the
+//! holder the same pass records after each mark, and states the
+//! spells, the maximal runs of consecutive marks one competitor
+//! held the record after. The obligations this module carries
+//! are PG-13 and PG-14 in CONTRACT.md, in the Round 6 section,
+//! PG-15 and PG-16, in the Round 7 section, and PG-17 and PG-18,
+//! in the Round 8 section. No Python module stands
 //! behind this one, so the contract text is the spec and the pins
 //! in the test suite hold it.
 
@@ -155,12 +159,17 @@ struct CompetitorStanding {
 /// The report lines stand beside the per competitor standings
 /// the same pass accumulated, so the meet report and the meet
 /// table are two readings of one walk and neither walks again.
+/// The trail records the holder after each mark in walk order,
+/// the day and the mark standing beside the holder, so the
+/// reign reading reads the same pass a third way and no walk
+/// stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
     standings: Vec<CompetitorStanding>,
     close: Vec<Option<BigRational>>,
     marks_walked: usize,
+    trail: Vec<(usize, BigRational, usize)>,
 }
 
 /// Walk the record progression of one loaded meet once.
@@ -182,7 +191,9 @@ struct MeetWalk {
 /// same pass the walk accumulates, per competitor, the lowest
 /// standing projection held after any mark with the day and mark
 /// at which it was first stood at, and the count of marks after
-/// which the competitor was the holder. Handed a meet value built
+/// which the competitor was the holder, and it records the
+/// holder after each mark in the trail the reign reading reads.
+/// Handed a meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -211,6 +222,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut lowest: Vec<Option<BigRational>> = vec![None; labels.len()];
     let mut lowest_set: Vec<Option<(usize, BigRational)>> = vec![None; labels.len()];
     let mut held: Vec<usize> = vec![0; labels.len()];
+    let mut trail: Vec<(usize, BigRational, usize)> = Vec::new();
     let mut holder: Option<usize> = None;
     let mut emitted: Option<(usize, BigRational)> = None;
     let mut closed_day = 0usize;
@@ -243,6 +255,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         };
         holder = Some(new_holder);
         held[new_holder] += 1;
+        trail.push((*day_index, mark.clone(), new_holder));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
                 "record at {} seconds on the {} day, {} at a projection of {}",
@@ -293,6 +306,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         standings,
         close: standing,
         marks_walked,
+        trail,
     })
 }
 
@@ -347,5 +361,94 @@ pub fn meet_table(meet: &Meet) -> Result<Vec<String>, String> {
         holders,
         walk.marks_walked
     ));
+    Ok(lines)
+}
+
+/// One spell of the reign reading.
+///
+/// A spell is a maximal run of consecutive marks of the walk
+/// after which the same competitor was the holder. The first
+/// and last marks stand as the day index and the elapsed figure
+/// of the marks that bound the run, and the length is the count
+/// of its marks.
+struct Spell {
+    holder: usize,
+    first: (usize, BigRational),
+    last: (usize, BigRational),
+    length: usize,
+}
+
+/// Return the reign lines for one loaded meet.
+///
+/// The reading reads the trail of the one walk, the holder the
+/// walk recorded after each mark, and states the spells in
+/// walk order, one line for each maximal run of consecutive
+/// marks one competitor held the record after, naming the
+/// competitor and the first and last marks of the spell and
+/// its length in marks. The closing line counts the marks the
+/// walk walked, the spells, and the competitors holding at
+/// least one spell, and names the longest spell and the
+/// competitor who held it, the earliest such spell standing
+/// where two or more spells share the greatest length. A meet
+/// in which no read projects holds no marks and no spells,
+/// and its closing line names that no spell stood. No
+/// competitor is ranked or compared against another beyond
+/// the longest spell the closing line names.
+pub fn meet_reign(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut spells: Vec<Spell> = Vec::new();
+    for (day_index, mark, holder) in &walk.trail {
+        match spells.last_mut() {
+            Some(spell) if spell.holder == *holder => {
+                spell.last = (*day_index, mark.clone());
+                spell.length += 1;
+            }
+            _ => spells.push(Spell {
+                holder: *holder,
+                first: (*day_index, mark.clone()),
+                last: (*day_index, mark.clone()),
+                length: 1,
+            }),
+        }
+    }
+    let mut lines = vec![format!("meet reign, {} days", meet.days.len())];
+    for spell in &spells {
+        lines.push(format!(
+            "spell, {}, first mark at {} seconds on the {} day, last mark at {} seconds on the {} day, {} marks",
+            walk.labels[spell.holder],
+            format_seconds_fraction(&spell.first.1),
+            ORDINALS[spell.first.0],
+            format_seconds_fraction(&spell.last.1),
+            ORDINALS[spell.last.0],
+            spell.length
+        ));
+    }
+    if spells.is_empty() {
+        lines.push(format!(
+            "reign counts, marks walked {}, spells 0, holders 0, no spell stood",
+            walk.marks_walked
+        ));
+    } else {
+        let mut longest = &spells[0];
+        for spell in &spells[1..] {
+            if spell.length > longest.length {
+                longest = spell;
+            }
+        }
+        let mut holders: Vec<usize> = Vec::new();
+        for spell in &spells {
+            if !holders.contains(&spell.holder) {
+                holders.push(spell.holder);
+            }
+        }
+        lines.push(format!(
+            "reign counts, marks walked {}, spells {}, holders {}, longest spell {} marks held by {}",
+            walk.marks_walked,
+            spells.len(),
+            holders.len(),
+            longest.length,
+            walk.labels[longest.holder]
+        ));
+    }
     Ok(lines)
 }

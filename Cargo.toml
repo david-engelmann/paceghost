@@ -117,6 +117,18 @@ path = "rust/tests/test_commands_round7.rs"
 name = "test_examples_round7"
 path = "rust/tests/test_examples_round7.rs"
 
+[[test]]
+name = "test_reign"
+path = "rust/tests/test_reign.rs"
+
+[[test]]
+name = "test_commands_round8"
+path = "rust/tests/test_commands_round8.rs"
+
+[[test]]
+name = "test_examples_round8"
+path = "rust/tests/test_examples_round8.rs"
+
 [dependencies]
 libc = "0.2"
 num-bigint = "0.4"

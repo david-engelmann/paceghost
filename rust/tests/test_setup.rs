@@ -77,8 +77,11 @@ fn test_readme_reports_the_round_four_status() {
     // slice, as the named mechanical consequence of slice 8
     // standing built and in review, so the count stood at one,
     // the slice 8 status line, until the Round 7 closure landed
-    // slice 8 and the count returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // slice 8 and the count returned to zero. Adjusted again
+    // with the Round 8 slice, as the named mechanical
+    // consequence of slice 9 standing built and in review, so
+    // the count stands at one, the slice 9 status line.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -107,6 +110,14 @@ fn test_readme_reports_the_round_seven_status() {
     let standing = "- Contract, PG-15 and PG-16 met. They stand in full form in CONTRACT.md, and Round 7 closed on the merged slice 8 after three reviews approving with no findings.";
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 8 has landed. It carries the meet table that reads a meet competitor by competitor over the one record progression of the meet report, naming the lowest standing projection of each competitor and the day and mark at which it was set, the count of marks each competitor held the record after, and their standing projection at the close, and the table command, with the golden meet table of the standing example meet under examples.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 7 of 100"));
+}
+
+#[test]
+fn test_readme_reports_the_round_eight_slice() {
+    let lines = readme_lines();
+    let slice_line = "- Slice 9 is built and in review. It carries the reign reading that reads a meet spell by spell over the one record progression of the meet report, naming each maximal run of consecutive marks one competitor held the record after with the marks it spans and its length, and the count of marks and spells and the longest spell at the close, and the reign command, with the golden reign reading of the standing example meet under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
     assert!(read("README.md").contains("Closed perfection rounds, 7 of 100"));
 }
