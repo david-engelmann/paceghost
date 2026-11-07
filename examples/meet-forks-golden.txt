@@ -1,0 +1,31 @@
+meet forks, 3 days, 4 competitors
+competitor operator
+standing, at a projection of 1260, set at 300 seconds on the first day
+standing, at a projection of 1105.714286, set at 700 seconds on the first day
+standing, at a projection of 1140, set at 1200 seconds on the first day
+standing, at a projection of 1140, set at 300 seconds on the second day
+standing, at a projection of 900, set at 800 seconds on the second day
+standing, at a projection of 750, set at 600 seconds on the third day
+spell, first mark at 300 seconds on the first day, last mark at 400 seconds on the first day, 2 marks
+spell, first mark at 700 seconds on the first day, last mark at 700 seconds on the first day, 1 marks
+close, days stood in 3, marks stood at 16, spells held 2, standing projection 750 at the close
+competitor night fork
+standing, at a projection of 1350, set at 400 seconds on the first day
+standing, at a projection of 940, set at 900 seconds on the first day
+standing, at a projection of 840, set at 1500 seconds on the first day
+standing, at a projection of 1152, set at 500 seconds on the second day
+standing, at a projection of 1008, set at 1000 seconds on the second day
+standing, at a projection of 720, set at 500 seconds on the third day
+spell, first mark at 900 seconds on the first day, last mark at 300 seconds on the second day, 5 marks
+close, days stood in 3, marks stood at 15, spells held 1, standing projection 720 at the close
+competitor dawn fork
+standing, at a projection of 1200, set at 600 seconds on the first day
+standing, at a projection of 998.181818, set at 1100 seconds on the first day
+standing, at a projection of 675, set at 400 seconds on the second day
+standing, at a projection of 560, set at 450 seconds on the third day
+spell, first mark at 600 seconds on the first day, last mark at 600 seconds on the first day, 1 marks
+spell, first mark at 400 seconds on the second day, last mark at 600 seconds on the third day, 7 marks
+close, days stood in 3, marks stood at 14, spells held 2, standing projection 560 at the close
+competitor quiet fork
+close, days stood in 1, marks stood at 0, spells held 0, no standing projection at the close
+forks counts, competitors 4, marks stood at 45, spells 5

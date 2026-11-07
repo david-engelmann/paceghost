@@ -86,8 +86,13 @@ fn test_readme_reports_the_round_four_status() {
     // as the named mechanical consequence of slice 10 standing
     // built and in review, so the count stood at one, the
     // slice 10 status line, until the Round 9 closure landed
-    // slice 10 and the count returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // slice 10 and the count returned to zero. Adjusted again
+    // with the Round 10 slice, as the named mechanical
+    // consequence of slice 11 standing built and in review, so
+    // the count stands at one, the slice 11 status line, until
+    // the Round 10 closure lands slice 11 and the count
+    // returns to zero.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -136,6 +141,16 @@ fn test_readme_reports_the_round_nine_status() {
     let standing = "- Contract, PG-19 and PG-20 met. They stand in full form in CONTRACT.md, and Round 9 closed on the merged slice 10 after three reviews, no repair pass, and the red team condition discharged on executed probes.";
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 10 has landed. It carries the days reading that reads a meet day by day over the one record progression of the meet report, naming the marks and handovers of each day and the record that stood at its close, and the days command, with the golden days reading of the standing example meet under examples, and the README brought to the fleet README standard, its lede, install, quickstart, and usage sections standing with captured output.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 9 of 100"));
+}
+
+#[test]
+fn test_readme_reports_the_round_ten_slice() {
+    let lines = readme_lines();
+    let stated = "- Contract, PG-21 and PG-22 now stand in full form in CONTRACT.md under the Round 10 obligations with the FIX-PG-11 repair amendment, and their standing is not claimed here, as Round 10 has not closed.";
+    assert!(lines.iter().any(|found| found == stated));
+    let slice_line = "- Slice 11 is built and in review. It carries the forks reading that reads a meet competitor by competitor over the one record progression of the meet report, naming every standing each competitor set and the record spells it held and the figures of its close, and the forks command, with the golden forks reading of the standing example meet under examples, and the label fencing closure of the meet readings under FIX-PG-11, and the README opening paragraph repaired of its lede restatement.";
     assert!(lines.iter().any(|found| found == slice_line));
     assert!(read("README.md").contains("Closed perfection rounds, 9 of 100"));
 }

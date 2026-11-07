@@ -2,7 +2,7 @@
 
 Paceghost is a command line tool that reads recorded task runs and field days from local files and prints reports over them.
 
-Paceghost is a command line tool that reads recorded task runs and field days from local files and prints reports about them. A recorded run names a task and a runner and carries a usage window, a total time, and timed splits for its phases. A field day is a set of recorded runs inside one window, and a meet is three or more field days read as one record progression. The tool runs nothing and schedules nothing. Every report is computed from recordings that already exist on disk, and the same input files always print the same reports.
+A recorded run names a task and a runner and carries a usage window, a total time, and timed splits for its phases. A field day is a set of recorded runs inside one window, and a meet is three or more field days read as one record progression. The tool runs nothing and schedules nothing. Every report is computed from recordings that already exist on disk, and the same input files always print the same reports.
 
 ```text
 $ paceghost reign examples/meet.json
@@ -256,6 +256,45 @@ day, the third day, marks 3, handovers 0, record at the close held by dawn fork 
 days counts, days 3, marks walked 16, handovers 4
 ```
 
+### forks
+
+The forks command prints the meet read competitor by competitor, naming every standing each competitor set and the record spells it held and the figures of its close.
+
+```text
+$ paceghost forks examples/meet.json
+meet forks, 3 days, 4 competitors
+competitor operator
+standing, at a projection of 1260, set at 300 seconds on the first day
+standing, at a projection of 1105.714286, set at 700 seconds on the first day
+standing, at a projection of 1140, set at 1200 seconds on the first day
+standing, at a projection of 1140, set at 300 seconds on the second day
+standing, at a projection of 900, set at 800 seconds on the second day
+standing, at a projection of 750, set at 600 seconds on the third day
+spell, first mark at 300 seconds on the first day, last mark at 400 seconds on the first day, 2 marks
+spell, first mark at 700 seconds on the first day, last mark at 700 seconds on the first day, 1 marks
+close, days stood in 3, marks stood at 16, spells held 2, standing projection 750 at the close
+competitor night fork
+standing, at a projection of 1350, set at 400 seconds on the first day
+standing, at a projection of 940, set at 900 seconds on the first day
+standing, at a projection of 840, set at 1500 seconds on the first day
+standing, at a projection of 1152, set at 500 seconds on the second day
+standing, at a projection of 1008, set at 1000 seconds on the second day
+standing, at a projection of 720, set at 500 seconds on the third day
+spell, first mark at 900 seconds on the first day, last mark at 300 seconds on the second day, 5 marks
+close, days stood in 3, marks stood at 15, spells held 1, standing projection 720 at the close
+competitor dawn fork
+standing, at a projection of 1200, set at 600 seconds on the first day
+standing, at a projection of 998.181818, set at 1100 seconds on the first day
+standing, at a projection of 675, set at 400 seconds on the second day
+standing, at a projection of 560, set at 450 seconds on the third day
+spell, first mark at 600 seconds on the first day, last mark at 600 seconds on the first day, 1 marks
+spell, first mark at 400 seconds on the second day, last mark at 600 seconds on the third day, 7 marks
+close, days stood in 3, marks stood at 14, spells held 2, standing projection 560 at the close
+competitor quiet fork
+close, days stood in 1, marks stood at 0, spells held 0, no standing projection at the close
+forks counts, competitors 4, marks stood at 45, spells 5
+```
+
 ## Status
 
 Seeded in October 2026. Setup has landed, and Rounds 1 to 9 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
@@ -271,6 +310,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 9 have closed, with al
 - Contract, PG-15 and PG-16 met. They stand in full form in CONTRACT.md, and Round 7 closed on the merged slice 8 after three reviews approving with no findings.
 - Contract, PG-17 and PG-18 met. They stand in full form in CONTRACT.md, and Round 8 closed on the merged slice 9 after three reviews, no repair pass, and the red team condition discharged on executed probes.
 - Contract, PG-19 and PG-20 met. They stand in full form in CONTRACT.md, and Round 9 closed on the merged slice 10 after three reviews, no repair pass, and the red team condition discharged on executed probes.
+- Contract, PG-21 and PG-22 now stand in full form in CONTRACT.md under the Round 10 obligations with the FIX-PG-11 repair amendment, and their standing is not claimed here, as Round 10 has not closed.
 - Slice 2 has landed. It carries the recorded run loader that names every malformed field, the ghost rule, the race report, the ghost change report, and the show, ghost, and race commands, with two synthetic example runs and a golden race report under examples.
 - The Round 2 slice has landed. It carries the season report over a recorded field of runs grouped by model and the live board over recorded timed reads, with the season and board commands, a synthetic example field, a synthetic ghost record carrying a usage figure, a synthetic example run carrying timed reads, and golden renderings under examples. PG-5 and PG-6 stand in full form in CONTRACT.md with the Round 2 repair amendment, and Round 2 closed on the merged slice after three reviews, a repair pass, a micro repair, and re-reviews approving the final head. The board reads a finished recording, and watching a real run while it runs remains future work.
 - Slice 4 has landed. It carries the field day loader that names every malformed field, the stolen record report that walks the record progression of one window across a field of recorded runs, and the fieldday command, with a synthetic example field day and its golden report under examples.
@@ -280,6 +320,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 9 have closed, with al
 - Slice 8 has landed. It carries the meet table that reads a meet competitor by competitor over the one record progression of the meet report, naming the lowest standing projection of each competitor and the day and mark at which it was set, the count of marks each competitor held the record after, and their standing projection at the close, and the table command, with the golden meet table of the standing example meet under examples.
 - Slice 9 has landed. It carries the reign reading that reads a meet spell by spell over the one record progression of the meet report, naming each maximal run of consecutive marks one competitor held the record after with the marks it spans and its length, and the count of marks and spells and the longest spell at the close, and the reign command, with the golden reign reading of the standing example meet under examples.
 - Slice 10 has landed. It carries the days reading that reads a meet day by day over the one record progression of the meet report, naming the marks and handovers of each day and the record that stood at its close, and the days command, with the golden days reading of the standing example meet under examples, and the README brought to the fleet README standard, its lede, install, quickstart, and usage sections standing with captured output.
+- Slice 11 is built and in review. It carries the forks reading that reads a meet competitor by competitor over the one record progression of the meet report, naming every standing each competitor set and the record spells it held and the figures of its close, and the forks command, with the golden forks reading of the standing example meet under examples, and the label fencing closure of the meet readings under FIX-PG-11, and the README opening paragraph repaired of its lede restatement.
 - The Rust port has landed. It carries the behavior the Python package carried, checked against the same goldens, and the Python tree stands removed under PORT-10.
 - Local gate, cargo test, cargo fmt --check, and cargo clippy --all-targets -- -D warnings. CI runs the same commands.
 
