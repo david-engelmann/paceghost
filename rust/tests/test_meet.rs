@@ -11,7 +11,9 @@ use std::path::PathBuf;
 use num_bigint::BigInt;
 
 use paceghost::fieldday::{DayRun, FieldDay};
-use paceghost::meet::{load_meet_file, load_meet_text, meet_report, Meet};
+use paceghost::meet::{
+    load_meet_file, load_meet_text, meet_days, meet_reign, meet_report, meet_table, Meet,
+};
 use paceghost::pynum::Num;
 use paceghost::pytext::PText;
 use paceghost::rematch::{load_rematch_text, rematch_report};
@@ -720,4 +722,107 @@ fn test_the_finite_guard_checks_the_days_in_list_order() {
     };
     let error = meet_report(&meet).expect_err("the report names the precondition");
     assert_eq!(error, "a read usage value is not a finite number");
+}
+
+// The label fencing pins of FIX-PG-11. Each one hands the
+// readings a runner label its loader would refuse and states
+// the error every reading must return, so a pin fails if a
+// reading ever prints the break raw inside a report line, and
+// the order pin fails if the label check ever stands before
+// the finiteness check of FIX-PG-10.
+
+fn break_run(label: &str) -> DayRun {
+    DayRun {
+        runner: PText::from_text(label),
+        usage: None,
+        reads: Some(vec![Read {
+            elapsed_seconds: Num::from_i64(300),
+            usage: Num::from_i64(100),
+        }]),
+    }
+}
+
+#[test]
+fn test_a_line_break_in_a_runner_label_on_the_first_day_names_the_precondition() {
+    for label in ["a\nb", "a\rb"] {
+        let meet = Meet {
+            days: vec![
+                hand_day(Num::from_i64(1800), vec![break_run(label)]),
+                ordinary_day(),
+                ordinary_day(),
+            ],
+        };
+        for reading in [meet_report, meet_table, meet_reign, meet_days] {
+            let error = reading(&meet).expect_err("the reading names the precondition");
+            assert_eq!(error, "a runner label holds a line break");
+        }
+    }
+}
+
+#[test]
+fn test_a_line_break_in_a_later_run_of_a_day_names_the_precondition() {
+    let meet = Meet {
+        days: vec![
+            hand_day(Num::from_i64(1800), vec![ordinary_run(), break_run("a\nb")]),
+            ordinary_day(),
+            ordinary_day(),
+        ],
+    };
+    let error = meet_report(&meet).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_a_line_break_in_a_runner_label_on_a_later_day_names_the_precondition() {
+    for label in ["a\nb", "a\rb"] {
+        let meet = Meet {
+            days: vec![
+                ordinary_day(),
+                ordinary_day(),
+                hand_day(Num::from_i64(1800), vec![break_run(label)]),
+            ],
+        };
+        for reading in [meet_report, meet_table, meet_reign, meet_days] {
+            let error = reading(&meet).expect_err("the reading names the precondition");
+            assert_eq!(error, "a runner label holds a line break");
+        }
+    }
+}
+
+#[test]
+fn test_a_label_break_behind_a_finite_defect_draws_the_finite_error() {
+    // The first day carries a runner label holding a line break
+    // and the third day carries a window that is not finite. The
+    // guard checks every figure of every day before any label,
+    // so the error names the broken figure and not the label.
+    let meet = Meet {
+        days: vec![
+            hand_day(Num::from_i64(1800), vec![break_run("a\nb")]),
+            ordinary_day(),
+            hand_day(Num::from_f64(f64::NAN), vec![ordinary_run()]),
+        ],
+    };
+    let error = meet_report(&meet).expect_err("the report names the precondition");
+    assert_eq!(error, "the window is not a finite number");
+}
+
+#[test]
+fn test_a_line_break_in_an_operator_label_still_renders() {
+    // The closure fences runner labels, the labels the readings
+    // print. The operator label stands in no meet reading line,
+    // so a break inside it draws no error and no line moves.
+    let op_day = || FieldDay {
+        window_seconds: Num::from_i64(1800),
+        operator: PText::from_text("a\nb"),
+        runs: vec![ordinary_run()],
+    };
+    let meet = Meet {
+        days: vec![op_day(), op_day(), op_day()],
+    };
+    let lines = meet_report(&meet).expect("the report reads");
+    assert_eq!(lines[0], "meet, 3 days");
+    assert_eq!(
+        lines[1],
+        "record at 300 seconds on the first day, a at a projection of 600"
+    );
 }

@@ -23,11 +23,21 @@
 //! a fourth way, over the same trail and the holder and the
 //! record figure the pass records at the close of each day, and
 //! states the marks and the handovers of each day and the
-//! record that stood at its close. The obligations this module
+//! record that stood at its close. The forks reading reads
+//! the same walk a fifth way, over the standing events the
+//! same pass records for each competitor and the spells of
+//! the trail cut by holder, and states one section for each
+//! competitor naming every standing it held and the figures
+//! of its close. Every reading of the walk
+//! stands inside the label fencing closure of FIX-PG-11, the
+//! one guard pass refusing a runner label that holds a line
+//! break after the figures of every day are checked and before
+//! any event is collected. The obligations this module
 //! carries are PG-13 and PG-14 in CONTRACT.md, in the Round 6
 //! section, PG-15 and PG-16, in the Round 7 section, PG-17 and
-//! PG-18, in the Round 8 section, and PG-19 and PG-20, in the
-//! Round 9 section. No Python module stands
+//! PG-18, in the Round 8 section, PG-19 and PG-20, in the
+//! Round 9 section, and PG-21 and PG-22 with the FIX-PG-11
+//! amendment, in the Round 10 section. No Python module stands
 //! behind this one, so the contract text is the spec and the pins
 //! in the test suite hold it.
 
@@ -170,11 +180,19 @@ fn day_close(
 /// the held count is the count of marks after which the
 /// competitor was the holder. A competitor holding no
 /// projecting read in any day holds no lowest figure, and the
-/// two stand and fall together.
+/// two stand and fall together. The standing events are the
+/// marks at which one of the competitor's own reads applied,
+/// each standing with the day and the mark of the read and the
+/// projection it set, and the marks stood at count is the count
+/// of marks of the walk from the first standing event to the
+/// close of the walk, the first standing event counted, which
+/// the forks reading reads beside the events themselves.
 struct CompetitorStanding {
     lowest: Option<BigRational>,
     lowest_set: Option<(usize, BigRational)>,
     held: usize,
+    standing_events: Vec<(usize, BigRational, BigRational)>,
+    marks_stood_at: usize,
 }
 
 /// The outcome of the one progression walk of a meet.
@@ -188,7 +206,10 @@ struct CompetitorStanding {
 /// stands for it either. The day closes record the holder and
 /// the record figure at the close of each day in day order,
 /// one entry per day, so the days reading reads the same pass
-/// a fourth way and no walk stands for it either.
+/// a fourth way and no walk stands for it either. The per
+/// competitor standings carry the standing events of the same
+/// pass beside the table figures, so the forks reading reads
+/// the same pass a fifth way and no walk stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -221,7 +242,10 @@ struct MeetWalk {
 /// which the competitor was the holder, and it records the
 /// holder after each mark in the trail the reign reading reads
 /// and the holder and the record figure at the close of each
-/// day in the day closes the days reading reads. Handed a meet
+/// day in the day closes the days reading reads, and the
+/// standing events of each competitor, the marks at which one
+/// of its own reads applied with the projection each set, in
+/// the standing events the forks reading reads. Handed a meet
 /// value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
@@ -239,6 +263,13 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     for day in &meet.days {
         check_finite_figures(&day.window_seconds, &day.runs)?;
     }
+    for day in &meet.days {
+        for run in &day.runs {
+            if run.runner.holds_line_break() {
+                return Err("a runner label holds a line break".to_string());
+            }
+        }
+    }
     let CollectedEvents {
         labels,
         events,
@@ -251,12 +282,15 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut lowest: Vec<Option<BigRational>> = vec![None; labels.len()];
     let mut lowest_set: Vec<Option<(usize, BigRational)>> = vec![None; labels.len()];
     let mut held: Vec<usize> = vec![0; labels.len()];
+    let mut standing_events: Vec<Vec<(usize, BigRational, BigRational)>> =
+        vec![Vec::new(); labels.len()];
+    let mut stood_from: Vec<Option<usize>> = vec![None; labels.len()];
     let mut trail: Vec<(usize, BigRational, usize)> = Vec::new();
     let mut day_closes: Vec<Option<(usize, BigRational)>> = Vec::new();
     let mut holder: Option<usize> = None;
     let mut emitted: Option<(usize, BigRational)> = None;
     let mut closed_day = 0usize;
-    for (day_index, mark) in &marks {
+    for (position, (day_index, mark)) in marks.iter().enumerate() {
         while closed_day < *day_index {
             lines.push(close_line(closed_day, holder, &standing, &labels));
             day_closes.push(day_close(holder, &standing));
@@ -266,6 +300,10 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
             if let Some(projection) = events[competitor].get(&(*day_index, mark.clone())) {
                 standing[competitor] = Some(projection.clone());
                 set_at[competitor] = Some((*day_index, mark.clone()));
+                standing_events[competitor].push((*day_index, mark.clone(), projection.clone()));
+                if stood_from[competitor].is_none() {
+                    stood_from[competitor] = Some(position);
+                }
             }
         }
         for competitor in 0..labels.len() {
@@ -330,6 +368,11 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
             lowest: lowest[competitor].clone(),
             lowest_set: lowest_set[competitor].clone(),
             held: held[competitor],
+            standing_events: standing_events[competitor].clone(),
+            marks_stood_at: match stood_from[competitor] {
+                Some(position) => marks_walked - position,
+                None => 0,
+            },
         })
         .collect();
     Ok(MeetWalk {
@@ -411,6 +454,32 @@ struct Spell {
     length: usize,
 }
 
+/// Aggregate the trail of one walk into its spells.
+///
+/// The spells stand in walk order, one for each maximal run of
+/// consecutive marks one competitor held the record after. The
+/// reign reading states the list whole and the forks reading
+/// cuts it by holder, and the two read this one aggregation so
+/// their spells cannot drift apart.
+fn collect_spells(trail: &[(usize, BigRational, usize)]) -> Vec<Spell> {
+    let mut spells: Vec<Spell> = Vec::new();
+    for (day_index, mark, holder) in trail {
+        match spells.last_mut() {
+            Some(spell) if spell.holder == *holder => {
+                spell.last = (*day_index, mark.clone());
+                spell.length += 1;
+            }
+            _ => spells.push(Spell {
+                holder: *holder,
+                first: (*day_index, mark.clone()),
+                last: (*day_index, mark.clone()),
+                length: 1,
+            }),
+        }
+    }
+    spells
+}
+
 /// Return the reign lines for one loaded meet.
 ///
 /// The reading reads the trail of the one walk, the holder the
@@ -429,21 +498,7 @@ struct Spell {
 /// the longest spell the closing line names.
 pub fn meet_reign(meet: &Meet) -> Result<Vec<String>, String> {
     let walk = meet_walk(meet)?;
-    let mut spells: Vec<Spell> = Vec::new();
-    for (day_index, mark, holder) in &walk.trail {
-        match spells.last_mut() {
-            Some(spell) if spell.holder == *holder => {
-                spell.last = (*day_index, mark.clone());
-                spell.length += 1;
-            }
-            _ => spells.push(Spell {
-                holder: *holder,
-                first: (*day_index, mark.clone()),
-                last: (*day_index, mark.clone()),
-                length: 1,
-            }),
-        }
-    }
+    let spells = collect_spells(&walk.trail);
     let mut lines = vec![format!("meet reign, {} days", meet.days.len())];
     for spell in &spells {
         lines.push(format!(
@@ -534,6 +589,87 @@ pub fn meet_days(meet: &Meet) -> Result<Vec<String>, String> {
         meet.days.len(),
         walk.marks_walked,
         handovers.iter().sum::<usize>()
+    ));
+    Ok(lines)
+}
+
+/// Return the forks lines for one loaded meet.
+///
+/// The reading reads the standing events and the trail of the
+/// one walk competitor by competitor, in the competitor order
+/// of the walk, and states one section for each competitor,
+/// naming every standing event of the competitor in walk order
+/// with the projection the event set and the day and mark at
+/// which it was set, then each spell of the competitor in the
+/// order the spells stand in the reign reading, and closes the
+/// section with the count of days whose runs name the
+/// competitor, the count of marks the competitor stood at, the
+/// count of its spells, and the standing projection it holds
+/// at the close, or that it holds none. The closing line counts
+/// the competitors, the marks stood at summed over the
+/// competitors, which is the marks walked counted once for
+/// each competitor holding a standing after each mark, and the
+/// spells over the whole meet, which is the spells count of
+/// the reign reading. No competitor is ranked or compared
+/// against another, and the competitors stand in the
+/// competitor order of the walk alone.
+pub fn meet_forks(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let spells = collect_spells(&walk.trail);
+    let mut lines = vec![format!(
+        "meet forks, {} days, {} competitors",
+        meet.days.len(),
+        walk.labels.len()
+    )];
+    let mut total_marks_stood_at = 0usize;
+    for (competitor, label) in walk.labels.iter().enumerate() {
+        lines.push(format!("competitor {}", label));
+        let standing = &walk.standings[competitor];
+        for (day_index, mark, figure) in &standing.standing_events {
+            lines.push(format!(
+                "standing, at a projection of {}, set at {} seconds on the {} day",
+                format_usage(figure),
+                format_seconds_fraction(mark),
+                ORDINALS[*day_index]
+            ));
+        }
+        let own_spells: Vec<&Spell> = spells
+            .iter()
+            .filter(|spell| spell.holder == competitor)
+            .collect();
+        for spell in &own_spells {
+            lines.push(format!(
+                "spell, first mark at {} seconds on the {} day, last mark at {} seconds on the {} day, {} marks",
+                format_seconds_fraction(&spell.first.1),
+                ORDINALS[spell.first.0],
+                format_seconds_fraction(&spell.last.1),
+                ORDINALS[spell.last.0],
+                spell.length
+            ));
+        }
+        let days_stood_in = meet
+            .days
+            .iter()
+            .filter(|day| day.runs.iter().any(|run| run.runner == *label))
+            .count();
+        total_marks_stood_at += standing.marks_stood_at;
+        let close_text = match &walk.close[competitor] {
+            Some(close) => format!("standing projection {} at the close", format_usage(close)),
+            None => "no standing projection at the close".to_string(),
+        };
+        lines.push(format!(
+            "close, days stood in {}, marks stood at {}, spells held {}, {}",
+            days_stood_in,
+            standing.marks_stood_at,
+            own_spells.len(),
+            close_text
+        ));
+    }
+    lines.push(format!(
+        "forks counts, competitors {}, marks stood at {}, spells {}",
+        walk.labels.len(),
+        total_marks_stood_at,
+        spells.len()
     ));
     Ok(lines)
 }
