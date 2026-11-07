@@ -2,13 +2,30 @@ name: ci
 on:
   push:
   pull_request:
+  merge_group:
 jobs:
   gate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: "1.91.1"
+          components: "rustfmt, clippy"
       - name: Rust port tests
-        run: cargo test
+        run: cargo test --no-fail-fast
+      - name: Rust port format check
+        run: cargo fmt --check
+      - name: Rust port clippy
+        run: cargo clippy --all-targets -- -D warnings
+  gate-stable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: "stable"
+          components: "rustfmt, clippy"
       - name: Rust port format check
         run: cargo fmt --check
       - name: Rust port clippy
