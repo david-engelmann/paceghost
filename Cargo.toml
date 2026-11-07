@@ -2,6 +2,7 @@
 name = "paceghost"
 version = "0.1.0"
 edition = "2021"
+description = "Paceghost is a command line tool that reads recorded task runs and field days from local files and prints reports over them."
 
 [lib]
 path = "rust/src/lib.rs"
@@ -128,6 +129,18 @@ path = "rust/tests/test_commands_round8.rs"
 [[test]]
 name = "test_examples_round8"
 path = "rust/tests/test_examples_round8.rs"
+
+[[test]]
+name = "test_days"
+path = "rust/tests/test_days.rs"
+
+[[test]]
+name = "test_commands_round9"
+path = "rust/tests/test_commands_round9.rs"
+
+[[test]]
+name = "test_examples_round9"
+path = "rust/tests/test_examples_round9.rs"
 
 [dependencies]
 libc = "0.2"
