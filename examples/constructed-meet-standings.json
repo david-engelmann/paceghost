@@ -1,0 +1,118 @@
+{
+  "days": [
+    {
+      "operator": "early bird",
+      "runs": [
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 200,
+              "usage": 180
+            },
+            {
+              "elapsed_seconds": 500,
+              "usage": 400
+            }
+          ],
+          "runner": "early bird",
+          "usage": 900
+        },
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 300,
+              "usage": 270
+            },
+            {
+              "elapsed_seconds": 600,
+              "usage": 480
+            }
+          ],
+          "runner": "steady hand",
+          "usage": 850
+        },
+        {
+          "runner": "late riser",
+          "usage": 700
+        }
+      ],
+      "window_seconds": 1000
+    },
+    {
+      "operator": "early bird",
+      "runs": [
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 250,
+              "usage": 205
+            }
+          ],
+          "runner": "early bird",
+          "usage": 820
+        },
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 400,
+              "usage": 312
+            }
+          ],
+          "runner": "steady hand",
+          "usage": 780
+        },
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 300,
+              "usage": 240
+            },
+            {
+              "elapsed_seconds": 700,
+              "usage": 490
+            }
+          ],
+          "runner": "late riser",
+          "usage": 600
+        }
+      ],
+      "window_seconds": 1000
+    },
+    {
+      "operator": "early bird",
+      "runs": [
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 500,
+              "usage": 375
+            }
+          ],
+          "runner": "early bird",
+          "usage": 750
+        },
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 500,
+              "usage": 360
+            }
+          ],
+          "runner": "steady hand",
+          "usage": 720
+        },
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 800,
+              "usage": 520
+            }
+          ],
+          "runner": "late riser",
+          "usage": 650
+        }
+      ],
+      "window_seconds": 1000
+    }
+  ]
+}

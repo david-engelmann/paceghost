@@ -344,3 +344,60 @@ fn test_ghost_prints_the_named_error_for_a_break_bearing_ghost() {
     assert_eq!(outcome.stdout, vec!["a runner label holds a line break"]);
     assert_eq!(outcome.code, 1);
 }
+
+// The FIX-PG-14 pins, added with the Round 12 repair. The
+// summary pass of FIX-PG-12 extends to the fields the summary
+// prints that a hand built run can carry a break in past its
+// loader, the task, the recorded_at, and the split phases,
+// checked after the runner in print order, each in its named
+// error. On the unrepaired code the summary prints each break
+// raw inside its own line, so each pin fails there for a real
+// reason. The order pin hands the pass a break in the task and
+// a break in a phase together and states that the task error
+// stands, because the task is checked first.
+
+fn summary_run(task: &str, recorded_at: &str, phase: &str) -> Run {
+    Run {
+        task: PText::from_text(task),
+        window_seconds: Num::from_i64(3600),
+        runner: PText::from_text("operator"),
+        recorded_at: PText::from_text(recorded_at),
+        splits: vec![Split {
+            phase: PText::from_text(phase),
+            elapsed_seconds: Num::from_i64(300),
+        }],
+        total_seconds: Num::from_i64(300),
+        usage: None,
+        budget: None,
+        reads: None,
+        model: None,
+    }
+}
+
+#[test]
+fn test_run_summary_lines_refuse_a_break_bearing_task() {
+    let run = summary_run("draft\nthe summary", "2026-01-04", "plan");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a task holds a line break");
+}
+
+#[test]
+fn test_run_summary_lines_refuse_a_break_bearing_recorded_at() {
+    let run = summary_run(TASK, "2026-01-04\nforged", "plan");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a recorded_at holds a line break");
+}
+
+#[test]
+fn test_run_summary_lines_refuse_a_break_bearing_phase() {
+    let run = summary_run(TASK, "2026-01-04", "pla\nn");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a split phase holds a line break");
+}
+
+#[test]
+fn test_run_summary_lines_name_the_task_break_before_a_phase_break() {
+    let run = summary_run("a\nb", "2026-01-04", "pla\nn");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a task holds a line break");
+}

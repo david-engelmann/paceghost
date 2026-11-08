@@ -19,7 +19,7 @@ use num_traits::{One, Zero};
 use crate::json::{parse_json, JsonValue};
 use crate::pynum::{floor_divmod, format_seconds, Num};
 use crate::pytext::PText;
-use crate::runs::{check_text_field, load_run_data, read_text_file, Run};
+use crate::runs::{check_label_field, check_text_field, load_run_data, read_text_file, Run};
 
 /// Return the count of units a fraction rounds to at a precision.
 ///
@@ -133,7 +133,7 @@ pub fn load_field_text(text: &str) -> (Option<Vec<Run>>, Vec<String>) {
             continue;
         }
         let run = load_run_data(entry, &mut defects, &prefix);
-        let model = check_text_field(entry, "model", &mut defects, &prefix);
+        let model = check_label_field(entry, "model", &mut defects, &prefix);
         for name in ["usage", "budget"] {
             let phrase = format!("{}missing field {}", prefix, name);
             if entry.get(name).is_none() && !defects.contains(&phrase) {

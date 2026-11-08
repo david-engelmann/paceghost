@@ -1,11 +1,13 @@
 0
 %%%STDOUT%%%
-usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks} ...
+usage: paceghost [-h]
+                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings}
+                 ...
 
 Race a recorded run against the ghost of your best run.
 
 positional arguments:
-  {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks}
+  {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings}
     show                print one recorded run
     ghost               print the standing ghost
     race                race a live run against a ghost
@@ -20,6 +22,7 @@ positional arguments:
     days                print the meet days for three or more field days
     forks               print the meet forks for three or more field days
     marks               print the meet marks for three or more field days
+    standings           print the meet standings for three or more field days
 
 options:
   -h, --help            show this help message and exit

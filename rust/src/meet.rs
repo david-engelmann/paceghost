@@ -31,7 +31,13 @@
 //! of its close. The marks reading reads the same walk a sixth
 //! way, over the state the same pass records before and after
 //! each mark, and states every mark of the meet in walk order
-//! with the standing it took against the state before it. Every
+//! with the standing it took against the state before it. The
+//! standings reading reads the same walk a seventh way, over
+//! the standing each competitor held at the close of each day
+//! and the closing line the pass emits at each day's close,
+//! and states every competitor's standing at every close in
+//! competitor order with no competitor ranked against another.
+//! Every
 //! reading of the walk stands inside the label fencing closure
 //! of FIX-PG-11, the one guard pass refusing a runner label
 //! that holds a line break after the figures of every day are
@@ -41,7 +47,8 @@
 //! section, PG-17 and PG-18, in the Round 8 section, PG-19 and
 //! PG-20, in the Round 9 section, PG-21 and PG-22 with the
 //! FIX-PG-11 amendment, in the Round 10 section, and PG-23
-//! and PG-24, in the Round 11 section. No Python module stands
+//! and PG-24, in the Round 11 section, and PG-25 and PG-26,
+//! in the Round 12 section. No Python module stands
 //! behind this one, so the contract text is the spec and the
 //! pins in the test suite hold it.
 
@@ -251,7 +258,12 @@ struct MarkRecord {
 /// The mark records carry the state before and after each mark
 /// beside the holder and the record after it, so the marks
 /// reading reads the same pass a sixth way and no walk stands
-/// for it either.
+/// for it either. The day standings record the standing of
+/// every competitor at the close of each day in day order,
+/// one list of standings per day in competitor order, beside
+/// the closing line the pass emits at that close, so the
+/// standings reading reads the same pass a seventh way and
+/// no walk stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -261,6 +273,8 @@ struct MeetWalk {
     trail: Vec<(usize, BigRational, usize)>,
     day_closes: Vec<Option<(usize, BigRational)>>,
     marks_detail: Vec<MarkRecord>,
+    day_standings: Vec<Vec<Option<BigRational>>>,
+    day_close_lines: Vec<String>,
 }
 
 /// Walk the record progression of one loaded meet once.
@@ -291,8 +305,11 @@ struct MeetWalk {
 /// the standing events the forks reading reads, and it records
 /// against each mark the holder and the record figure after it
 /// and the standing of the mark against the state that stood
-/// before it, in the mark records the marks reading reads.
-/// Handed a meet value built
+/// before it, in the mark records the marks reading reads, and
+/// at the close of each day it records the standing of every
+/// competitor and the closing line it emits at that close, in
+/// the day standings and the day closing lines the standings
+/// reading reads. Handed a meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -334,13 +351,18 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut trail: Vec<(usize, BigRational, usize)> = Vec::new();
     let mut day_closes: Vec<Option<(usize, BigRational)>> = Vec::new();
     let mut marks_detail: Vec<MarkRecord> = Vec::new();
+    let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
+    let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
     let mut holder: Option<usize> = None;
     let mut emitted: Option<(usize, BigRational)> = None;
     let mut closed_day = 0usize;
     for (position, (day_index, mark)) in marks.iter().enumerate() {
         while closed_day < *day_index {
-            lines.push(close_line(closed_day, holder, &standing, &labels));
+            let emitted_line = close_line(closed_day, holder, &standing, &labels);
+            lines.push(emitted_line.clone());
+            day_close_lines.push(emitted_line);
+            day_standings.push(standing.clone());
             day_closes.push(day_close(holder, &standing));
             closed_day += 1;
         }
@@ -408,7 +430,10 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         }
     }
     while closed_day < meet.days.len() {
-        lines.push(close_line(closed_day, holder, &standing, &labels));
+        let emitted_line = close_line(closed_day, holder, &standing, &labels);
+        lines.push(emitted_line.clone());
+        day_close_lines.push(emitted_line);
+        day_standings.push(standing.clone());
         day_closes.push(day_close(holder, &standing));
         closed_day += 1;
     }
@@ -455,6 +480,8 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         trail,
         day_closes,
         marks_detail,
+        day_standings,
+        day_close_lines,
     })
 }
 
@@ -816,6 +843,67 @@ pub fn meet_marks(meet: &Meet) -> Result<Vec<String>, String> {
         walk.marks_walked,
         record_marks,
         meet.days.len()
+    ));
+    Ok(lines)
+}
+
+/// Return the meet standings lines for one loaded meet.
+///
+/// The standings reading reads the one walk a seventh way.
+/// One section stands for each day of the meet in day order,
+/// and each section names the standing of every competitor at
+/// the close of that day in competitor order, in the close
+/// forms of PG-16, a competitor holding a figure standing at
+/// it and a competitor holding none standing in the none form,
+/// and it closes with the closing line the walk emitted at
+/// the close of that day, the line the meet report prints,
+/// byte for byte. The reading opens by naming the meet, the
+/// count of its days, and the count of its competitors, and
+/// closes by counting the days, the competitors, and the
+/// standings held, the sum over the sections of the
+/// competitors holding a standing at a close. The competitor
+/// order never changes across the sections, so a later section
+/// reads against an earlier one competitor by competitor, and
+/// a competitor's standing at a later close is its figure at
+/// that close or the standing it already held, never an
+/// invented one, under the discipline PG-26 states. No
+/// competitor is ranked or compared against another, and the
+/// order is the competitor order of the walk alone.
+pub fn meet_standings(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut lines = vec![format!(
+        "meet standings, {} days, {} competitors",
+        meet.days.len(),
+        walk.labels.len()
+    )];
+    let mut standings_held = 0usize;
+    for (day_index, day) in walk.day_standings.iter().enumerate() {
+        let held_here = day.iter().filter(|standing| standing.is_some()).count();
+        standings_held += held_here;
+        lines.push(format!(
+            "day, the {} day, standings {}",
+            ORDINALS[day_index], held_here
+        ));
+        for (competitor, standing) in day.iter().enumerate() {
+            match standing {
+                Some(figure) => lines.push(format!(
+                    "competitor {}, standing projection {} at the close",
+                    walk.labels[competitor],
+                    format_usage(figure)
+                )),
+                None => lines.push(format!(
+                    "competitor {}, no standing projection at the close",
+                    walk.labels[competitor]
+                )),
+            }
+        }
+        lines.push(walk.day_close_lines[day_index].clone());
+    }
+    lines.push(format!(
+        "standings counts, days {}, competitors {}, standings held {}",
+        meet.days.len(),
+        walk.labels.len(),
+        standings_held
     ));
     Ok(lines)
 }

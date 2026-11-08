@@ -594,3 +594,51 @@ fn test_the_season_report_is_byte_deterministic() {
         season_report(&runs, &ghost(45))
     );
 }
+
+// The FIX-PG-14 pins, added with the Round 12 repair. The field
+// loader reads its runs through the run loader and its model
+// through the same wrapped checker, so the break phrases of
+// FIX-PG-14 stand inside a field under the run index prefix
+// PG-5 states. On the unrepaired code each field below loads
+// clean, so each pin fails there for a real reason.
+
+#[test]
+fn test_a_model_holding_a_line_break_is_named() {
+    let (runs, defects) = load_field(&[run_data(
+        Some("\"pea\\nk\""),
+        "100",
+        "200",
+        Some("40"),
+        Some("50"),
+        "t",
+        "",
+    )]);
+    assert!(runs.is_none());
+    assert_eq!(defects, vec!["run 0 field model holds a line break"]);
+}
+
+#[test]
+fn test_a_task_holding_a_line_break_is_named_in_a_field() {
+    let (runs, defects) = load_field(&[run_data(
+        Some("\"peak\""),
+        "100",
+        "200",
+        Some("40"),
+        Some("50"),
+        "t\\n",
+        "",
+    )]);
+    assert!(runs.is_none());
+    assert_eq!(defects, vec!["run 0 field task holds a line break"]);
+}
+
+#[test]
+fn test_a_phase_holding_a_line_break_is_named_in_a_field() {
+    let text = "{\"runs\": [{\"task\": \"t\", \"window_seconds\": 200, \"runner\": \"someone\", \"recorded_at\": \"2026-01-04\", \"splits\": [{\"phase\": \"on\\nly\", \"elapsed_seconds\": 100}], \"usage\": 40, \"budget\": 50, \"model\": \"peak\"}]}";
+    let (runs, defects) = load_field_text(text);
+    assert!(runs.is_none());
+    assert_eq!(
+        defects,
+        vec!["run 0 split 0 field phase holds a line break"]
+    );
+}

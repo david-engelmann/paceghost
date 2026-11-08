@@ -1,0 +1,17 @@
+meet standings, 3 days, 3 competitors
+day, the first day, standings 2
+competitor early bird, standing projection 800 at the close
+competitor steady hand, standing projection 800 at the close
+competitor late riser, no standing projection at the close
+close of the first day, record held by early bird at a projection of 800
+day, the second day, standings 3
+competitor early bird, standing projection 820 at the close
+competitor steady hand, standing projection 780 at the close
+competitor late riser, standing projection 700 at the close
+close of the second day, record held by late riser at a projection of 700
+day, the third day, standings 3
+competitor early bird, standing projection 750 at the close
+competitor steady hand, standing projection 720 at the close
+competitor late riser, standing projection 650 at the close
+close of the third day, record held by late riser at a projection of 650
+standings counts, days 3, competitors 3, standings held 8
