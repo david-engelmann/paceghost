@@ -39,7 +39,7 @@ fn test_the_example_night_fork_steals_the_ghost() {
     ];
     let ghost = select_ghost(&runs).expect("runs stand");
     assert!(std::ptr::eq(ghost, &runs[1]));
-    let (steals, line) = ghost_change(&runs[0], &runs[1]);
+    let (steals, line) = ghost_change(&runs[0], &runs[1]).expect("a clean pair reports");
     assert!(steals);
     assert_eq!(
         line,

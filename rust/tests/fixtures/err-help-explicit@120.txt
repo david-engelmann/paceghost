@@ -1,5 +1,5 @@
 2
 %%%STDOUT%%%
 %%%STDERR%%%
-usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks} ...
+usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks} ...
 paceghost: error: argument -h/--help: ignored explicit argument 'x'

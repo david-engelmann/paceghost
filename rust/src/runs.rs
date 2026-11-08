@@ -639,10 +639,31 @@ pub fn race_report(ghost: &Run, live: &Run) -> Vec<String> {
     lines
 }
 
+/// Check the runner label of one run for a line break.
+///
+/// The recorded run loader states no line break rule for a runner,
+/// so a loaded run can carry a label holding a break, and the
+/// readings that print a runner refuse such a label with the one
+/// named error of FIX-PG-11 instead of printing it, in the
+/// discipline of FIX-PG-12. The check consumes the one line break
+/// predicate the loaders consume and stands in one home here for
+/// the ghost change report and the command line printings alike.
+pub(crate) fn check_runner_label(run: &Run) -> Result<(), String> {
+    if run.runner.holds_line_break() {
+        return Err("a runner label holds a line break".to_string());
+    }
+    Ok(())
+}
+
 /// Return whether the candidate takes the ghost, with a report line.
 ///
-/// The line names both runners and both totals either way.
-pub fn ghost_change(old_ghost: &Run, candidate: &Run) -> (bool, String) {
+/// The line names both runners and both totals either way. Handed
+/// a run whose runner label holds a line break, the report names
+/// that precondition as its error instead of a line, the answer
+/// standing on the error channel of FIX-PG-12.
+pub fn ghost_change(old_ghost: &Run, candidate: &Run) -> Result<(bool, String), String> {
+    check_runner_label(old_ghost)?;
+    check_runner_label(candidate)?;
     // PG-4 defines the steal by the PG-2 rule applied to the pair, so
     // the candidate steals exactly when its total, and then its
     // recorded date on a tie, sorts strictly before the standing
@@ -665,5 +686,5 @@ pub fn ghost_change(old_ghost: &Run, candidate: &Run) -> (bool, String) {
             old_ghost.runner, old_total, candidate.runner, new_total
         )
     };
-    (steals, line)
+    Ok((steals, line))
 }

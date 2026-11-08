@@ -641,7 +641,7 @@ fn test_a_faster_candidate_steals_the_ghost_with_both_totals() {
         "2026-01-05",
         &[("plan", n(240)), ("polish", n(1320))],
     );
-    let (steals, line) = ghost_change(&old, &candidate);
+    let (steals, line) = ghost_change(&old, &candidate).expect("a clean pair reports");
     assert!(steals);
     assert_eq!(
         line,
@@ -661,7 +661,7 @@ fn test_a_slower_candidate_leaves_the_ghost_with_both_totals() {
         "2026-01-05",
         &[("plan", n(400)), ("polish", n(1800))],
     );
-    let (steals, line) = ghost_change(&old, &candidate);
+    let (steals, line) = ghost_change(&old, &candidate).expect("a clean pair reports");
     assert!(!steals);
     assert_eq!(
         line,
@@ -681,7 +681,7 @@ fn test_an_equal_total_with_an_earlier_date_steals() {
         "2026-01-02",
         &[("plan", n(200)), ("polish", n(1500))],
     );
-    let (steals, line) = ghost_change(&old, &candidate);
+    let (steals, line) = ghost_change(&old, &candidate).expect("a clean pair reports");
     assert!(steals);
     assert_eq!(
         line,
@@ -698,7 +698,7 @@ fn test_an_equal_total_with_a_later_or_same_date_does_not_steal() {
     );
     for date in ["2026-01-04", "2026-01-09"] {
         let candidate = make_run("night fork", date, &[("plan", n(200)), ("polish", n(1500))]);
-        let (steals, line) = ghost_change(&old, &candidate);
+        let (steals, line) = ghost_change(&old, &candidate).expect("a clean pair reports");
         assert!(!steals);
         assert_eq!(
             line,
@@ -870,4 +870,44 @@ fn test_a_sub_microsecond_difference_renders_at_full_precision() {
         format!("finish ahead by {} seconds", expected)
     );
     assert!(lines.iter().all(|line| !line.contains("by 0 seconds")));
+}
+
+// The FIX-PG-12 pins, added with the Round 11 repair. Each one
+// hands the ghost change report a runner label holding a line
+// break, a value the recorded run loader states no line break
+// rule against, and states the named error the report must
+// return on its error channel. On the unrepaired code the report
+// returns its line with the break standing raw inside it, so
+// each pin fails there for a real reason.
+
+#[test]
+fn test_ghost_change_refuses_a_break_bearing_candidate() {
+    let old = make_run(
+        "operator",
+        "2026-01-04",
+        &[("plan", n(300)), ("polish", n(1500))],
+    );
+    let candidate = make_run(
+        "b\nb",
+        "2026-01-05",
+        &[("plan", n(240)), ("polish", n(1320))],
+    );
+    let error = ghost_change(&old, &candidate).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_ghost_change_refuses_a_break_bearing_standing_ghost() {
+    let old = make_run(
+        "b\nb",
+        "2026-01-04",
+        &[("plan", n(300)), ("polish", n(1500))],
+    );
+    let candidate = make_run(
+        "night fork",
+        "2026-01-05",
+        &[("plan", n(240)), ("polish", n(1320))],
+    );
+    let error = ghost_change(&old, &candidate).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
 }

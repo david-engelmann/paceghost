@@ -843,3 +843,89 @@ fn test_an_oversized_window_names_the_precondition_instead_of_rendering_inf() {
     let error = field_day_report(&day).expect_err("the report names the precondition");
     assert_eq!(error, "the window is not a finite number");
 }
+
+// The FIX-PG-12 pins, added with the Round 11 repair. Each one
+// hands the reading a runner label holding a line break, a value
+// the field day loader refuses by name, and states the named
+// error the reading must return. On the unrepaired code the
+// report prints the label raw inside its record and finish
+// lines, as the Round 10 red team showed, so the first two
+// pins fail there for a real reason. The third pin is an
+// ordering pin, not a repair pin. It passes on the unrepaired
+// code too, and pins that the finite figure check stands
+// before the label check in the walk, so a day holding both
+// defects names the figure first.
+
+fn hand_day_runs(window: i64, operator: &str, runs: Vec<DayRun>) -> FieldDay {
+    FieldDay {
+        window_seconds: Num::from_i64(window),
+        operator: PText::from_text(operator),
+        runs,
+    }
+}
+
+fn hand_timed(label: &str, elapsed: i64, usage: i64) -> DayRun {
+    DayRun {
+        runner: PText::from_text(label),
+        usage: None,
+        reads: Some(vec![Read {
+            elapsed_seconds: Num::from_i64(elapsed),
+            usage: Num::from_i64(usage),
+        }]),
+    }
+}
+
+#[test]
+fn test_a_break_on_the_record_holding_run_names_the_precondition() {
+    // The Round 10 red team shape: the operator names a clean
+    // run, and the break stands on the run holding the record.
+    let day = hand_day_runs(
+        1800,
+        "operator",
+        vec![
+            hand_timed("operator", 300, 150),
+            hand_timed("b\nb", 300, 100),
+        ],
+    );
+    let error = field_day_report(&day).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_a_break_on_a_run_that_never_projects_names_the_precondition() {
+    let day = hand_day_runs(
+        1800,
+        "operator",
+        vec![
+            hand_timed("operator", 300, 150),
+            DayRun {
+                runner: PText::from_text("b\nb"),
+                usage: None,
+                reads: None,
+            },
+        ],
+    );
+    let error = field_day_report(&day).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_a_non_finite_figure_is_named_before_a_break_bearing_label() {
+    let day = hand_day_runs(
+        1800,
+        "operator",
+        vec![
+            DayRun {
+                runner: PText::from_text("operator"),
+                usage: None,
+                reads: Some(vec![Read {
+                    elapsed_seconds: Num::from_i64(300),
+                    usage: Num::from_f64(f64::INFINITY),
+                }]),
+            },
+            hand_timed("b\nb", 300, 100),
+        ],
+    );
+    let error = field_day_report(&day).expect_err("the report names the precondition");
+    assert_eq!(error, "a read usage value is not a finite number");
+}

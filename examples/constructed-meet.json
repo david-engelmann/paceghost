@@ -1,0 +1,90 @@
+{
+  "days": [
+    {
+      "operator": "alpha",
+      "runs": [
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 100,
+              "usage": 40
+            }
+          ],
+          "runner": "alpha",
+          "usage": 400
+        },
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 100,
+              "usage": 60
+            },
+            {
+              "elapsed_seconds": 200,
+              "usage": 110
+            }
+          ],
+          "runner": "beta",
+          "usage": 900
+        }
+      ],
+      "window_seconds": 1000
+    },
+    {
+      "operator": "alpha",
+      "runs": [
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 100,
+              "usage": 50
+            }
+          ],
+          "runner": "alpha",
+          "usage": 600
+        },
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 200,
+              "usage": 140
+            }
+          ],
+          "runner": "beta",
+          "usage": 950
+        }
+      ],
+      "window_seconds": 1000
+    },
+    {
+      "operator": "alpha",
+      "runs": [
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 200,
+              "usage": 50
+            },
+            {
+              "elapsed_seconds": 300,
+              "usage": 60
+            }
+          ],
+          "runner": "alpha",
+          "usage": 300
+        },
+        {
+          "reads": [
+            {
+              "elapsed_seconds": 100,
+              "usage": 30
+            }
+          ],
+          "runner": "beta",
+          "usage": 500
+        }
+      ],
+      "window_seconds": 1000
+    }
+  ]
+}

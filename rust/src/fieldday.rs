@@ -353,6 +353,25 @@ pub(crate) fn check_finite_figures(window: &Num, runs: &[DayRun]) -> Result<(), 
     Ok(())
 }
 
+/// Check every runner label a day value carries for line breaks.
+///
+/// A runner label holding a line break is a value the field day
+/// loader would refuse by name, and the walks print runner labels
+/// inside their lines, so a handed label holding a break fails
+/// with the one named error of FIX-PG-11 instead of printing, in
+/// the discipline of FIX-PG-12. The check consumes the one line
+/// break predicate the loaders consume, and it stands in one home
+/// here for the record walk and the rematch report alike, the
+/// runs read in list order.
+pub(crate) fn check_runner_labels(runs: &[DayRun]) -> Result<(), String> {
+    for run in runs {
+        if run.runner.holds_line_break() {
+            return Err("a runner label holds a line break".to_string());
+        }
+    }
+    Ok(())
+}
+
 /// Walk the record progression and return its lines and holder.
 ///
 /// Returns a pair of the report lines and the index of the holder at
@@ -366,7 +385,10 @@ pub(crate) fn check_finite_figures(window: &Num, runs: &[DayRun]) -> Result<(), 
 /// as its horizon. Handed a value the loader would refuse, in which
 /// the operator names no run among the runs, the walk names that
 /// precondition as its error, in the discipline of FIX-PG-8, and
-/// never fails bare.
+/// never fails bare. Handed a run whose runner label holds a line
+/// break, the walk names that precondition as its error after the
+/// figures are checked and before the operator is looked up, in
+/// the discipline of FIX-PG-12.
 pub(crate) fn record_walk(
     runs: &[DayRun],
     operator: &PText,
@@ -374,6 +396,7 @@ pub(crate) fn record_walk(
     horizon: Option<&BigRational>,
 ) -> Result<(Vec<String>, Option<usize>), String> {
     check_finite_figures(window_value, runs)?;
+    check_runner_labels(runs)?;
     let window = window_value.to_rational();
     let operator_index = match runs.iter().position(|run| &run.runner == operator) {
         Some(index) => index,
