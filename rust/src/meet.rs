@@ -28,18 +28,22 @@
 //! same pass records for each competitor and the spells of
 //! the trail cut by holder, and states one section for each
 //! competitor naming every standing it held and the figures
-//! of its close. Every reading of the walk
-//! stands inside the label fencing closure of FIX-PG-11, the
-//! one guard pass refusing a runner label that holds a line
-//! break after the figures of every day are checked and before
-//! any event is collected. The obligations this module
-//! carries are PG-13 and PG-14 in CONTRACT.md, in the Round 6
-//! section, PG-15 and PG-16, in the Round 7 section, PG-17 and
-//! PG-18, in the Round 8 section, PG-19 and PG-20, in the
-//! Round 9 section, and PG-21 and PG-22 with the FIX-PG-11
-//! amendment, in the Round 10 section. No Python module stands
-//! behind this one, so the contract text is the spec and the pins
-//! in the test suite hold it.
+//! of its close. The marks reading reads the same walk a sixth
+//! way, over the state the same pass records before and after
+//! each mark, and states every mark of the meet in walk order
+//! with the standing it took against the state before it. Every
+//! reading of the walk stands inside the label fencing closure
+//! of FIX-PG-11, the one guard pass refusing a runner label
+//! that holds a line break after the figures of every day are
+//! checked and before any event is collected. The obligations
+//! this module carries are PG-13 and PG-14 in CONTRACT.md, in
+//! the Round 6 section, PG-15 and PG-16, in the Round 7
+//! section, PG-17 and PG-18, in the Round 8 section, PG-19 and
+//! PG-20, in the Round 9 section, PG-21 and PG-22 with the
+//! FIX-PG-11 amendment, in the Round 10 section, and PG-23
+//! and PG-24, in the Round 11 section. No Python module stands
+//! behind this one, so the contract text is the spec and the
+//! pins in the test suite hold it.
 
 use std::path::Path;
 
@@ -195,6 +199,40 @@ struct CompetitorStanding {
     marks_stood_at: usize,
 }
 
+/// The standing of one mark of the walk against the state
+/// that stood before it, as PG-23 states the four standings.
+///
+/// A mark took the record where the holder changed, naming the
+/// holder it took the record from and the figure it displaced,
+/// and a mark extended the record where its holder already held
+/// it and the figure fell, naming the figure it displaced. A
+/// mark stood below in every other case with the holder
+/// unchanged, naming the record that stood before it, and that
+/// case covers the mark whose own read raises the standing of
+/// the competitor already holding the record, so the record
+/// after the mark stands above the record before it.
+enum MarkStanding {
+    Set,
+    Took { from: usize, displaced: BigRational },
+    Extended { displaced: BigRational },
+    Below { standing_record: BigRational },
+}
+
+/// One mark of the walk as the marks reading states it.
+///
+/// The day and the elapsed figure of the mark stand beside the
+/// holder after the mark and the record figure after it, and
+/// the standing of the mark against the state before it, so
+/// the marks reading reads the pass a sixth way off these
+/// records alone.
+struct MarkRecord {
+    day_index: usize,
+    mark: BigRational,
+    holder: usize,
+    record: BigRational,
+    standing: MarkStanding,
+}
+
 /// The outcome of the one progression walk of a meet.
 ///
 /// The report lines stand beside the per competitor standings
@@ -210,6 +248,10 @@ struct CompetitorStanding {
 /// competitor standings carry the standing events of the same
 /// pass beside the table figures, so the forks reading reads
 /// the same pass a fifth way and no walk stands for it either.
+/// The mark records carry the state before and after each mark
+/// beside the holder and the record after it, so the marks
+/// reading reads the same pass a sixth way and no walk stands
+/// for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -218,6 +260,7 @@ struct MeetWalk {
     marks_walked: usize,
     trail: Vec<(usize, BigRational, usize)>,
     day_closes: Vec<Option<(usize, BigRational)>>,
+    marks_detail: Vec<MarkRecord>,
 }
 
 /// Walk the record progression of one loaded meet once.
@@ -245,8 +288,11 @@ struct MeetWalk {
 /// day in the day closes the days reading reads, and the
 /// standing events of each competitor, the marks at which one
 /// of its own reads applied with the projection each set, in
-/// the standing events the forks reading reads. Handed a meet
-/// value built
+/// the standing events the forks reading reads, and it records
+/// against each mark the holder and the record figure after it
+/// and the standing of the mark against the state that stood
+/// before it, in the mark records the marks reading reads.
+/// Handed a meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -287,6 +333,8 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut stood_from: Vec<Option<usize>> = vec![None; labels.len()];
     let mut trail: Vec<(usize, BigRational, usize)> = Vec::new();
     let mut day_closes: Vec<Option<(usize, BigRational)>> = Vec::new();
+    let mut marks_detail: Vec<MarkRecord> = Vec::new();
+    let mut previous: Option<(usize, BigRational)> = None;
     let mut holder: Option<usize> = None;
     let mut emitted: Option<(usize, BigRational)> = None;
     let mut closed_day = 0usize;
@@ -325,6 +373,29 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         holder = Some(new_holder);
         held[new_holder] += 1;
         trail.push((*day_index, mark.clone(), new_holder));
+        let mark_standing = match previous {
+            None => MarkStanding::Set,
+            Some((before_holder, before_record)) if new_holder != before_holder => {
+                MarkStanding::Took {
+                    from: before_holder,
+                    displaced: before_record,
+                }
+            }
+            Some((_, before_record)) if record < before_record => MarkStanding::Extended {
+                displaced: before_record,
+            },
+            Some((_, before_record)) => MarkStanding::Below {
+                standing_record: before_record,
+            },
+        };
+        marks_detail.push(MarkRecord {
+            day_index: *day_index,
+            mark: mark.clone(),
+            holder: new_holder,
+            record: record.clone(),
+            standing: mark_standing,
+        });
+        previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
                 "record at {} seconds on the {} day, {} at a projection of {}",
@@ -383,6 +454,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         marks_walked,
         trail,
         day_closes,
+        marks_detail,
     })
 }
 
@@ -670,6 +742,80 @@ pub fn meet_forks(meet: &Meet) -> Result<Vec<String>, String> {
         walk.labels.len(),
         total_marks_stood_at,
         spells.len()
+    ));
+    Ok(lines)
+}
+
+/// Return the marks lines for one loaded meet.
+///
+/// The reading reads the mark records of the one walk, and
+/// states one section for each day of the meet in meet order,
+/// every day holding a section, and inside a section one line
+/// for each mark of the walk standing in that day, in walk
+/// order, naming the place of the mark in the whole walk, the
+/// holder after the mark and the record figure after it, in
+/// the mark form of the meet report, and the standing of the
+/// mark in one of the four phrases of PG-24, every phrase but
+/// the first naming the state that stood before the mark. The
+/// closing line counts the marks the walk walked, the record
+/// marks, the marks that set, took, or extended the record,
+/// and the days. The marks that set or took the record equal
+/// the spells of the reign reading, because every spell opens
+/// on such a mark and no extension opens one, and the marks
+/// walked equal the sum of the per day mark counts of the days
+/// reading, because every mark stands in exactly one day. No
+/// competitor is ranked or compared against another beyond the
+/// holder each mark line names.
+pub fn meet_marks(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet marks, {} days", meet.days.len())];
+    let mut record_marks = 0usize;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let phrase = match &record.standing {
+                MarkStanding::Set => "set the standing record".to_string(),
+                MarkStanding::Took { from, displaced } => format!(
+                    "took the record from {}, displacing a projection of {}",
+                    walk.labels[*from],
+                    format_usage(displaced)
+                ),
+                MarkStanding::Extended { displaced } => format!(
+                    "extended its own record, displacing a projection of {}",
+                    format_usage(displaced)
+                ),
+                MarkStanding::Below { standing_record } => format!(
+                    "stood below the standing record of {}",
+                    format_usage(standing_record)
+                ),
+            };
+            if !matches!(record.standing, MarkStanding::Below { .. }) {
+                record_marks += 1;
+            }
+            lines.push(format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}, {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record),
+                phrase
+            ));
+        }
+    }
+    lines.push(format!(
+        "marks counts, marks walked {}, record marks {}, days {}",
+        walk.marks_walked,
+        record_marks,
+        meet.days.len()
     ));
     Ok(lines)
 }

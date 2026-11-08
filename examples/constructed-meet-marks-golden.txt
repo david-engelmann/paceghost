@@ -1,0 +1,12 @@
+meet marks, 3 days
+day, the first day, marks 2
+mark 1, at 100 seconds on the first day, alpha at a projection of 400, set the standing record
+mark 2, at 200 seconds on the first day, alpha at a projection of 400, stood below the standing record of 400
+day, the second day, marks 2
+mark 3, at 100 seconds on the second day, alpha at a projection of 500, stood below the standing record of 400
+mark 4, at 200 seconds on the second day, alpha at a projection of 500, stood below the standing record of 500
+day, the third day, marks 3
+mark 5, at 100 seconds on the third day, beta at a projection of 300, took the record from alpha, displacing a projection of 500
+mark 6, at 200 seconds on the third day, alpha at a projection of 250, took the record from beta, displacing a projection of 300
+mark 7, at 300 seconds on the third day, alpha at a projection of 200, extended its own record, displacing a projection of 250
+marks counts, marks walked 7, record marks 4, days 3

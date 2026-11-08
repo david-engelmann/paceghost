@@ -470,3 +470,38 @@ fn test_the_report_raises_a_value_error_when_the_day_holds_no_runs() {
     let error = ladder_report(&ladder).expect_err("the report names the precondition");
     assert_eq!(error, "the operator names no run among the runs");
 }
+
+// The FIX-PG-12 pin, added with the Round 11 repair. The ladder
+// inherits the label check from the one record walk it shares
+// with the field day report, so a break standing on the run
+// holding the record names the precondition here too. On the
+// unrepaired code the ladder prints the label raw inside its
+// record lines, so the pin fails there for a real reason.
+
+#[test]
+fn test_a_break_on_the_record_holding_run_names_the_precondition() {
+    let runs = vec![
+        paceghost::fieldday::DayRun {
+            runner: PText::from_text("operator"),
+            usage: None,
+            reads: Some(vec![paceghost::runs::Read {
+                elapsed_seconds: Num::from_i64(300),
+                usage: Num::from_i64(150),
+            }]),
+        },
+        paceghost::fieldday::DayRun {
+            runner: PText::from_text("b\nb"),
+            usage: None,
+            reads: Some(vec![paceghost::runs::Read {
+                elapsed_seconds: Num::from_i64(300),
+                usage: Num::from_i64(100),
+            }]),
+        },
+    ];
+    let ladder = Ladder {
+        day: hand_day("operator", runs),
+        windows: vec![BigInt::from(600)],
+    };
+    let error = ladder_report(&ladder).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}

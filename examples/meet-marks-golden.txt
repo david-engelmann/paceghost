@@ -1,0 +1,21 @@
+meet marks, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, set the standing record
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, stood below the standing record of 1260
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, took the record from operator, displacing a projection of 1260
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, took the record from dawn fork, displacing a projection of 1200
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, took the record from operator, displacing a projection of 1105.714286
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, stood below the standing record of 940
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, stood below the standing record of 940
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, extended its own record, displacing a projection of 940
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, stood below the standing record of 840
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, took the record from night fork, displacing a projection of 840
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, stood below the standing record of 675
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, stood below the standing record of 675
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, stood below the standing record of 675
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, extended its own record, displacing a projection of 675
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, stood below the standing record of 560
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, stood below the standing record of 560
+marks counts, marks walked 16, record marks 7, days 3

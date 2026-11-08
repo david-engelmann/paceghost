@@ -7,8 +7,10 @@
 
 use std::path::{Path, PathBuf};
 
-use paceghost::cli::{dispatch, CliOutcome};
+use paceghost::cli::{dispatch, run_summary_lines, CliOutcome};
+use paceghost::pynum::Num;
 use paceghost::pytext::PText;
+use paceghost::runs::{Run, Split};
 
 fn reader(bytes: &[u8]) -> Option<String> {
     let path = String::from_utf8_lossy(bytes).into_owned();
@@ -281,4 +283,64 @@ fn test_race_rejects_runs_of_different_tasks() {
         .stdout
         .iter()
         .any(|line| line == "runs do not share one task"));
+}
+
+// The FIX-PG-12 pins, added with the Round 11 repair. A run file
+// can carry a runner label holding a line break, because the
+// recorded run loader states no line break rule for a runner, so
+// the show and ghost printings refuse such a label in the one
+// named error instead of printing it raw. On the unrepaired code
+// both commands print the label with the break standing inside
+// the runner line, so each pin fails there for a real reason.
+
+#[test]
+fn test_run_summary_lines_refuse_a_break_bearing_runner() {
+    let run = Run {
+        task: PText::from_text(TASK),
+        window_seconds: Num::from_i64(3600),
+        runner: PText::from_text("b\nb"),
+        recorded_at: PText::from_text("2026-01-04"),
+        splits: vec![Split {
+            phase: PText::from_text("plan"),
+            elapsed_seconds: Num::from_i64(300),
+        }],
+        total_seconds: Num::from_i64(300),
+        usage: None,
+        budget: None,
+        reads: None,
+        model: None,
+    };
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_show_prints_the_named_error_for_a_break_bearing_runner() {
+    let dir = scratch("show-break");
+    let path = write_run(
+        &dir,
+        "run.json",
+        &run_data("b\\nb", "2026-01-04", &[("plan", 300)], TASK),
+    );
+    let outcome = cli(&["show", &path]);
+    assert_eq!(outcome.stdout, vec!["a runner label holds a line break"]);
+    assert_eq!(outcome.code, 1);
+}
+
+#[test]
+fn test_ghost_prints_the_named_error_for_a_break_bearing_ghost() {
+    let dir = scratch("ghost-break");
+    let clean = write_run(
+        &dir,
+        "clean.json",
+        &run_data("operator", "2026-01-04", &[("plan", 1500)], TASK),
+    );
+    let broken = write_run(
+        &dir,
+        "broken.json",
+        &run_data("b\\nb", "2026-01-05", &[("plan", 1320)], TASK),
+    );
+    let outcome = cli(&["ghost", &clean, &broken]);
+    assert_eq!(outcome.stdout, vec!["a runner label holds a line break"]);
+    assert_eq!(outcome.code, 1);
 }

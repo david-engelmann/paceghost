@@ -18,8 +18,8 @@ use std::path::Path;
 use num_rational::BigRational;
 
 use crate::fieldday::{
-    check_finite_figures, collect_events, load_field_day_data, select_holder, CollectedEvents,
-    FieldDay,
+    check_finite_figures, check_runner_labels, collect_events, load_field_day_data, select_holder,
+    CollectedEvents, FieldDay,
 };
 use crate::json::parse_json;
 use crate::pynum::{format_seconds, format_seconds_fraction};
@@ -105,10 +105,16 @@ pub fn load_rematch_file(path: &Path) -> (Option<Rematch>, Vec<String>) {
 /// pair carrying a figure its loader would refuse as not finite,
 /// the report names the broken precondition as its error, the
 /// first day checked before the second, in the discipline of
-/// FIX-PG-10, and never fails bare.
+/// FIX-PG-10, and never fails bare. Handed a pair either of whose
+/// days carries a runner label holding a line break, the report
+/// names that precondition as its error after both days' figures
+/// are checked, the first day's labels before the second day's,
+/// in the discipline of FIX-PG-12.
 pub fn rematch_report(rematch: &Rematch) -> Result<Vec<String>, String> {
     check_finite_figures(&rematch.first.window_seconds, &rematch.first.runs)?;
     check_finite_figures(&rematch.second.window_seconds, &rematch.second.runs)?;
+    check_runner_labels(&rematch.first.runs)?;
+    check_runner_labels(&rematch.second.runs)?;
     let days = [&rematch.first, &rematch.second];
     let CollectedEvents {
         labels,

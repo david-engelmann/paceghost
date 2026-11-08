@@ -728,3 +728,67 @@ fn test_an_oversized_read_elapsed_names_the_precondition_instead_of_rendering_in
     let error = rematch_report(&rematch).expect_err("the report names the precondition");
     assert_eq!(error, "a read elapsed value is not a finite number");
 }
+
+// The FIX-PG-12 pins, added with the Round 11 repair. Each one
+// hands the reading a runner label holding a line break standing
+// on one day only, and states the named error the reading must
+// return. On the unrepaired code the report prints the label raw
+// inside its record and finish lines, so each pin fails there
+// for a real reason.
+
+fn break_run(elapsed: i64, usage: i64) -> DayRun {
+    DayRun {
+        runner: PText::from_text("b\nb"),
+        usage: None,
+        reads: Some(vec![Read {
+            elapsed_seconds: Num::from_i64(elapsed),
+            usage: Num::from_i64(usage),
+        }]),
+    }
+}
+
+#[test]
+fn test_a_break_standing_only_on_the_second_day_names_the_precondition() {
+    let rematch = Rematch {
+        first: hand_day(Num::from_i64(1800), vec![ordinary_run()]),
+        second: hand_day(
+            Num::from_i64(1800),
+            vec![ordinary_run(), break_run(300, 50)],
+        ),
+    };
+    let error = rematch_report(&rematch).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_a_break_standing_only_on_the_first_day_names_the_precondition() {
+    let rematch = Rematch {
+        first: hand_day(
+            Num::from_i64(1800),
+            vec![ordinary_run(), break_run(300, 50)],
+        ),
+        second: hand_day(Num::from_i64(1800), vec![ordinary_run()]),
+    };
+    let error = rematch_report(&rematch).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_a_break_on_a_run_that_never_projects_names_the_precondition() {
+    let rematch = Rematch {
+        first: hand_day(Num::from_i64(1800), vec![ordinary_run()]),
+        second: hand_day(
+            Num::from_i64(1800),
+            vec![
+                ordinary_run(),
+                DayRun {
+                    runner: PText::from_text("b\nb"),
+                    usage: None,
+                    reads: None,
+                },
+            ],
+        ),
+    };
+    let error = rematch_report(&rematch).expect_err("the report names the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
