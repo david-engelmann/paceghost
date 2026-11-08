@@ -147,6 +147,30 @@ pub(crate) fn check_text_field(
     }
 }
 
+/// Read a text field of an object under the line break rule.
+///
+/// The checks are the ones check_text_field draws, plus the line
+/// break phrase standing last, one defect standing for a text
+/// field, in the check_label form the field day loader states.
+/// A task reaches the printer inside report lines, so a task
+/// holding a line break would forge a line, and the loader names
+/// it as a defect under FIX-PG-14 instead of letting it reach
+/// the printer. The field loader of the season consumes this
+/// same checker for the model field.
+pub(crate) fn check_label_field(
+    data: &JsonValue,
+    name: &str,
+    defects: &mut Vec<String>,
+    prefix: &str,
+) -> Option<PText> {
+    let value = check_text_field(data, name, defects, prefix)?;
+    if value.holds_line_break() {
+        defects.push(format!("{}field {} holds a line break", prefix, name));
+        return None;
+    }
+    Some(value)
+}
+
 /// Validate the splits field and return the clean splits, if any.
 fn load_splits(data: &JsonValue, defects: &mut Vec<String>, prefix: &str) -> Option<Vec<Split>> {
     let raw = match data.get("splits") {
@@ -181,6 +205,11 @@ fn load_splits(data: &JsonValue, defects: &mut Vec<String>, prefix: &str) -> Opt
                 } else if value.holds_unpaired_surrogate() {
                     defects.push(format!(
                         "{}split {} field phase holds an unpaired surrogate",
+                        prefix, index
+                    ));
+                } else if value.holds_line_break() {
+                    defects.push(format!(
+                        "{}split {} field phase holds a line break",
                         prefix, index
                     ));
                 } else {
@@ -399,7 +428,7 @@ pub(crate) fn load_run_data(
     prefix: &str,
 ) -> Option<Run> {
     let before = defects.len();
-    let task = check_text_field(data, "task", defects, prefix);
+    let task = check_label_field(data, "task", defects, prefix);
     let runner = check_text_field(data, "runner", defects, prefix);
     let mut window: Option<Num> = None;
     match data.get("window_seconds") {

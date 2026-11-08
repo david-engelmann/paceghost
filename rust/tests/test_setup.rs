@@ -96,7 +96,11 @@ fn test_readme_reports_the_round_four_status() {
     // standing built and in review, so the count stood at
     // one, the slice 12 status line, until the Round 11
     // closure landed slice 12 and the count returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // Adjusted again with the Round 12 slice, as the named
+    // mechanical consequence of slice 13 standing built and
+    // in review, so the count stands at one, the slice 13
+    // status line.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -170,6 +174,16 @@ fn test_readme_reports_the_round_eleven_status() {
 }
 
 #[test]
+fn test_readme_reports_the_round_twelve_slice() {
+    let lines = readme_lines();
+    let stated = "- Contract, PG-25 and PG-26 now stand in full form in CONTRACT.md under the Round 12 obligations with the FIX-PG-13 and FIX-PG-14 repair amendments, and their standing is not claimed here, as Round 12 has not closed.";
+    assert!(lines.iter().any(|found| found == stated));
+    let slice_line = "- Slice 13 is built and in review. It carries the standings reading that reads a meet at the close of each day over the one record progression of the meet report, naming every competitor's standing at every day's close and closing each section with the closing line of the meet report for that day, and the standings command, with the golden standings readings of the standing example meet and of a constructed meet under examples, and the file carried fencing closure of the loaders and the summary under FIX-PG-14, and the input forms named at version 1 with the guarded closed stream pin under FIX-PG-13, and the seeded generated fixture family pinned by the closing relations the contract states.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 11 of 100"));
+}
+
+#[test]
 fn test_ci_runs_the_same_gate_as_the_local_gate() {
     let live: Vec<String> = read(".github/workflows/ci.yml")
         .lines()
@@ -211,4 +225,37 @@ fn test_readme_reports_the_rust_port_status() {
             .count(),
         1
     );
+}
+
+// The FIX-PG-13 pins, added with the Round 12 slice. The README
+// carries the stranger's documents the amendment states, the
+// Input files section naming the six forms at version 1 with
+// the evolution rule in its short form, the Install sentence
+// naming the cargo install route, and the Testing section
+// carrying the local gate line and naming the suite's one
+// device assumption. Each pin reads the exact line, so a
+// README that drops or rewords one fails here.
+
+#[test]
+fn test_readme_names_the_input_files_at_version_one() {
+    let lines = readme_lines();
+    assert!(lines.iter().any(|found| found == "## Input files"));
+    let rule = "Paceghost reads six kinds of input file, and CONTRACT.md specifies each one. Every form stands at version 1. Fields the contract does not name are ignored. A new required field, a changed refusal, or a changed defect phrase raises the version of a form, and the defect vocabulary is part of the versioned surface, so a changed defect phrase is a version change and never a silent one. The forms are the recorded run of PG-1 with the Round 2 run extension, the field of PG-5, the field day of the Round 3 section of CONTRACT.md, the ladder of the Round 4 section, the rematch of the Round 5 section, and the meet of the Round 6 section.";
+    assert!(lines.iter().any(|found| found == rule));
+}
+
+#[test]
+fn test_readme_install_names_the_cargo_install_route() {
+    let line = "The build leaves the binary at target/release/paceghost. To install the command on your PATH, run cargo install --path . in the clone.";
+    assert!(readme_lines().iter().any(|found| found == line));
+}
+
+#[test]
+fn test_readme_testing_names_the_gate_and_the_device() {
+    let lines = readme_lines();
+    assert!(lines.iter().any(|found| found == "## Testing"));
+    let gate = "The local gate is cargo test, cargo fmt --check, and cargo clippy --all-targets -- -D warnings, run from the repo root. CI runs the same commands.";
+    assert!(lines.iter().any(|found| found == gate));
+    let device = "One pin in the suite, the closed stream pin in rust/tests/test_cli_widths.rs, opens /dev/full and expects the write to fail. The pin stands skipped on a machine where that path is absent or is not a character device, and it names the state it found in its output when it skips.";
+    assert!(lines.iter().any(|found| found == device));
 }

@@ -1,0 +1,20 @@
+meet standings, 3 days, 4 competitors
+day, the first day, standings 3
+competitor operator, standing projection 1140 at the close
+competitor night fork, standing projection 840 at the close
+competitor dawn fork, standing projection 998.181818 at the close
+competitor quiet fork, no standing projection at the close
+close of the first day, record held by night fork at a projection of 840
+day, the second day, standings 3
+competitor operator, standing projection 900 at the close
+competitor night fork, standing projection 1008 at the close
+competitor dawn fork, standing projection 675 at the close
+competitor quiet fork, no standing projection at the close
+close of the second day, record held by dawn fork at a projection of 675
+day, the third day, standings 3
+competitor operator, standing projection 750 at the close
+competitor night fork, standing projection 720 at the close
+competitor dawn fork, standing projection 560 at the close
+competitor quiet fork, no standing projection at the close
+close of the third day, record held by dawn fork at a projection of 560
+standings counts, days 3, competitors 4, standings held 9

@@ -1,5 +1,7 @@
 2
 %%%STDOUT%%%
 %%%STDERR%%%
-usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks} ...
+usage: paceghost [-h]
+                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings}
+                 ...
 paceghost: error: the following arguments are required: command

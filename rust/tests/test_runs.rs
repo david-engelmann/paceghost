@@ -911,3 +911,54 @@ fn test_ghost_change_refuses_a_break_bearing_standing_ghost() {
     let error = ghost_change(&old, &candidate).expect_err("the report names the precondition");
     assert_eq!(error, "a runner label holds a line break");
 }
+
+// The FIX-PG-14 pins, added with the Round 12 repair. The run
+// loader's text field rule widens to line breaks for the task
+// and the split phases, in the check_label form the field day
+// loader states, so a file carrying a break in either field is
+// refused at load instead of forging a line in the readings
+// that print it. On the unrepaired code the files under the
+// two break pins load clean, so those pins fail there for a
+// real reason. The order pin passes there by design, because
+// its file already draws the unpaired surrogate defect there,
+// check_text_field drawing that defect and returning nothing,
+// and so the pin discriminates the check order instead, one
+// defect standing for a text field, the text checks first and
+// the break phrase last, so a task holding a surrogate beside
+// its break draws the surrogate phrase alone.
+
+#[test]
+fn test_a_task_holding_a_line_break_is_named() {
+    let (run, defects) = load(&run_text(
+        "\"draft\\nthe weekly summary\"",
+        "3600",
+        OPERATOR,
+        DATE,
+        SPLITS,
+        "",
+    ));
+    assert!(run.is_none());
+    assert_eq!(defects, vec!["field task holds a line break"]);
+}
+
+#[test]
+fn test_a_phase_holding_a_carriage_return_is_named() {
+    let splits = "[{\"phase\": \"plan\", \"elapsed_seconds\": 300}, {\"phase\": \"dra\\rft\", \"elapsed_seconds\": 900}]";
+    let (run, defects) = load(&run_text(TASK, "3600", OPERATOR, DATE, splits, ""));
+    assert!(run.is_none());
+    assert_eq!(defects, vec!["split 1 field phase holds a line break"]);
+}
+
+#[test]
+fn test_a_task_holding_a_surrogate_beside_a_break_draws_the_surrogate_phrase() {
+    let (run, defects) = load(&run_text(
+        "\"\\ud800\\nx\"",
+        "3600",
+        OPERATOR,
+        DATE,
+        SPLITS,
+        "",
+    ));
+    assert!(run.is_none());
+    assert_eq!(defects, vec!["field task holds an unpaired surrogate"]);
+}
