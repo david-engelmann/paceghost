@@ -31,6 +31,7 @@
 
 use paceghost::meet::{
     load_meet_text, meet_days, meet_marks, meet_reign, meet_report, meet_standings, meet_table,
+    meet_traces,
 };
 use paceghost::pynum::Num;
 use paceghost::runs::load_run_text;
@@ -390,5 +391,98 @@ fn test_generated_meets_load_clean_and_the_readings_close_over_them() {
                 );
             }
         }
+    }
+}
+
+// The traces pin of the generated family, added with Round
+// 13 beside the standings closings above. It fails before the
+// round by the absence of meet_traces from this suite's
+// imports, and on the built tree it fails against a traces
+// construction that drifts from the standings reading over
+// generated shapes, which is the drift charge the family
+// exists to catch.
+#[test]
+fn test_generated_meets_close_under_the_traces_reading() {
+    for index in 0..8u64 {
+        let seed = MEET_SEED + index;
+        let mut gen = Gen::new(seed);
+        let text = meet_text(&mut gen);
+        let (meet, defects) = load_meet_text(&text);
+        assert_eq!(defects, Vec::<String>::new(), "seed {}", seed);
+        let meet = meet.expect("the generated meet loads");
+
+        let standings = meet_standings(&meet).expect("the standings read");
+        let traces = meet_traces(&meet).expect("the traces read");
+
+        // The closings of PG-28, computed from the printed
+        // lines of the two readings alone. Every traces day
+        // line states the close form the standings reading
+        // states for that competitor in that day's section,
+        // the transposition relation.
+        fn close_form(line: &str) -> String {
+            if line.contains("no standing projection at the close") {
+                return "no standing projection at the close".to_string();
+            }
+            let start = line
+                .find("standing projection ")
+                .expect("a figured line names its figure");
+            line[start..].to_string()
+        }
+        let mut by_day: Vec<Vec<String>> = Vec::new();
+        for line in &standings {
+            if line.starts_with("day, the ") {
+                by_day.push(Vec::new());
+            }
+            if let Some(section) = by_day.last_mut() {
+                section.push(line.clone());
+            }
+        }
+        let mut by_competitor: Vec<Vec<String>> = Vec::new();
+        for line in traces.iter().skip(1) {
+            if line.starts_with("competitor ") {
+                by_competitor.push(Vec::new());
+            }
+            if let Some(section) = by_competitor.last_mut() {
+                section.push(line.clone());
+            }
+        }
+        for (competitor, section) in by_competitor.iter().enumerate() {
+            let day_lines: Vec<&String> = section
+                .iter()
+                .filter(|line| line.starts_with("the "))
+                .collect();
+            assert_eq!(day_lines.len(), by_day.len(), "seed {}", seed);
+            let mut stood = false;
+            for (day_index, day_line) in day_lines.iter().enumerate() {
+                let standings_line = by_day[day_index]
+                    .iter()
+                    .filter(|other| other.starts_with("competitor "))
+                    .nth(competitor)
+                    .expect("the standings section names the competitor");
+                assert_eq!(
+                    close_form(day_line),
+                    close_form(standings_line),
+                    "seed {}",
+                    seed
+                );
+                // Within a section the no standing form never
+                // stands after a figured day, because a
+                // standing once set is never cleared.
+                if day_line.contains("no standing projection at the close") {
+                    assert!(!stood, "seed {}", seed);
+                } else {
+                    stood = true;
+                }
+            }
+        }
+
+        // The standings held of the traces counts line equals
+        // the standings held of the standings counts line.
+        let traces_held = count_after(traces.last().expect("the traces close"), "standings held ");
+        let standings_held = count_after(
+            standings.last().expect("the standings close"),
+            "standings held ",
+        );
+        assert_eq!(traces_held, standings_held, "seed {}", seed);
     }
 }

@@ -1,0 +1,22 @@
+meet traces, 3 days, 4 competitors
+competitor operator
+the first day, standing projection 1140 at the close
+the second day, standing projection 900 at the close
+the third day, standing projection 750 at the close
+close, standings held at 3 closes, standing projection 750 at the close
+competitor night fork
+the first day, standing projection 840 at the close
+the second day, standing projection 1008 at the close
+the third day, standing projection 720 at the close
+close, standings held at 3 closes, standing projection 720 at the close
+competitor dawn fork
+the first day, standing projection 998.181818 at the close
+the second day, standing projection 675 at the close
+the third day, standing projection 560 at the close
+close, standings held at 3 closes, standing projection 560 at the close
+competitor quiet fork
+the first day, no standing projection at the close
+the second day, no standing projection at the close
+the third day, no standing projection at the close
+close, standings held at 0 closes, no standing projection at the close
+traces counts, competitors 4, days 3, standings held 9
