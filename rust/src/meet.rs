@@ -41,7 +41,13 @@
 //! the same day standings read competitor by competitor, and
 //! states every competitor's standing at the close of each
 //! day in one section of its own, with the closes at which it
-//! held a standing counted at the section's close. Every
+//! held a standing counted at the section's close. The
+//! margins reading reads the same walk a ninth way, over the
+//! nearest standing the same pass records after each mark,
+//! and states every mark with the holder after it, the record
+//! after it, the nearest standing held after it by a
+//! competitor other than its holder, and the margin by which
+//! the record stands ahead of that standing. Every
 //! reading of the walk stands inside the label fencing closure
 //! of FIX-PG-11, the one guard pass refusing a runner label
 //! that holds a line break after the figures of every day are
@@ -52,8 +58,9 @@
 //! PG-20, in the Round 9 section, PG-21 and PG-22 with the
 //! FIX-PG-11 amendment, in the Round 10 section, and PG-23
 //! and PG-24, in the Round 11 section, PG-25 and PG-26,
-//! in the Round 12 section, and PG-27 and PG-28, in the
-//! Round 13 section. No Python module stands
+//! in the Round 12 section, PG-27 and PG-28, in the
+//! Round 13 section, and PG-29 and PG-30, in the Round 14
+//! section. No Python module stands
 //! behind this one, so the contract text is the spec and the
 //! pins in the test suite hold it.
 
@@ -271,7 +278,13 @@ struct MarkRecord {
 /// no walk stands for it either. The traces reading reads
 /// the same day standings an eighth way, transposed
 /// competitor by competitor, and no walk stands for it
-/// either.
+/// either. The nearest standings record, after each mark,
+/// the competitor holding the nearest standing after that
+/// mark and its figure, one optional entry per mark in walk
+/// order beside the mark records, an entry standing empty
+/// where no competitor other than the holder held a standing
+/// after the mark, so the margins reading reads the same
+/// pass a ninth way and no walk stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -281,8 +294,60 @@ struct MeetWalk {
     trail: Vec<(usize, BigRational, usize)>,
     day_closes: Vec<Option<(usize, BigRational)>>,
     marks_detail: Vec<MarkRecord>,
+    nearest: Vec<Option<(usize, BigRational)>>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
+}
+
+/// The nearest standing after a mark, over the walk's vectors.
+///
+/// The nearest standing is the lowest standing projection
+/// held after the mark by a competitor other than the holder,
+/// read off the standing and set at vectors the holder
+/// selection just read. A tie at that lowest figure breaks
+/// to the competitor whose standing was set at the earliest
+/// mark, and a tie at one mark breaks to the earlier place
+/// in competitor order, the discipline the holder selection
+/// applies among the competitors standing at the record
+/// figure, read here over the field behind the holder. No
+/// competitor other than the holder holding a standing after
+/// the mark leaves the nearest standing empty.
+fn select_nearest(
+    standing: &[Option<BigRational>],
+    set_at: &[Option<(usize, BigRational)>],
+    holder: usize,
+) -> Option<(usize, BigRational)> {
+    let mut best: Option<usize> = None;
+    for (index, figure) in standing.iter().enumerate() {
+        if index == holder {
+            continue;
+        }
+        let Some(figure) = figure else {
+            continue;
+        };
+        let take = match best {
+            None => true,
+            Some(champion) => {
+                let champion_figure = standing[champion]
+                    .as_ref()
+                    .expect("a champion stands at a figure");
+                figure < champion_figure
+                    || (figure == champion_figure
+                        && (set_at[index].as_ref(), index) < (set_at[champion].as_ref(), champion))
+            }
+        };
+        if take {
+            best = Some(index);
+        }
+    }
+    best.map(|index| {
+        (
+            index,
+            standing[index]
+                .clone()
+                .expect("the nearest competitor stands at a figure"),
+        )
+    })
 }
 
 /// Walk the record progression of one loaded meet once.
@@ -317,7 +382,13 @@ struct MeetWalk {
 /// at the close of each day it records the standing of every
 /// competitor and the closing line it emits at that close, in
 /// the day standings and the day closing lines the standings
-/// reading reads. Handed a meet value built
+/// reading reads, and after the holder selection at each mark
+/// it records the nearest standing after the mark, the lowest
+/// standing then held by a competitor other than the holder,
+/// a tie at that figure breaking to the competitor whose
+/// standing was set at the earliest mark and then to the
+/// earlier competitor place, in the nearest standings the
+/// margins reading reads. Handed a meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -359,6 +430,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut trail: Vec<(usize, BigRational, usize)> = Vec::new();
     let mut day_closes: Vec<Option<(usize, BigRational)>> = Vec::new();
     let mut marks_detail: Vec<MarkRecord> = Vec::new();
+    let mut nearest: Vec<Option<(usize, BigRational)>> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -425,6 +497,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
             record: record.clone(),
             standing: mark_standing,
         });
+        nearest.push(select_nearest(&standing, &set_at, new_holder));
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -488,6 +561,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         trail,
         day_closes,
         marks_detail,
+        nearest,
         day_standings,
         day_close_lines,
     })
@@ -982,5 +1056,103 @@ pub fn meet_traces(meet: &Meet) -> Result<Vec<String>, String> {
         meet.days.len(),
         standings_held
     ));
+    Ok(lines)
+}
+
+/// Return the meet margins lines for one loaded meet.
+///
+/// The margins reading reads the one walk a ninth way. One
+/// section stands for each day of the meet in meet order,
+/// every day holding a section, and inside a section one
+/// line stands for each mark of the walk standing in that
+/// day, in walk order, naming the place of the mark in the
+/// whole walk, the holder after the mark and the record
+/// figure after it, in the mark form of the marks reading
+/// as far as the record figure, and then the nearest
+/// standing after the mark, the lowest standing projection
+/// held after it by a competitor other than the holder, a
+/// tie at that figure standing with the competitor whose
+/// standing was set at the earliest mark and the earlier
+/// competitor place standing where their standings were
+/// set at one mark, and the margin by which the record
+/// stands ahead of that standing, or the words and no
+/// other standing where no competitor other than the
+/// holder holds a standing after the mark. The margin is
+/// computed on exact values before any rendering, so it
+/// is never negative, and it stands at zero exactly where
+/// another competitor stands at the record figure. The
+/// reading closes by counting the marks the walk walked,
+/// the marks with another standing, and the days, and
+/// naming the closest margin and the earliest mark
+/// standing at it, the closest margin taken over the
+/// marks and never over the competitors, or by stating
+/// that no other standing stood at any mark where none
+/// did. No competitor is ranked or compared against
+/// another beyond the holder and the nearest standing
+/// each mark line names.
+pub fn meet_margins(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet margins, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut closest: Option<(BigRational, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record)
+            );
+            match &walk.nearest[place - 1] {
+                Some((competitor, figure)) => {
+                    let margin = figure.clone() - record.record.clone();
+                    with_another += 1;
+                    let nearer = match &closest {
+                        None => true,
+                        Some((smallest, _)) => margin < *smallest,
+                    };
+                    if nearer {
+                        closest = Some((margin.clone(), *record));
+                    }
+                    lines.push(format!(
+                        "{}, nearest standing {} held by {}, margin {}",
+                        head,
+                        format_usage(figure),
+                        walk.labels[*competitor],
+                        format_usage(&margin)
+                    ));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match closest {
+        Some((margin, record)) => lines.push(format!(
+            "margins counts, marks walked {}, marks with another standing {}, days {}, closest margin {} at {} seconds on the {} day",
+            walk.marks_walked,
+            with_another,
+            meet.days.len(),
+            format_usage(&margin),
+            format_seconds_fraction(&record.mark),
+            ORDINALS[record.day_index]
+        )),
+        None => lines.push(format!(
+            "margins counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
     Ok(lines)
 }

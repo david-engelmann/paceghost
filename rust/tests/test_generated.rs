@@ -30,8 +30,8 @@
 //! what the suite believes.
 
 use paceghost::meet::{
-    load_meet_text, meet_days, meet_marks, meet_reign, meet_report, meet_standings, meet_table,
-    meet_traces,
+    load_meet_text, meet_days, meet_margins, meet_marks, meet_reign, meet_report, meet_standings,
+    meet_table, meet_traces,
 };
 use paceghost::pynum::Num;
 use paceghost::runs::load_run_text;
@@ -484,5 +484,275 @@ fn test_generated_meets_close_under_the_traces_reading() {
             "standings held ",
         );
         assert_eq!(traces_held, standings_held, "seed {}", seed);
+    }
+}
+
+// The margins pin of the generated family, added with Round
+// 14 beside the traces pin above. It fails before the round
+// by the absence of meet_margins from this suite's imports,
+// and on the built tree it fails against a margins
+// construction that drifts from the marks or standings
+// readings over generated shapes, which is the drift charge
+// the family exists to catch. Its relations are the closings
+// of PG-30 computed from the printed lines of the readings
+// alone, the line by line agreement with the marks reading,
+// the margin arithmetic of every mark line, the day close
+// relation against the standings reading, the counts
+// arithmetic, and the zero relation, a margin of zero
+// standing only where the line's nearest standing figure
+// equals its record figure, checked where the generated
+// shapes produce one and stated as the relation PG-30
+// fixes, not as a shape the family owes.
+
+fn margins_record_prefix(mark_line: &str) -> String {
+    let start = mark_line
+        .find("at a projection of ")
+        .expect("a mark line names its record figure");
+    let figure_start = start + "at a projection of ".len();
+    let figure_end = mark_line[figure_start..]
+        .find(',')
+        .map(|offset| figure_start + offset)
+        .expect("a record figure ends at a comma");
+    mark_line[..figure_end].to_string()
+}
+
+/// The figures of one margins mark line: the record figure,
+/// and where another standing stands, the nearest standing
+/// figure, the label of its holder, and the margin figure.
+fn margins_mark_parts(line: &str) -> (String, Option<(String, String, String)>) {
+    let start = line
+        .find("at a projection of ")
+        .expect("a mark line names its record figure");
+    let figure_start = start + "at a projection of ".len();
+    let figure_end = line[figure_start..]
+        .find(',')
+        .map(|offset| figure_start + offset)
+        .expect("a record figure ends at a comma");
+    let record = line[figure_start..figure_end].to_string();
+    if line.ends_with(", and no other standing") {
+        return (record, None);
+    }
+    let nearest_start = line
+        .find(", nearest standing ")
+        .expect("a figured mark line names its nearest standing")
+        + ", nearest standing ".len();
+    let held = line[nearest_start..]
+        .find(" held by ")
+        .map(|offset| nearest_start + offset)
+        .expect("a nearest standing names its holder");
+    let figure = line[nearest_start..held].to_string();
+    let label_start = held + " held by ".len();
+    let margin_mark = line[label_start..]
+        .find(", margin ")
+        .map(|offset| label_start + offset)
+        .expect("a figured mark line names its margin");
+    let label = line[label_start..margin_mark].to_string();
+    let margin = line[margin_mark + ", margin ".len()..].to_string();
+    (record, Some((figure, label, margin)))
+}
+
+/// The elapsed figure and ordinal phrase a mark line names.
+fn margins_mark_position(line: &str) -> (String, String) {
+    let at = line.find(", at ").expect("a mark line names its mark") + ", at ".len();
+    let seconds = line[at..]
+        .find(" seconds on the ")
+        .map(|offset| at + offset)
+        .expect("a mark line names its seconds");
+    let elapsed = line[at..seconds].to_string();
+    let day_start = seconds + " seconds on the ".len();
+    let day_end = line[day_start..]
+        .find(" day,")
+        .map(|offset| day_start + offset)
+        .expect("a mark line names its day");
+    (elapsed, line[day_start..day_end].to_string())
+}
+
+#[test]
+fn test_generated_meets_close_under_the_margins_reading() {
+    for index in 0..8u64 {
+        let seed = MEET_SEED + index;
+        let mut gen = Gen::new(seed);
+        let text = meet_text(&mut gen);
+        let (meet, defects) = load_meet_text(&text);
+        assert_eq!(defects, Vec::<String>::new(), "seed {}", seed);
+        let meet = meet.expect("the generated meet loads");
+
+        let marks = meet_marks(&meet).expect("the marks read");
+        let margins = meet_margins(&meet).expect("the margins read");
+        let standings = meet_standings(&meet).expect("the standings read");
+
+        let reading_marks: Vec<&String> = marks
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let margin_marks: Vec<&String> = margins
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        assert_eq!(margin_marks.len(), reading_marks.len(), "seed {}", seed);
+
+        // The line by line agreement of PG-30, the margin
+        // arithmetic of every mark line, and the zero
+        // relation where the shapes produce one.
+        let mut with_another = 0usize;
+        for (margin_line, mark_line) in margin_marks.iter().zip(reading_marks.iter()) {
+            assert!(
+                margin_line.starts_with(&margins_record_prefix(mark_line)),
+                "seed {}",
+                seed
+            );
+            let (record, nearest) = margins_mark_parts(margin_line);
+            if let Some((figure, _label, margin)) = nearest {
+                with_another += 1;
+                let record_value: f64 = record.parse().expect("a record figure parses");
+                let nearest_value: f64 = figure.parse().expect("a nearest figure parses");
+                let margin_value: f64 = margin.parse().expect("a margin figure parses");
+                assert!(margin_value >= 0.0, "seed {}", seed);
+                assert!(
+                    (nearest_value - record_value - margin_value).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                if margin == "0" {
+                    assert_eq!(figure, record, "seed {}", seed);
+                }
+            }
+        }
+
+        // The counts arithmetic of PG-30, and the closest
+        // margin standing at the earliest mark stating it.
+        let counts = margins.last().expect("the margins close");
+        let walked = count_after(counts, "marks walked ");
+        assert_eq!(walked, margin_marks.len(), "seed {}", seed);
+        let stated_with = count_after(counts, "marks with another standing ");
+        assert_eq!(stated_with, with_another, "seed {}", seed);
+        let no_other = margin_marks
+            .iter()
+            .filter(|line| line.ends_with(", and no other standing"))
+            .count();
+        assert_eq!(with_another + no_other, walked, "seed {}", seed);
+        if with_another > 0 {
+            let closest = counts
+                .split("closest margin ")
+                .nth(1)
+                .expect("the counts line names its closest margin");
+            let (figure, rest) = closest
+                .split_once(" at ")
+                .expect("the closest margin names its mark");
+            let (elapsed, ordinal) = rest
+                .split_once(" seconds on the ")
+                .expect("the closest margin names its seconds");
+            let ordinal = ordinal
+                .strip_suffix(" day")
+                .expect("the closest margin names its day");
+            let first = margin_marks
+                .iter()
+                .find(|line| {
+                    matches!(margins_mark_parts(line).1, Some((_, _, ref margin)) if margin == figure)
+                })
+                .expect("a mark line states the closest margin");
+            assert_eq!(
+                margins_mark_position(first),
+                (elapsed.to_string(), ordinal.to_string()),
+                "seed {}",
+                seed
+            );
+        } else {
+            assert!(
+                counts.ends_with(", and, no other standing at any mark"),
+                "seed {}",
+                seed
+            );
+        }
+
+        // The day close relation of PG-30, computed from
+        // the standings sections and the margins sections.
+        let mut standing_sections: Vec<Vec<String>> = Vec::new();
+        for line in &standings {
+            if line.starts_with("day, the ") {
+                standing_sections.push(Vec::new());
+            }
+            if let Some(section) = standing_sections.last_mut() {
+                section.push(line.clone());
+            }
+        }
+        let mut margin_sections: Vec<Vec<&String>> = Vec::new();
+        for line in &margins {
+            if line.starts_with("day, the ") {
+                margin_sections.push(Vec::new());
+            }
+            if let Some(section) = margin_sections.last_mut() {
+                section.push(line);
+            }
+        }
+        assert_eq!(
+            standing_sections.len(),
+            margin_sections.len(),
+            "seed {}",
+            seed
+        );
+        for (section, margin_section) in standing_sections.iter().zip(margin_sections.iter()) {
+            let day_marks: Vec<&&String> = margin_section
+                .iter()
+                .filter(|line| line.starts_with("mark "))
+                .collect();
+            if day_marks.is_empty() {
+                continue;
+            }
+            let closing = section
+                .iter()
+                .find(|line| line.starts_with("close of the "))
+                .expect("a standings section closes");
+            let holder = closing
+                .split("record held by ")
+                .nth(1)
+                .and_then(|rest| rest.split(" at a projection of ").next())
+                .expect("a closing line names its holder");
+            let record = closing
+                .rsplit("at a projection of ")
+                .next()
+                .expect("a closing line names its record figure");
+            let record_value: f64 = record.parse().expect("a record figure parses");
+            let others: Vec<(&str, &str)> = section
+                .iter()
+                .filter(|line| line.starts_with("competitor "))
+                .filter(|line| !line.starts_with(&format!("competitor {},", holder)))
+                .filter_map(|line| {
+                    line.strip_prefix("competitor ")
+                        .and_then(|rest| rest.split_once(", standing projection "))
+                        .and_then(|(label, rest)| {
+                            rest.strip_suffix(" at the close")
+                                .map(|figure| (label, figure))
+                        })
+                })
+                .collect();
+            let last = day_marks.last().expect("the day holds a mark");
+            let (_last_record, last_nearest) = margins_mark_parts(last);
+            match (others.is_empty(), last_nearest) {
+                (true, None) => {}
+                (false, Some((figure, label, margin))) => {
+                    let lowest = others
+                        .iter()
+                        .map(|(_, other)| other.parse::<f64>().expect("a figure parses"))
+                        .fold(f64::INFINITY, f64::min);
+                    let figure_value: f64 = figure.parse().expect("a figure parses");
+                    assert_eq!(figure_value, lowest, "seed {}", seed);
+                    assert!(
+                        others.iter().any(|(other_label, other_figure)| {
+                            *other_label == label && other_figure.parse::<f64>() == Ok(lowest)
+                        }),
+                        "seed {}",
+                        seed
+                    );
+                    let margin_value: f64 = margin.parse().expect("a margin parses");
+                    assert!(
+                        (figure_value - record_value - margin_value).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                }
+                _ => panic!("the day close relation fails, seed {}", seed),
+            }
+        }
     }
 }
