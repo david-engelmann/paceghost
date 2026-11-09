@@ -327,8 +327,7 @@ fn test_the_last_day_line_of_each_section_states_the_table_close() {
     for (section, table_line) in sections.iter().zip(table_lines.iter()) {
         let last_day = section
             .iter()
-            .filter(|line| line.starts_with("the "))
-            .next_back()
+            .rfind(|line| line.starts_with("the "))
             .expect("a section holds a day line");
         let form = close_form(last_day);
         if form == "no standing projection at the close" {
