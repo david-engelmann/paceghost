@@ -32,7 +32,7 @@ fn test_agents_carries_the_canonical_marker() {
 
 #[test]
 fn test_readme_states_the_closed_round_count() {
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
@@ -103,10 +103,10 @@ fn test_readme_reports_the_round_four_status() {
     // and the count returned to zero. Adjusted again with
     // the Round 13 slice, as the named mechanical consequence
     // of slice 14 standing built and in review, so the count
-    // stands at one, the slice 14 status line, until the
-    // Round 13 closure lands slice 14 and the count returns
+    // stood at one, the slice 14 status line, until the
+    // Round 13 closure landed slice 14 and the count returned
     // to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 1);
+    assert_eq!(read("README.md").matches("built and in review").count(), 0);
 }
 
 #[test]
@@ -116,7 +116,7 @@ fn test_readme_reports_the_round_five_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 6 has landed. It carries the rematch loader that names every malformed field in a rematch file, the rematch report that reads two field days as one record progression and closes by naming where the record changed hands between the days, and the rematch command, with two synthetic example rematches and their golden reports under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
@@ -126,7 +126,7 @@ fn test_readme_reports_the_round_six_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 7 has landed. It carries the meet loader that names every malformed field in a meet file, the meet report that reads three or more field days as one record progression and names the closing holder of each day and the day the standing record was set, and the meet command, with a synthetic example meet and its golden report under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
@@ -136,7 +136,7 @@ fn test_readme_reports_the_round_seven_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 8 has landed. It carries the meet table that reads a meet competitor by competitor over the one record progression of the meet report, naming the lowest standing projection of each competitor and the day and mark at which it was set, the count of marks each competitor held the record after, and their standing projection at the close, and the table command, with the golden meet table of the standing example meet under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
@@ -146,7 +146,7 @@ fn test_readme_reports_the_round_eight_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 9 has landed. It carries the reign reading that reads a meet spell by spell over the one record progression of the meet report, naming each maximal run of consecutive marks one competitor held the record after with the marks it spans and its length, and the count of marks and spells and the longest spell at the close, and the reign command, with the golden reign reading of the standing example meet under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
@@ -156,7 +156,7 @@ fn test_readme_reports_the_round_nine_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 10 has landed. It carries the days reading that reads a meet day by day over the one record progression of the meet report, naming the marks and handovers of each day and the record that stood at its close, and the days command, with the golden days reading of the standing example meet under examples, and the README brought to the fleet README standard, its lede, install, quickstart, and usage sections standing with captured output.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
@@ -166,7 +166,7 @@ fn test_readme_reports_the_round_ten_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 11 has landed. It carries the forks reading that reads a meet competitor by competitor over the one record progression of the meet report, naming every standing each competitor set and the record spells it held and the figures of its close, and the forks command, with the golden forks reading of the standing example meet under examples, and the label fencing closure of the meet readings under FIX-PG-11, and the README opening paragraph repaired of its lede restatement.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
@@ -176,7 +176,7 @@ fn test_readme_reports_the_round_eleven_status() {
     assert!(lines.iter().any(|found| found == stated));
     let slice_line = "- Slice 12 has landed. It carries the marks reading that reads a meet mark by mark over the one record progression of the meet report, naming the place of each mark in the whole meet and the competitor who held the record after it and the standing the mark took against the state that stood before it, and the marks command, with the golden marks readings of the standing example meet and of a constructed meet under examples, and the label fencing closure of the field day family and the run readings under FIX-PG-12.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
@@ -186,17 +186,17 @@ fn test_readme_reports_the_round_twelve_status() {
     assert!(lines.iter().any(|found| found == stated));
     let slice_line = "- Slice 13 has landed. It carries the standings reading that reads a meet at the close of each day over the one record progression of the meet report, naming every competitor's standing at every day's close and closing each section with the closing line of the meet report for that day, and the standings command, with the golden standings readings of the standing example meet and of a constructed meet under examples, and the file carried fencing closure of the loaders and the summary under FIX-PG-14, and the input forms named at version 1 with the guarded closed stream pin under FIX-PG-13, and the seeded generated fixture family pinned by the closing relations the contract states.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
 fn test_readme_reports_the_round_thirteen_status() {
     let lines = readme_lines();
-    let stated = "- Contract, PG-27 and PG-28 now stand in full form in CONTRACT.md under the Round 13 obligations with the FIX-PG-15 repair amendment, and their standing is not claimed here, as Round 13 has not closed.";
+    let stated = "- Contract, PG-27 and PG-28 met. They stand in full form in CONTRACT.md under the Round 13 obligations with the FIX-PG-15 repair amendment, and Round 13 closed on the merged slice 14 after three reviews approving with no findings, with one stable toolchain lint repair on the traces tests at the landing.";
     assert!(lines.iter().any(|found| found == stated));
-    let slice_line = "- Slice 14 is built and in review. It carries the traces reading that reads a meet competitor by competitor at the close of each day over the one record progression of the meet report, naming every competitor's standing at the close of each day in one section of its own and the closes at which it held a standing, and the traces command, with the golden traces readings of the standing example meet and of a constructed meet under examples, and the summary guard order pins completed under FIX-PG-15, and the seeded generated fixture family extended to the traces reading.";
+    let slice_line = "- Slice 14 has landed. It carries the traces reading that reads a meet competitor by competitor at the close of each day over the one record progression of the meet report, naming every competitor's standing at the close of each day in one section of its own and the closes at which it held a standing, and the traces command, with the golden traces readings of the standing example meet and of a constructed meet under examples, and the summary guard order pins completed under FIX-PG-15, and the seeded generated fixture family extended to the traces reading.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 12 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 13 of 100"));
 }
 
 #[test]
