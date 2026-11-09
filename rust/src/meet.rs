@@ -37,7 +37,11 @@
 //! and the closing line the pass emits at each day's close,
 //! and states every competitor's standing at every close in
 //! competitor order with no competitor ranked against another.
-//! Every
+//! The traces reading reads the same walk an eighth way, over
+//! the same day standings read competitor by competitor, and
+//! states every competitor's standing at the close of each
+//! day in one section of its own, with the closes at which it
+//! held a standing counted at the section's close. Every
 //! reading of the walk stands inside the label fencing closure
 //! of FIX-PG-11, the one guard pass refusing a runner label
 //! that holds a line break after the figures of every day are
@@ -47,8 +51,9 @@
 //! section, PG-17 and PG-18, in the Round 8 section, PG-19 and
 //! PG-20, in the Round 9 section, PG-21 and PG-22 with the
 //! FIX-PG-11 amendment, in the Round 10 section, and PG-23
-//! and PG-24, in the Round 11 section, and PG-25 and PG-26,
-//! in the Round 12 section. No Python module stands
+//! and PG-24, in the Round 11 section, PG-25 and PG-26,
+//! in the Round 12 section, and PG-27 and PG-28, in the
+//! Round 13 section. No Python module stands
 //! behind this one, so the contract text is the spec and the
 //! pins in the test suite hold it.
 
@@ -263,7 +268,10 @@ struct MarkRecord {
 /// one list of standings per day in competitor order, beside
 /// the closing line the pass emits at that close, so the
 /// standings reading reads the same pass a seventh way and
-/// no walk stands for it either.
+/// no walk stands for it either. The traces reading reads
+/// the same day standings an eighth way, transposed
+/// competitor by competitor, and no walk stands for it
+/// either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -903,6 +911,75 @@ pub fn meet_standings(meet: &Meet) -> Result<Vec<String>, String> {
         "standings counts, days {}, competitors {}, standings held {}",
         meet.days.len(),
         walk.labels.len(),
+        standings_held
+    ));
+    Ok(lines)
+}
+
+/// Return the meet traces lines for one loaded meet.
+///
+/// The traces reading reads the one walk an eighth way, the
+/// standings reading transposed. One section stands for each
+/// competitor in the competitor order of the walk, opening as
+/// the forks sections open, and inside a section one line
+/// stands for each day of the meet in day order, naming the
+/// standing of that competitor at the close of that day in the
+/// close forms of PG-26, every day holding a line in every
+/// section. The section closes by counting the closes at which
+/// the competitor held a standing and naming the standing it
+/// holds at the close of the last day in the same two forms,
+/// the figure form standing exactly where that count is not
+/// zero, because a standing once set is never cleared. The
+/// reading opens by naming the meet, the count of its days,
+/// and the count of its competitors, and closes by counting
+/// the competitors, the days, and the standings held, the sum
+/// over the sections of the closes at which a competitor held
+/// a standing, which is the standings held of the standings
+/// reading over the same meet. The reading computes no figure
+/// the standings reading does not already state. No competitor
+/// is ranked or compared against another, and the order is the
+/// competitor order of the walk alone.
+pub fn meet_traces(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut lines = vec![format!(
+        "meet traces, {} days, {} competitors",
+        meet.days.len(),
+        walk.labels.len()
+    )];
+    let mut standings_held = 0usize;
+    for (competitor, label) in walk.labels.iter().enumerate() {
+        lines.push(format!("competitor {}", label));
+        let mut held = 0usize;
+        for (day_index, day) in walk.day_standings.iter().enumerate() {
+            match &day[competitor] {
+                Some(figure) => {
+                    held += 1;
+                    lines.push(format!(
+                        "the {} day, standing projection {} at the close",
+                        ORDINALS[day_index],
+                        format_usage(figure)
+                    ));
+                }
+                None => lines.push(format!(
+                    "the {} day, no standing projection at the close",
+                    ORDINALS[day_index]
+                )),
+            }
+        }
+        standings_held += held;
+        let close_text = match &walk.close[competitor] {
+            Some(close) => format!("standing projection {} at the close", format_usage(close)),
+            None => "no standing projection at the close".to_string(),
+        };
+        lines.push(format!(
+            "close, standings held at {} closes, {}",
+            held, close_text
+        ));
+    }
+    lines.push(format!(
+        "traces counts, competitors {}, days {}, standings held {}",
+        walk.labels.len(),
+        meet.days.len(),
         standings_held
     ));
     Ok(lines)

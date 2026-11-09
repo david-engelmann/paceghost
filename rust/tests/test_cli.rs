@@ -401,3 +401,59 @@ fn test_run_summary_lines_name_the_task_break_before_a_phase_break() {
     let error = run_summary_lines(&run).expect_err("the lines name the precondition");
     assert_eq!(error, "a task holds a line break");
 }
+
+// The FIX-PG-15 pins, added with the Round 13 repair. The five
+// pins below complete the pairwise order pins of the summary
+// guard of FIX-PG-14, each handing the pass breaks in both
+// fields of one pair and stating that the earlier field's
+// error stands. All five pass on the standing tree by design,
+// because the guard already checks in the stated order, and
+// their discrimination is against a guard whose named pair
+// stands swapped. The three runner pins pass also on the tree
+// before Round 12, because the runner check of FIX-PG-12
+// already stood first in the summary pass there. The task
+// before recorded_at pin and the recorded_at before phase pin
+// fail on the tree before Round 12 by assertion, where no task
+// or recorded_at check stood in the summary pass and the
+// summary printed both breaks raw. The order among the phases
+// themselves stands unpinned here, because the phase error
+// carries no split index and any phase order draws the
+// identical observable at this surface, as FIX-PG-15 states.
+
+#[test]
+fn test_run_summary_lines_name_the_runner_break_before_a_task_break() {
+    let mut run = summary_run("a\nb", "2026-01-04", "plan");
+    run.runner = PText::from_text("oper\nator");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_run_summary_lines_name_the_runner_break_before_a_recorded_at_break() {
+    let mut run = summary_run(TASK, "2026-01-04\nforged", "plan");
+    run.runner = PText::from_text("oper\nator");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_run_summary_lines_name_the_runner_break_before_a_phase_break() {
+    let mut run = summary_run(TASK, "2026-01-04", "pla\nn");
+    run.runner = PText::from_text("oper\nator");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_run_summary_lines_name_the_task_break_before_a_recorded_at_break() {
+    let run = summary_run("a\nb", "2026-01-04\nforged", "plan");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a task holds a line break");
+}
+
+#[test]
+fn test_run_summary_lines_name_the_recorded_at_break_before_a_phase_break() {
+    let run = summary_run(TASK, "2026-01-04\nforged", "pla\nn");
+    let error = run_summary_lines(&run).expect_err("the lines name the precondition");
+    assert_eq!(error, "a recorded_at holds a line break");
+}

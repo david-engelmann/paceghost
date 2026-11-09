@@ -1,0 +1,17 @@
+meet traces, 3 days, 3 competitors
+competitor early bird
+the first day, standing projection 800 at the close
+the second day, standing projection 820 at the close
+the third day, standing projection 750 at the close
+close, standings held at 3 closes, standing projection 750 at the close
+competitor steady hand
+the first day, standing projection 800 at the close
+the second day, standing projection 780 at the close
+the third day, standing projection 720 at the close
+close, standings held at 3 closes, standing projection 720 at the close
+competitor late riser
+the first day, no standing projection at the close
+the second day, standing projection 700 at the close
+the third day, standing projection 650 at the close
+close, standings held at 2 closes, standing projection 650 at the close
+traces counts, competitors 3, days 3, standings held 8

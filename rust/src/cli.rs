@@ -1,6 +1,6 @@
 //! The paceghost command line surface.
 //!
-//! Fifteen commands read recorded runs from local files and
+//! Sixteen commands read recorded runs from local files and
 //! print reports. The show command prints one run or its
 //! defects, the
 //! ghost command prints the standing ghost for a task, and the race
@@ -23,7 +23,9 @@
 //! competitor. The marks command prints the meet marks for a
 //! meet, the same walk read mark by mark. The standings command
 //! prints the meet standings for a meet, the same walk read at
-//! the close of each day. Nothing here touches
+//! the close of each day. The traces command prints the meet
+//! traces for a meet, the same walk read competitor by
+//! competitor at the close of each day. Nothing here touches
 //! the network.
 //!
 //! The dispatch is a pure function of the argument list and a file
@@ -46,7 +48,7 @@ use crate::fieldday::{field_day_report, load_field_day_text, FieldDay};
 use crate::ladder::{ladder_report, load_ladder_text, Ladder};
 use crate::meet::{
     load_meet_text, meet_days, meet_forks, meet_marks, meet_reign, meet_report, meet_standings,
-    meet_table, Meet,
+    meet_table, meet_traces, Meet,
 };
 use crate::pynum::format_seconds;
 use crate::pytext::PText;
@@ -71,7 +73,7 @@ impl CliOutcome {
     }
 }
 
-const COMMANDS: [&str; 15] = [
+const COMMANDS: [&str; 16] = [
     "show",
     "ghost",
     "race",
@@ -87,9 +89,10 @@ const COMMANDS: [&str; 15] = [
     "forks",
     "marks",
     "standings",
+    "traces",
 ];
 
-const COMMAND_HELPS: [(&str, &str); 15] = [
+const COMMAND_HELPS: [(&str, &str); 16] = [
     ("show", "print one recorded run"),
     ("ghost", "print the standing ghost"),
     ("race", "race a live run against a ghost"),
@@ -114,10 +117,14 @@ const COMMAND_HELPS: [(&str, &str); 15] = [
         "standings",
         "print the meet standings for three or more field days",
     ),
+    (
+        "traces",
+        "print the meet traces for three or more field days",
+    ),
 ];
 
 const CHOICES_HEADER: &str =
-    "{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings}";
+    "{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces}";
 
 /// The static shape of one subcommand.
 struct Spec {
@@ -195,6 +202,11 @@ fn spec_for(command: &str) -> Spec {
         },
         "standings" => Spec {
             name: "standings",
+            positionals: &["file"],
+            variadic: false,
+        },
+        "traces" => Spec {
+            name: "traces",
             positionals: &["file"],
             variadic: false,
         },
@@ -306,6 +318,7 @@ fn sub_parser_info(spec: &Spec) -> ParserInfo {
             "forks" => "paceghost forks",
             "marks" => "paceghost marks",
             "standings" => "paceghost standings",
+            "traces" => "paceghost traces",
             _ => "paceghost ladder",
         },
         description: None,
@@ -1073,7 +1086,7 @@ pub fn dispatch_with_columns(
                 out,
                 &main_usage,
                 format!(
-                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings')",
+                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces')",
                     py_repr(token)
                 ),
             );
@@ -1093,7 +1106,7 @@ pub fn dispatch_with_columns(
                     out,
                     &main_usage,
                     format!(
-                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings')",
+                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces')",
                         py_repr(token)
                     ),
                 );
@@ -1265,6 +1278,7 @@ fn run_command(
         "forks" => command_forks(&positionals[0], read_file, out),
         "marks" => command_marks(&positionals[0], read_file, out),
         "standings" => command_standings(&positionals[0], read_file, out),
+        "traces" => command_traces(&positionals[0], read_file, out),
         _ => command_ladder(&positionals[0], read_file, out),
     }
 }
@@ -1631,6 +1645,18 @@ fn command_standings(
         Some(meet) => meet,
     };
     let lines = meet_standings(&meet).expect("a loaded meet satisfies the standings preconditions");
+    out.stdout.extend(lines);
+}
+
+fn command_traces(file: &PText, read_file: &dyn Fn(&[u8]) -> Option<String>, out: &mut CliOutcome) {
+    let meet = match load_meet_or_print_defects(file, read_file, out) {
+        None => {
+            out.code = 1;
+            return;
+        }
+        Some(meet) => meet,
+    };
+    let lines = meet_traces(&meet).expect("a loaded meet satisfies the traces preconditions");
     out.stdout.extend(lines);
 }
 
