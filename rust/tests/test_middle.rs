@@ -7,9 +7,13 @@
 //! tree. On the built tree, pin 1 fails under M-1 at its even
 //! field marks, under M-2 at every figured mark, under M-4 at
 //! the marks where its middle separates from its nearest, and
-//! under M-6 at every mark after the first. Pin 2 fails under
-//! M-6 wherever a mark moves the record. Pin 3 fails under
-//! M-1 and M-2 at the closing marks whose fields separate.
+//! under M-6 at every mark after the first. Pin 2 passes
+//! under M-6 at every mark, the mark line prefix it
+//! compares standing rendered from the walk's mark
+//! records, which M-6 does not touch, the lag M-6
+//! introduces living only in the middle vector behind
+//! the prefix. Pin 3 fails under M-1 and M-2 at the
+//! closing marks whose fields separate.
 //! Pin 4 fails under M-2, a field taken whole figuring the
 //! holder itself. Pin 5 fails under M-1 at its second figured
 //! mark, where the place above the middle place stands above
