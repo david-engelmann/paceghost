@@ -1,0 +1,125 @@
+//! Tests for the Round 17 command line surface, the tails
+//! command beside the nineteen standing commands.
+//!
+//! Written for Round 17 in the shape of the Round 16 command
+//! tests. The command reads one meet file and prints the
+//! tails reading of PG-36, and a malformed meet or a missing
+//! file prints exactly what the meet command prints for the
+//! same file, so the reading never depends on a second
+//! loading. The usage pins state the argument outcomes of
+//! the command at its own surface. Every pin in this file
+//! fails before the round by the absence of the command, the
+//! tails command not standing on the pre round tree, the
+//! golden pin and the two defect pins failing by invalid
+//! choice and the usage pins by the missing subcommand.
+
+use std::path::{Path, PathBuf};
+
+use paceghost::cli::{dispatch, CliOutcome};
+use paceghost::pytext::PText;
+
+fn reader(bytes: &[u8]) -> Option<String> {
+    let path = String::from_utf8_lossy(bytes).into_owned();
+    let data = std::fs::read(path).ok()?;
+    String::from_utf8(data).ok()
+}
+
+fn cli(args: &[&str]) -> CliOutcome {
+    let argv: Vec<PText> = args.iter().map(|arg| PText::from_text(arg)).collect();
+    dispatch(&argv, &reader)
+}
+
+fn scratch(tag: &str) -> PathBuf {
+    let dir = std::env::temp_dir().join(format!(
+        "paceghost-commands17-{}-{}",
+        std::process::id(),
+        tag
+    ));
+    std::fs::create_dir_all(&dir).expect("the scratch dir is created");
+    dir
+}
+
+fn write_file(dir: &Path, name: &str, text: &str) -> String {
+    let path = dir.join(name);
+    std::fs::write(&path, text).expect("the scratch file writes");
+    path.to_string_lossy().into_owned()
+}
+
+fn examples_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples")
+}
+
+fn golden_lines(name: &str) -> Vec<String> {
+    let golden = std::fs::read_to_string(examples_dir().join(name)).expect("the golden file reads");
+    assert!(golden.ends_with('\n'));
+    golden.lines().map(str::to_string).collect()
+}
+
+#[test]
+fn test_the_cli_tails_command_prints_the_shipped_golden() {
+    let path = examples_dir()
+        .join("meet.json")
+        .to_string_lossy()
+        .into_owned();
+    let outcome = cli(&["tails", &path]);
+    assert_eq!(outcome.code, 0);
+    assert_eq!(outcome.stdout, golden_lines("meet-tails-golden.txt"));
+}
+
+#[test]
+fn test_the_cli_tails_command_prints_what_meet_prints_for_a_malformed_meet() {
+    let dir = scratch("tails-malformed");
+    let path = write_file(&dir, "meet.json", "{\"days\": [{\"window_seconds\": 0}]}");
+    let tails = cli(&["tails", &path]);
+    let meet = cli(&["meet", &path]);
+    assert_eq!(tails.code, 1);
+    assert_eq!(tails.stdout, meet.stdout);
+    assert_eq!(
+        tails.stdout.first().map(String::as_str),
+        Some("invalid meet")
+    );
+}
+
+#[test]
+fn test_the_cli_tails_command_prints_what_meet_prints_for_a_missing_file() {
+    let dir = scratch("tails-missing");
+    let path = dir.join("absent.json").to_string_lossy().into_owned();
+    let tails = cli(&["tails", &path]);
+    let meet = cli(&["meet", &path]);
+    assert_eq!(tails.code, 1);
+    assert_eq!(tails.stdout, meet.stdout);
+    assert_eq!(
+        tails.stdout,
+        vec!["invalid meet", "defect file cannot be read"]
+    );
+}
+
+#[test]
+fn test_the_cli_tails_command_without_an_argument_prints_the_usage_message() {
+    let outcome = cli(&["tails"]);
+    assert_eq!(outcome.code, 2);
+    assert_eq!(outcome.stdout, Vec::<String>::new());
+    assert_eq!(
+        outcome.stderr,
+        vec![
+            "usage: paceghost tails [-h] file",
+            "paceghost tails: error: the following arguments are required: file",
+        ]
+    );
+}
+
+#[test]
+fn test_the_cli_tails_command_with_an_extra_argument_prints_the_usage_message() {
+    let outcome = cli(&["tails", "a.json", "b.json"]);
+    assert_eq!(outcome.code, 2);
+    assert_eq!(outcome.stdout, Vec::<String>::new());
+    assert_eq!(
+        outcome.stderr,
+        vec![
+            "usage: paceghost [-h]",
+            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails}",
+            "                 ...",
+            "paceghost: error: unrecognized arguments: b.json",
+        ]
+    );
+}

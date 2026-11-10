@@ -380,6 +380,35 @@ mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, midd
 middle counts, marks walked 16, marks with another standing 15, days 3, closest middle margin 58.181818 at 1100 seconds on the first day
 ```
 
+### tails
+
+The tails command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, the lower tail standing and the upper tail standing held after it by the field behind its holder, and the lower tail margin and the upper tail margin by which the record stands ahead of each tail standing.
+
+```text
+$ paceghost tails examples/meet.json
+meet tails, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, lower tail standing 1350, lower tail margin 90, upper tail standing 1350, upper tail margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, lower tail standing 1260, lower tail margin 60, upper tail standing 1350, upper tail margin 150
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, lower tail standing 1200, lower tail margin 94.285714, upper tail standing 1350, upper tail margin 244.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, lower tail standing 1105.714286, lower tail margin 165.714286, upper tail standing 1200, upper tail margin 260
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, lower tail standing 998.181818, lower tail margin 58.181818, upper tail standing 1105.714286, upper tail margin 165.714286
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, lower tail standing 998.181818, lower tail margin 58.181818, upper tail standing 1140, upper tail margin 200
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, lower tail standing 998.181818, lower tail margin 158.181818, upper tail standing 1140, upper tail margin 300
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, lower tail standing 998.181818, lower tail margin 158.181818, upper tail standing 1140, upper tail margin 300
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, lower tail standing 840, lower tail margin 165, upper tail standing 1140, upper tail margin 465
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, lower tail standing 1140, lower tail margin 465, upper tail standing 1152, upper tail margin 477
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, lower tail standing 900, lower tail margin 225, upper tail standing 1152, upper tail margin 477
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, lower tail standing 900, lower tail margin 225, upper tail standing 1008, upper tail margin 333
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, lower tail standing 900, lower tail margin 340, upper tail standing 1008, upper tail margin 448
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, lower tail standing 720, lower tail margin 160, upper tail standing 900, upper tail margin 340
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, lower tail standing 720, lower tail margin 160, upper tail standing 750, upper tail margin 190
+tails counts, marks walked 16, marks with another standing 15, days 3, closest lower tail margin 58.181818 at 1100 seconds on the first day, closest upper tail margin 90 at 400 seconds on the first day
+```
+
 ## Status
 
 Seeded in October 2026. Setup has landed, and Rounds 1 to 16 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
@@ -402,6 +431,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 16 have closed, with a
 - Contract, PG-29 and PG-30 met. They stand in full form in CONTRACT.md under the Round 14 obligations, and Round 14 closed on the merged slice 15 after three reviews approving with findings, with the red team's one Minor recorded as a known envelope limit of the shared seconds formatter.
 - Contract, PG-31 and PG-32 met. They stand in full form in CONTRACT.md under the Round 15 obligations, and Round 15 closed on the merged slice 16 after three reviews approving with findings, with the one Minor standing against the design record and not the slice.
 - Contract, PG-33 and PG-34 met. They stand in full form in CONTRACT.md under the Round 16 obligations, and Round 16 closed on the merged slice 17 after three reviews, with the standards Minor repaired in the slice and the red team's one Minor standing against the evidence record and not the slice.
+- Contract, PG-35 and PG-36 now stand in full form in CONTRACT.md under the Round 17 obligations, and their standing is not claimed here, as Round 17 has not closed.
 - Slice 2 has landed. It carries the recorded run loader that names every malformed field, the ghost rule, the race report, the ghost change report, and the show, ghost, and race commands, with two synthetic example runs and a golden race report under examples.
 - The Round 2 slice has landed. It carries the season report over a recorded field of runs grouped by model and the live board over recorded timed reads, with the season and board commands, a synthetic example field, a synthetic ghost record carrying a usage figure, a synthetic example run carrying timed reads, and golden renderings under examples. PG-5 and PG-6 stand in full form in CONTRACT.md with the Round 2 repair amendment, and Round 2 closed on the merged slice after three reviews, a repair pass, a micro repair, and re-reviews approving the final head. The board reads a finished recording, and watching a real run while it runs remains future work.
 - Slice 4 has landed. It carries the field day loader that names every malformed field, the stolen record report that walks the record progression of one window across a field of recorded runs, and the fieldday command, with a synthetic example field day and its golden report under examples.
@@ -418,6 +448,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 16 have closed, with a
 - Slice 15 has landed. It carries the margins reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the nearest standing held after it by a competitor other than its holder, and the margin by which the record stands ahead of that nearest standing, and the margins command, with the golden margins readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the nearest standing after each mark, and the seeded generated fixture family extended to the margins reading.
 - Slice 16 has landed. It carries the spread reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the count of competitors holding a standing after it, the farthest standing held after it by a competitor other than its holder, and the spread by which that farthest standing stands behind the record, and the spread command, with the golden spread readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the farthest standing and the field after each mark, and the seeded generated fixture family extended to the spread reading.
 - Slice 17 has landed. It carries the middle reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the middle standing held after it by a competitor other than its holder, and the middle margin by which the record stands ahead of that middle standing, and the middle command, with the golden middle readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the middle standing after each mark, and the seeded generated fixture family extended to the middle reading.
+- Slice 18 is built and in review. It carries the tails reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the lower tail standing and the upper tail standing held after it by the field behind its holder, and the lower tail margin and the upper tail margin by which the record stands ahead of each tail standing, and the tails command, with the golden tails readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the lower tail standing and the upper tail standing after each mark, and the seeded generated fixture family extended to the tails reading.
 - The Rust port has landed. It carries the behavior the Python package carried, checked against the same goldens, and the Python tree stands removed under PORT-10.
 - Local gate, cargo test, cargo fmt --check, and cargo clippy --all-targets -- -D warnings. CI runs the same commands.
 

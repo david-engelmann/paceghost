@@ -61,7 +61,17 @@
 //! and states every mark with the holder after it, the
 //! record after it, the middle standing held after it by a
 //! competitor other than its holder, and the middle margin
-//! by which the record stands ahead of that standing. Every
+//! by which the record stands ahead of that standing. The tails
+//! reading reads the same walk a twelfth way, over the
+//! lower tail standing and the upper tail standing the
+//! same pass records after each mark, and states every
+//! mark with the holder after it, the record after it, the
+//! lower tail standing held after it by the field behind
+//! its holder and the lower tail margin by which the
+//! record stands ahead of that standing, and the upper
+//! tail standing held after it by that field and the
+//! upper tail margin by which the record stands ahead of
+//! that standing. Every
 //! reading of the walk stands inside the label fencing closure
 //! of FIX-PG-11, the one guard pass refusing a runner label
 //! that holds a line break after the figures of every day are
@@ -75,13 +85,15 @@
 //! in the Round 12 section, PG-27 and PG-28, in the
 //! Round 13 section, PG-29 and PG-30, in the Round 14
 //! section, PG-31 and PG-32, in the Round 15 section,
-//! and PG-33 and PG-34, in the Round 16 section.
+//! PG-33 and PG-34, in the Round 16 section, and PG-35
+//! and PG-36, in the Round 17 section.
 //! No Python module stands
 //! behind this one, so the contract text is the spec and the
 //! pins in the test suite hold it.
 
 use std::path::Path;
 
+use num_bigint::BigInt;
 use num_rational::BigRational;
 
 use crate::fieldday::{
@@ -319,7 +331,16 @@ struct MarkRecord {
 /// empty where no competitor other than the holder held
 /// a standing after the mark, so the middle reading
 /// reads the same pass an eleventh way and no walk
-/// stands for it either.
+/// stands for it either. The tails standings record,
+/// after each mark, the lower tail standing and the
+/// upper tail standing after that mark, the means of
+/// the lowest and the highest figures of the field
+/// behind the holder, one optional entry per mark in
+/// walk order beside the middle standings, an entry
+/// standing empty where no competitor other than the
+/// holder held a standing after the mark, so the tails
+/// reading reads the same pass a twelfth way and no
+/// walk stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -333,6 +354,7 @@ struct MeetWalk {
     farthest: Vec<Option<(usize, BigRational)>>,
     fields: Vec<usize>,
     middle: Vec<Option<(usize, BigRational)>>,
+    tails: Vec<Option<(BigRational, BigRational)>>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
 }
@@ -398,6 +420,35 @@ fn select_extreme(
     best.map(|index| (index, standing[index].clone().expect(expect)))
 }
 
+/// The ordered figures of the field behind the holder,
+/// over the walk's vectors.
+///
+/// The field behind the holder is the standing projections
+/// held after the mark by competitors other than the
+/// holder, ordered from the lowest figure to the highest,
+/// returned as references into the standing vector. The
+/// middle selection takes its middle figure from this one
+/// collection and the tails selection takes its two means
+/// from it, so the field the two readings state stands in
+/// one body and the two cannot be edited apart. The
+/// helper guards no invariant and carries no expect
+/// string, because it reads no competitor out of the
+/// vector; the emptiness of the field is each caller's
+/// own case.
+fn field_figures(standing: &[Option<BigRational>], holder: usize) -> Vec<&BigRational> {
+    let mut figures: Vec<&BigRational> = Vec::new();
+    for (index, figure) in standing.iter().enumerate() {
+        if index == holder {
+            continue;
+        }
+        if let Some(figure) = figure {
+            figures.push(figure);
+        }
+    }
+    figures.sort();
+    figures
+}
+
 /// The middle standing after a mark, over the walk's vectors.
 ///
 /// The middle standing is the standing at the middle figure
@@ -417,19 +468,10 @@ fn select_middle(
     set_at: &[Option<(usize, BigRational)>],
     holder: usize,
 ) -> Option<(usize, BigRational)> {
-    let mut figures: Vec<&BigRational> = Vec::new();
-    for (index, figure) in standing.iter().enumerate() {
-        if index == holder {
-            continue;
-        }
-        if let Some(figure) = figure {
-            figures.push(figure);
-        }
-    }
+    let figures = field_figures(standing, holder);
     if figures.is_empty() {
         return None;
     }
-    figures.sort();
     let middle_figure = figures[figures.len().div_ceil(2) - 1].clone();
     let mut best: Option<usize> = None;
     for (index, figure) in standing.iter().enumerate() {
@@ -460,6 +502,43 @@ fn select_middle(
                 .expect("the middle competitor stands at a figure"),
         )
     })
+}
+
+/// The tail standings after a mark, over the walk's vectors.
+///
+/// The lower tail standing is the mean of the lowest
+/// figures of the field behind the holder and the upper
+/// tail standing is the mean of the highest figures of
+/// that field, the tails taken over the (m + 1) div 2
+/// lowest and the (m + 1) div 2 highest of the ordered
+/// figures the one collection returns, where m counts the
+/// competitors of the field, so the middle figure stands
+/// in both tails where m is odd and the two tails stand
+/// apart where m is even and past two. A tail standing is
+/// a mean of figures and is held by no competitor, so the
+/// selection names no holder for either tail and applies
+/// no tie discipline. No competitor other than the holder
+/// holding a standing after the mark leaves the tail
+/// standings empty.
+fn select_tails(
+    standing: &[Option<BigRational>],
+    holder: usize,
+) -> Option<(BigRational, BigRational)> {
+    let figures = field_figures(standing, holder);
+    if figures.is_empty() {
+        return None;
+    }
+    let count = figures.len().div_ceil(2);
+    let mean = |part: &[&BigRational]| {
+        let mut total = BigRational::from(BigInt::from(0));
+        for figure in part {
+            total += (*figure).clone();
+        }
+        total / BigRational::from(BigInt::from(part.len() as i64))
+    };
+    let lower = mean(&figures[..count]);
+    let upper = mean(&figures[figures.len() - count..]);
+    Some((lower, upper))
 }
 
 /// Walk the record progression of one loaded meet once.
@@ -514,7 +593,11 @@ fn select_middle(
 /// at that figure breaking to the competitor whose
 /// standing was set at the earliest mark and then to the
 /// earlier competitor place, in the middle standings the
-/// middle reading reads. Handed a meet value built
+/// middle reading reads, and it records the lower tail
+/// standing and the upper tail standing after the mark,
+/// the means of the lowest and the highest figures of
+/// the field behind the holder, in the tails standings
+/// the tails reading reads. Handed a meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -560,6 +643,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut farthest: Vec<Option<(usize, BigRational)>> = Vec::new();
     let mut fields: Vec<usize> = Vec::new();
     let mut middle: Vec<Option<(usize, BigRational)>> = Vec::new();
+    let mut tails: Vec<Option<(BigRational, BigRational)>> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -648,6 +732,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         ));
         fields.push(standing.iter().filter(|held| held.is_some()).count());
         middle.push(select_middle(&standing, &set_at, new_holder));
+        tails.push(select_tails(&standing, new_holder));
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -715,6 +800,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         farthest,
         fields,
         middle,
+        tails,
         day_standings,
         day_close_lines,
     })
@@ -1508,6 +1594,125 @@ pub fn meet_middle(meet: &Meet) -> Result<Vec<String>, String> {
         )),
         None => lines.push(format!(
             "middle counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
+    Ok(lines)
+}
+
+/// Return the meet tails lines for one loaded meet.
+///
+/// The tails reading reads the one walk a twelfth way.
+/// One section stands for each day of the meet in meet
+/// order, every day holding a section, and inside a
+/// section one line stands for each mark of the walk
+/// standing in that day, in walk order, naming the place
+/// of the mark in the whole walk, the holder after the
+/// mark and the record figure after it, in the mark form
+/// of the marks reading as far as the record figure, and
+/// then the lower tail standing after the mark, the mean
+/// of the lowest (m + 1) div 2 figures of the field
+/// behind the holder, where m counts the competitors of
+/// that field, and the lower tail margin by which the
+/// record stands ahead of that standing, and the upper
+/// tail standing after the mark, the mean of the highest
+/// (m + 1) div 2 figures of that field, and the upper
+/// tail margin by which the record stands ahead of that
+/// standing, or the words and no other standing where no
+/// competitor other than the holder holds a standing
+/// after the mark. A tail standing is a mean of figures
+/// and is held by no competitor, so no mark line names a
+/// holder for either tail. The tail margins are computed
+/// on exact values before any rendering, so neither is
+/// ever negative, and each stands at zero exactly where
+/// every figure of its half of the field stands at the
+/// record figure. The reading closes by counting the
+/// marks the walk walked, the marks with another
+/// standing, and the days, and naming the closest lower
+/// tail margin and the earliest mark standing at it and
+/// the closest upper tail margin and the earliest mark
+/// standing at it, the closest tail margins taken over
+/// the marks and never over the competitors, or by
+/// stating that no other standing stood at any mark
+/// where none did. No competitor is ranked or compared
+/// against another beyond the holder each mark line
+/// names.
+pub fn meet_tails(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet tails, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut closest_lower: Option<(BigRational, &MarkRecord)> = None;
+    let mut closest_upper: Option<(BigRational, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record)
+            );
+            match &walk.tails[place - 1] {
+                Some((lower, upper)) => {
+                    let lower_margin = lower.clone() - record.record.clone();
+                    let upper_margin = upper.clone() - record.record.clone();
+                    with_another += 1;
+                    let nearer_lower = match &closest_lower {
+                        None => true,
+                        Some((smallest, _)) => lower_margin < *smallest,
+                    };
+                    if nearer_lower {
+                        closest_lower = Some((lower_margin.clone(), *record));
+                    }
+                    let nearer_upper = match &closest_upper {
+                        None => true,
+                        Some((smallest, _)) => upper_margin < *smallest,
+                    };
+                    if nearer_upper {
+                        closest_upper = Some((upper_margin.clone(), *record));
+                    }
+                    lines.push(format!(
+                        "{}, lower tail standing {}, lower tail margin {}, upper tail standing {}, upper tail margin {}",
+                        head,
+                        format_usage(lower),
+                        format_usage(&lower_margin),
+                        format_usage(upper),
+                        format_usage(&upper_margin)
+                    ));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match (closest_lower, closest_upper) {
+        (Some((lower_margin, lower_record)), Some((upper_margin, upper_record))) => {
+            lines.push(format!(
+                "tails counts, marks walked {}, marks with another standing {}, days {}, closest lower tail margin {} at {} seconds on the {} day, closest upper tail margin {} at {} seconds on the {} day",
+                walk.marks_walked,
+                with_another,
+                meet.days.len(),
+                format_usage(&lower_margin),
+                format_seconds_fraction(&lower_record.mark),
+                ORDINALS[lower_record.day_index],
+                format_usage(&upper_margin),
+                format_seconds_fraction(&upper_record.mark),
+                ORDINALS[upper_record.day_index]
+            ))
+        }
+        _ => lines.push(format!(
+            "tails counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
             walk.marks_walked,
             with_another,
             meet.days.len()

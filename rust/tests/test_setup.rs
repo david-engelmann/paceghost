@@ -119,8 +119,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 17 standing built and in review, so the count
     // stood at one, the slice 17 status line, until the
     // Round 16 closure landed slice 17 and the count
-    // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // returned to zero. Adjusted again with the
+    // Round 17 slice, as the named mechanical consequence
+    // of slice 18 standing built and in review, so the count
+    // stands at one, the slice 18 status line, until the
+    // Round 17 closure lands slice 18 and the count returns
+    // to zero.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -271,6 +276,24 @@ fn test_readme_reports_the_round_sixteen_status() {
 fn test_contract_carries_the_round_sixteen_obligations() {
     let text = read("CONTRACT.md");
     for label in ["PG-33", "PG-34"] {
+        assert!(text.contains(label), "the contract carries {}", label);
+    }
+}
+
+#[test]
+fn test_readme_reports_the_round_seventeen_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-35 and PG-36 now stand in full form in CONTRACT.md under the Round 17 obligations, and their standing is not claimed here, as Round 17 has not closed.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 18 is built and in review. It carries the tails reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the lower tail standing and the upper tail standing held after it by the field behind its holder, and the lower tail margin and the upper tail margin by which the record stands ahead of each tail standing, and the tails command, with the golden tails readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the lower tail standing and the upper tail standing after each mark, and the seeded generated fixture family extended to the tails reading.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 16 of 100"));
+}
+
+#[test]
+fn test_contract_carries_the_round_seventeen_obligations() {
+    let text = read("CONTRACT.md");
+    for label in ["PG-35", "PG-36"] {
         assert!(text.contains(label), "the contract carries {}", label);
     }
 }
