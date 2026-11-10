@@ -1,0 +1,21 @@
+meet spread, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, field of 1, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, field of 2, farthest standing 1350 held by night fork, spread 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, field of 3, farthest standing 1350 held by night fork, spread 150
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, field of 3, farthest standing 1350 held by night fork, spread 244.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, field of 3, farthest standing 1200 held by dawn fork, spread 260
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, field of 3, farthest standing 1105.714286 held by operator, spread 165.714286
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, field of 3, farthest standing 1140 held by operator, spread 200
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, field of 3, farthest standing 1140 held by operator, spread 300
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, field of 3, farthest standing 1140 held by operator, spread 300
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, field of 3, farthest standing 1140 held by operator, spread 465
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, field of 3, farthest standing 1152 held by night fork, spread 477
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, field of 3, farthest standing 1152 held by night fork, spread 477
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, field of 3, farthest standing 1008 held by night fork, spread 333
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, field of 3, farthest standing 1008 held by night fork, spread 448
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, field of 3, farthest standing 900 held by operator, spread 340
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, field of 3, farthest standing 750 held by operator, spread 190
+spread counts, marks walked 16, marks with another standing 15, days 3, fullest field 3 at 600 seconds on the first day
