@@ -322,6 +322,35 @@ close, days stood in 1, marks stood at 0, spells held 0, no standing projection 
 forks counts, competitors 4, marks stood at 45, spells 5
 ```
 
+### spread
+
+The spread command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, the count of competitors holding a standing after it, the farthest standing held after it by a competitor other than its holder, and the spread by which that farthest standing stands behind the record.
+
+```text
+$ paceghost spread examples/meet.json
+meet spread, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, field of 1, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, field of 2, farthest standing 1350 held by night fork, spread 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, field of 3, farthest standing 1350 held by night fork, spread 150
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, field of 3, farthest standing 1350 held by night fork, spread 244.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, field of 3, farthest standing 1200 held by dawn fork, spread 260
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, field of 3, farthest standing 1105.714286 held by operator, spread 165.714286
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, field of 3, farthest standing 1140 held by operator, spread 200
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, field of 3, farthest standing 1140 held by operator, spread 300
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, field of 3, farthest standing 1140 held by operator, spread 300
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, field of 3, farthest standing 1140 held by operator, spread 465
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, field of 3, farthest standing 1152 held by night fork, spread 477
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, field of 3, farthest standing 1152 held by night fork, spread 477
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, field of 3, farthest standing 1008 held by night fork, spread 333
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, field of 3, farthest standing 1008 held by night fork, spread 448
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, field of 3, farthest standing 900 held by operator, spread 340
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, field of 3, farthest standing 750 held by operator, spread 190
+spread counts, marks walked 16, marks with another standing 15, days 3, fullest field 3 at 600 seconds on the first day
+```
+
 ## Status
 
 Seeded in October 2026. Setup has landed, and Rounds 1 to 14 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
@@ -342,6 +371,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 14 have closed, with a
 - Contract, PG-25 and PG-26 met. They stand in full form in CONTRACT.md under the Round 12 obligations with the FIX-PG-13 and FIX-PG-14 repair amendments, and Round 12 closed on the merged slice 13 after three reviews, one standards Minor on a test comment repaired.
 - Contract, PG-27 and PG-28 met. They stand in full form in CONTRACT.md under the Round 13 obligations with the FIX-PG-15 repair amendment, and Round 13 closed on the merged slice 14 after three reviews approving with no findings, with one stable toolchain lint repair on the traces tests at the landing.
 - Contract, PG-29 and PG-30 met. They stand in full form in CONTRACT.md under the Round 14 obligations, and Round 14 closed on the merged slice 15 after three reviews approving with findings, with the red team's one Minor recorded as a known envelope limit of the shared seconds formatter.
+- Contract, PG-31 and PG-32 now stand in full form in CONTRACT.md under the Round 15 obligations, and their standing is not claimed here, as Round 15 has not closed.
 - Slice 2 has landed. It carries the recorded run loader that names every malformed field, the ghost rule, the race report, the ghost change report, and the show, ghost, and race commands, with two synthetic example runs and a golden race report under examples.
 - The Round 2 slice has landed. It carries the season report over a recorded field of runs grouped by model and the live board over recorded timed reads, with the season and board commands, a synthetic example field, a synthetic ghost record carrying a usage figure, a synthetic example run carrying timed reads, and golden renderings under examples. PG-5 and PG-6 stand in full form in CONTRACT.md with the Round 2 repair amendment, and Round 2 closed on the merged slice after three reviews, a repair pass, a micro repair, and re-reviews approving the final head. The board reads a finished recording, and watching a real run while it runs remains future work.
 - Slice 4 has landed. It carries the field day loader that names every malformed field, the stolen record report that walks the record progression of one window across a field of recorded runs, and the fieldday command, with a synthetic example field day and its golden report under examples.
@@ -356,6 +386,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 14 have closed, with a
 - Slice 13 has landed. It carries the standings reading that reads a meet at the close of each day over the one record progression of the meet report, naming every competitor's standing at every day's close and closing each section with the closing line of the meet report for that day, and the standings command, with the golden standings readings of the standing example meet and of a constructed meet under examples, and the file carried fencing closure of the loaders and the summary under FIX-PG-14, and the input forms named at version 1 with the guarded closed stream pin under FIX-PG-13, and the seeded generated fixture family pinned by the closing relations the contract states.
 - Slice 14 has landed. It carries the traces reading that reads a meet competitor by competitor at the close of each day over the one record progression of the meet report, naming every competitor's standing at the close of each day in one section of its own and the closes at which it held a standing, and the traces command, with the golden traces readings of the standing example meet and of a constructed meet under examples, and the summary guard order pins completed under FIX-PG-15, and the seeded generated fixture family extended to the traces reading.
 - Slice 15 has landed. It carries the margins reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the nearest standing held after it by a competitor other than its holder, and the margin by which the record stands ahead of that nearest standing, and the margins command, with the golden margins readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the nearest standing after each mark, and the seeded generated fixture family extended to the margins reading.
+- Slice 16 is built and in review. It carries the spread reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the count of competitors holding a standing after it, the farthest standing held after it by a competitor other than its holder, and the spread by which that farthest standing stands behind the record, and the spread command, with the golden spread readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the farthest standing and the field after each mark, and the seeded generated fixture family extended to the spread reading.
 - The Rust port has landed. It carries the behavior the Python package carried, checked against the same goldens, and the Python tree stands removed under PORT-10.
 - Local gate, cargo test, cargo fmt --check, and cargo clippy --all-targets -- -D warnings. CI runs the same commands.
 

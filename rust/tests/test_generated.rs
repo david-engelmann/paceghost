@@ -30,8 +30,8 @@
 //! what the suite believes.
 
 use paceghost::meet::{
-    load_meet_text, meet_days, meet_margins, meet_marks, meet_reign, meet_report, meet_standings,
-    meet_table, meet_traces,
+    load_meet_text, meet_days, meet_margins, meet_marks, meet_reign, meet_report, meet_spread,
+    meet_standings, meet_table, meet_traces,
 };
 use paceghost::pynum::Num;
 use paceghost::runs::load_run_text;
@@ -747,6 +747,307 @@ fn test_generated_meets_close_under_the_margins_reading() {
                     let margin_value: f64 = margin.parse().expect("a margin parses");
                     assert!(
                         (figure_value - record_value - margin_value).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                }
+                _ => panic!("the day close relation fails, seed {}", seed),
+            }
+        }
+    }
+}
+
+// The spread pin of the generated family, added with Round
+// 15 beside the margins pin above. It fails before the
+// round by the absence of meet_spread from this suite's
+// imports, and on the built tree it fails against a
+// spread construction that drifts from the marks,
+// standings, or margins readings over generated shapes,
+// which is the drift charge the family exists to catch.
+// Its relations are the closings of PG-32 computed from
+// the printed lines of the readings alone, the line by
+// line agreement with the marks reading, the spread
+// arithmetic of every mark line, the day close relation
+// against the standings reading, the counts arithmetic,
+// the fullest field standing at the earliest mark
+// stating it, the cross relation against the margins
+// reading, a spread never below the margin at the same
+// mark with the two equal exactly where the farthest
+// and nearest standing figures of the two lines agree,
+// and the zero relation, a spread of zero standing only
+// where the line's farthest standing figure equals its
+// record figure, checked where the generated shapes
+// produce one and stated as the relation PG-32 fixes,
+// not as a shape the family owes.
+
+/// The figures of one spread mark line: the record
+/// figure, the field, and where another standing
+/// stands, the farthest standing figure, the label of
+/// its holder, and the spread figure.
+fn spread_mark_parts(line: &str) -> (String, usize, Option<(String, String, String)>) {
+    let start = line
+        .find("at a projection of ")
+        .expect("a mark line names its record figure");
+    let figure_start = start + "at a projection of ".len();
+    let figure_end = line[figure_start..]
+        .find(',')
+        .map(|offset| figure_start + offset)
+        .expect("a record figure ends at a comma");
+    let record = line[figure_start..figure_end].to_string();
+    let field = count_after(line, "field of ");
+    if line.ends_with(", and no other standing") {
+        return (record, field, None);
+    }
+    let farthest_start = line
+        .find(", farthest standing ")
+        .expect("a figured mark line names its farthest standing")
+        + ", farthest standing ".len();
+    let held = line[farthest_start..]
+        .find(" held by ")
+        .map(|offset| farthest_start + offset)
+        .expect("a farthest standing names its holder");
+    let figure = line[farthest_start..held].to_string();
+    let label_start = held + " held by ".len();
+    let spread_mark = line[label_start..]
+        .find(", spread ")
+        .map(|offset| label_start + offset)
+        .expect("a figured mark line names its spread");
+    let label = line[label_start..spread_mark].to_string();
+    let spread = line[spread_mark + ", spread ".len()..].to_string();
+    (record, field, Some((figure, label, spread)))
+}
+
+/// The elapsed figure and ordinal phrase a spread mark
+/// line names, read the way the margins helper reads
+/// them.
+fn spread_mark_position(line: &str) -> (String, String) {
+    margins_mark_position(line)
+}
+
+#[test]
+fn test_generated_meets_close_under_the_spread_reading() {
+    for index in 0..8u64 {
+        let seed = MEET_SEED + index;
+        let mut gen = Gen::new(seed);
+        let text = meet_text(&mut gen);
+        let (meet, defects) = load_meet_text(&text);
+        assert_eq!(defects, Vec::<String>::new(), "seed {}", seed);
+        let meet = meet.expect("the generated meet loads");
+
+        let marks = meet_marks(&meet).expect("the marks read");
+        let margins = meet_margins(&meet).expect("the margins read");
+        let spread = meet_spread(&meet).expect("the spread read");
+        let standings = meet_standings(&meet).expect("the standings read");
+
+        let reading_marks: Vec<&String> = marks
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let margin_marks: Vec<&String> = margins
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let spread_marks: Vec<&String> = spread
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        assert_eq!(spread_marks.len(), reading_marks.len(), "seed {}", seed);
+        assert_eq!(spread_marks.len(), margin_marks.len(), "seed {}", seed);
+
+        // The line by line agreement of PG-32, the spread
+        // arithmetic of every mark line, the zero
+        // relation where the shapes produce one, and the
+        // cross relation against the margins reading at
+        // the same mark.
+        let mut with_another = 0usize;
+        for ((spread_line, mark_line), margin_line) in spread_marks
+            .iter()
+            .zip(reading_marks.iter())
+            .zip(margin_marks.iter())
+        {
+            assert!(
+                spread_line.starts_with(&margins_record_prefix(mark_line)),
+                "seed {}",
+                seed
+            );
+            let (record, _field, farthest) = spread_mark_parts(spread_line);
+            let (_margin_record, nearest) = margins_mark_parts(margin_line);
+            if let Some((figure, _label, spread_figure)) = farthest {
+                with_another += 1;
+                let record_value: f64 = record.parse().expect("a record figure parses");
+                let farthest_value: f64 = figure.parse().expect("a farthest figure parses");
+                let spread_value: f64 = spread_figure.parse().expect("a spread figure parses");
+                assert!(spread_value >= 0.0, "seed {}", seed);
+                assert!(
+                    (farthest_value - record_value - spread_value).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                if spread_figure == "0" {
+                    assert_eq!(figure, record, "seed {}", seed);
+                }
+                let (nearest_figure, _nearest_label, margin_figure) =
+                    nearest.expect("the margins line states a nearest standing");
+                let nearest_value: f64 = nearest_figure.parse().expect("a nearest figure parses");
+                let margin_value: f64 = margin_figure.parse().expect("a margin figure parses");
+                assert!(spread_value + 0.000002 >= margin_value, "seed {}", seed);
+                if figure == nearest_figure {
+                    assert_eq!(spread_figure, margin_figure, "seed {}", seed);
+                }
+                if spread_figure == margin_figure {
+                    assert!(
+                        (farthest_value - nearest_value).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                }
+            } else {
+                assert!(nearest.is_none(), "seed {}", seed);
+            }
+        }
+
+        // The counts arithmetic of PG-32, and the fullest
+        // field standing at the earliest mark stating it.
+        let counts = spread.last().expect("the spread close");
+        let walked = count_after(counts, "marks walked ");
+        assert_eq!(walked, spread_marks.len(), "seed {}", seed);
+        let stated_with = count_after(counts, "marks with another standing ");
+        assert_eq!(stated_with, with_another, "seed {}", seed);
+        let no_other = spread_marks
+            .iter()
+            .filter(|line| line.ends_with(", and no other standing"))
+            .count();
+        assert_eq!(with_another + no_other, walked, "seed {}", seed);
+        if with_another > 0 {
+            let fullest = counts
+                .split("fullest field ")
+                .nth(1)
+                .expect("the counts line names its fullest field");
+            let (figure, rest) = fullest
+                .split_once(" at ")
+                .expect("the fullest field names its mark");
+            let (elapsed, ordinal) = rest
+                .split_once(" seconds on the ")
+                .expect("the fullest field names its seconds");
+            let ordinal = ordinal
+                .strip_suffix(" day")
+                .expect("the fullest field names its day");
+            let greatest = spread_marks
+                .iter()
+                .map(|line| spread_mark_parts(line).1)
+                .max()
+                .expect("a mark line states a field");
+            assert_eq!(figure, greatest.to_string(), "seed {}", seed);
+            let first = spread_marks
+                .iter()
+                .find(|line| spread_mark_parts(line).1 == greatest)
+                .expect("a mark line states the fullest field");
+            assert_eq!(
+                spread_mark_position(first),
+                (elapsed.to_string(), ordinal.to_string()),
+                "seed {}",
+                seed
+            );
+        } else {
+            assert!(
+                counts.ends_with(", and, no other standing at any mark"),
+                "seed {}",
+                seed
+            );
+        }
+
+        // The day close relation of PG-32, computed from
+        // the standings sections and the spread sections.
+        let mut standing_sections: Vec<Vec<String>> = Vec::new();
+        for line in &standings {
+            if line.starts_with("day, the ") {
+                standing_sections.push(Vec::new());
+            }
+            if let Some(section) = standing_sections.last_mut() {
+                section.push(line.clone());
+            }
+        }
+        let mut spread_sections: Vec<Vec<&String>> = Vec::new();
+        for line in &spread {
+            if line.starts_with("day, the ") {
+                spread_sections.push(Vec::new());
+            }
+            if let Some(section) = spread_sections.last_mut() {
+                section.push(line);
+            }
+        }
+        assert_eq!(
+            standing_sections.len(),
+            spread_sections.len(),
+            "seed {}",
+            seed
+        );
+        for (section, spread_section) in standing_sections.iter().zip(spread_sections.iter()) {
+            let day_marks: Vec<&&String> = spread_section
+                .iter()
+                .filter(|line| line.starts_with("mark "))
+                .collect();
+            if day_marks.is_empty() {
+                continue;
+            }
+            let closing = section
+                .iter()
+                .find(|line| line.starts_with("close of the "))
+                .expect("a standings section closes");
+            let holder = closing
+                .split("record held by ")
+                .nth(1)
+                .and_then(|rest| rest.split(" at a projection of ").next())
+                .expect("a closing line names its holder");
+            let record = closing
+                .rsplit("at a projection of ")
+                .next()
+                .expect("a closing line names its record figure");
+            let record_value: f64 = record.parse().expect("a record figure parses");
+            let others: Vec<(&str, &str)> = section
+                .iter()
+                .filter(|line| line.starts_with("competitor "))
+                .filter(|line| !line.starts_with(&format!("competitor {},", holder)))
+                .filter_map(|line| {
+                    line.strip_prefix("competitor ")
+                        .and_then(|rest| rest.split_once(", standing projection "))
+                        .and_then(|(label, rest)| {
+                            rest.strip_suffix(" at the close")
+                                .map(|figure| (label, figure))
+                        })
+                })
+                .collect();
+            let standing_count = section
+                .iter()
+                .filter(|line| line.starts_with("competitor "))
+                .filter_map(|line| {
+                    line.strip_prefix("competitor ")
+                        .and_then(|rest| rest.split_once(", standing projection "))
+                        .and_then(|(_, rest)| rest.strip_suffix(" at the close"))
+                })
+                .count();
+            let last = day_marks.last().expect("the day holds a mark");
+            let (_last_record, last_field, last_farthest) = spread_mark_parts(last);
+            assert_eq!(last_field, standing_count, "seed {}", seed);
+            match (others.is_empty(), last_farthest) {
+                (true, None) => {}
+                (false, Some((figure, label, spread_figure))) => {
+                    let highest = others
+                        .iter()
+                        .map(|(_, other)| other.parse::<f64>().expect("a figure parses"))
+                        .fold(f64::NEG_INFINITY, f64::max);
+                    let figure_value: f64 = figure.parse().expect("a figure parses");
+                    assert_eq!(figure_value, highest, "seed {}", seed);
+                    assert!(
+                        others.iter().any(|(other_label, other_figure)| {
+                            *other_label == label && other_figure.parse::<f64>() == Ok(highest)
+                        }),
+                        "seed {}",
+                        seed
+                    );
+                    let spread_value: f64 = spread_figure.parse().expect("a spread parses");
+                    assert!(
+                        (figure_value - record_value - spread_value).abs() <= 0.000002,
                         "seed {}",
                         seed
                     );

@@ -47,7 +47,15 @@
 //! and states every mark with the holder after it, the record
 //! after it, the nearest standing held after it by a
 //! competitor other than its holder, and the margin by which
-//! the record stands ahead of that standing. Every
+//! the record stands ahead of that standing. The spread
+//! reading reads the same walk a tenth way, over the
+//! farthest standing and the field the same pass records
+//! after each mark, and states every mark with the holder
+//! after it, the record after it, the count of competitors
+//! holding a standing after it, the farthest standing held
+//! after it by a competitor other than its holder, and the
+//! spread by which that farthest standing stands behind
+//! the record. Every
 //! reading of the walk stands inside the label fencing closure
 //! of FIX-PG-11, the one guard pass refusing a runner label
 //! that holds a line break after the figures of every day are
@@ -59,8 +67,9 @@
 //! FIX-PG-11 amendment, in the Round 10 section, and PG-23
 //! and PG-24, in the Round 11 section, PG-25 and PG-26,
 //! in the Round 12 section, PG-27 and PG-28, in the
-//! Round 13 section, and PG-29 and PG-30, in the Round 14
-//! section. No Python module stands
+//! Round 13 section, PG-29 and PG-30, in the Round 14
+//! section, and PG-31 and PG-32, in the Round 15 section.
+//! No Python module stands
 //! behind this one, so the contract text is the spec and the
 //! pins in the test suite hold it.
 
@@ -284,7 +293,18 @@ struct MarkRecord {
 /// order beside the mark records, an entry standing empty
 /// where no competitor other than the holder held a standing
 /// after the mark, so the margins reading reads the same
-/// pass a ninth way and no walk stands for it either.
+/// pass a ninth way and no walk stands for it either. The
+/// farthest standings record, after each mark, the
+/// competitor holding the farthest standing after that
+/// mark and its figure, one optional entry per mark in
+/// walk order beside the nearest standings, an entry
+/// standing empty where no competitor other than the
+/// holder held a standing after the mark, and the fields
+/// record, after each mark, the count of competitors
+/// holding a standing after that mark, the holder
+/// counted, one count per mark in walk order beside the
+/// farthest standings, so the spread reading reads the
+/// same pass a tenth way and no walk stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -295,6 +315,8 @@ struct MeetWalk {
     day_closes: Vec<Option<(usize, BigRational)>>,
     marks_detail: Vec<MarkRecord>,
     nearest: Vec<Option<(usize, BigRational)>>,
+    farthest: Vec<Option<(usize, BigRational)>>,
+    fields: Vec<usize>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
 }
@@ -350,6 +372,57 @@ fn select_nearest(
     })
 }
 
+/// The farthest standing after a mark, over the walk's vectors.
+///
+/// The farthest standing is the highest standing projection
+/// held after the mark by a competitor other than the holder,
+/// read off the standing and set at vectors the holder
+/// selection just read. A tie at that highest figure breaks
+/// to the competitor whose standing was set at the earliest
+/// mark, and a tie at one mark breaks to the earlier place
+/// in competitor order, the discipline the holder selection
+/// applies among the competitors standing at the record
+/// figure, read here over the field behind the holder. No
+/// competitor other than the holder holding a standing after
+/// the mark leaves the farthest standing empty.
+fn select_farthest(
+    standing: &[Option<BigRational>],
+    set_at: &[Option<(usize, BigRational)>],
+    holder: usize,
+) -> Option<(usize, BigRational)> {
+    let mut best: Option<usize> = None;
+    for (index, figure) in standing.iter().enumerate() {
+        if index == holder {
+            continue;
+        }
+        let Some(figure) = figure else {
+            continue;
+        };
+        let take = match best {
+            None => true,
+            Some(champion) => {
+                let champion_figure = standing[champion]
+                    .as_ref()
+                    .expect("a champion stands at a figure");
+                figure > champion_figure
+                    || (figure == champion_figure
+                        && (set_at[index].as_ref(), index) < (set_at[champion].as_ref(), champion))
+            }
+        };
+        if take {
+            best = Some(index);
+        }
+    }
+    best.map(|index| {
+        (
+            index,
+            standing[index]
+                .clone()
+                .expect("the farthest competitor stands at a figure"),
+        )
+    })
+}
+
 /// Walk the record progression of one loaded meet once.
 ///
 /// The walk reads the days as one field of competitors, a runner
@@ -388,7 +461,15 @@ fn select_nearest(
 /// a tie at that figure breaking to the competitor whose
 /// standing was set at the earliest mark and then to the
 /// earlier competitor place, in the nearest standings the
-/// margins reading reads. Handed a meet value built
+/// margins reading reads, and it records the farthest
+/// standing after the mark, the highest standing then held
+/// by a competitor other than the holder, a tie at that
+/// figure breaking to the competitor whose standing was
+/// set at the earliest mark and then to the earlier
+/// competitor place, and the field after the mark, the
+/// count of competitors then holding a standing, the
+/// holder counted, in the farthest standings and the
+/// fields the spread reading reads. Handed a meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -431,6 +512,8 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut day_closes: Vec<Option<(usize, BigRational)>> = Vec::new();
     let mut marks_detail: Vec<MarkRecord> = Vec::new();
     let mut nearest: Vec<Option<(usize, BigRational)>> = Vec::new();
+    let mut farthest: Vec<Option<(usize, BigRational)>> = Vec::new();
+    let mut fields: Vec<usize> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -498,6 +581,8 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
             standing: mark_standing,
         });
         nearest.push(select_nearest(&standing, &set_at, new_holder));
+        farthest.push(select_farthest(&standing, &set_at, new_holder));
+        fields.push(standing.iter().filter(|held| held.is_some()).count());
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -562,6 +647,8 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         day_closes,
         marks_detail,
         nearest,
+        farthest,
+        fields,
         day_standings,
         day_close_lines,
     })
@@ -1149,6 +1236,110 @@ pub fn meet_margins(meet: &Meet) -> Result<Vec<String>, String> {
         )),
         None => lines.push(format!(
             "margins counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
+    Ok(lines)
+}
+
+/// Return the meet spread lines for one loaded meet.
+///
+/// The spread reading reads the one walk a tenth way. One
+/// section stands for each day of the meet in meet order,
+/// every day holding a section, and inside a section one
+/// line stands for each mark of the walk standing in that
+/// day, in walk order, naming the place of the mark in the
+/// whole walk, the holder after the mark and the record
+/// figure after it, in the mark form of the marks reading
+/// as far as the record figure, and then the field after
+/// the mark, the count of competitors holding a standing
+/// after it with the holder counted, and the farthest
+/// standing after the mark, the highest standing
+/// projection held after it by a competitor other than
+/// the holder, a tie at that figure standing with the
+/// competitor whose standing was set at the earliest
+/// mark and the earlier competitor place standing where
+/// their standings were set at one mark, and the spread
+/// by which that farthest standing stands behind the
+/// record, or the words and no other standing where no
+/// competitor other than the holder holds a standing
+/// after the mark. The spread is computed on exact
+/// values before any rendering, so it is never
+/// negative, and it stands at zero exactly where every
+/// competitor holding a standing stands at the record
+/// figure. The reading closes by counting the marks the
+/// walk walked, the marks with another standing, and
+/// the days, and naming the fullest field and the
+/// earliest mark standing at it, the fullest field
+/// taken over the marks and never over the
+/// competitors, or by stating that no other standing
+/// stood at any mark where none did. No competitor is
+/// ranked or compared against another beyond the
+/// holder and the farthest standing each mark line
+/// names.
+pub fn meet_spread(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet spread, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut fullest: Option<(usize, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let field = walk.fields[place - 1];
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}, field of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record),
+                field
+            );
+            match &walk.farthest[place - 1] {
+                Some((competitor, figure)) => {
+                    let spread = figure.clone() - record.record.clone();
+                    with_another += 1;
+                    let fuller = match &fullest {
+                        None => true,
+                        Some((greatest, _)) => field > *greatest,
+                    };
+                    if fuller {
+                        fullest = Some((field, *record));
+                    }
+                    lines.push(format!(
+                        "{}, farthest standing {} held by {}, spread {}",
+                        head,
+                        format_usage(figure),
+                        walk.labels[*competitor],
+                        format_usage(&spread)
+                    ));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match fullest {
+        Some((field, record)) => lines.push(format!(
+            "spread counts, marks walked {}, marks with another standing {}, days {}, fullest field {} at {} seconds on the {} day",
+            walk.marks_walked,
+            with_another,
+            meet.days.len(),
+            field,
+            format_seconds_fraction(&record.mark),
+            ORDINALS[record.day_index]
+        )),
+        None => lines.push(format!(
+            "spread counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
             walk.marks_walked,
             with_another,
             meet.days.len()
