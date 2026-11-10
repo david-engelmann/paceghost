@@ -1,0 +1,21 @@
+meet middle, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, middle standing 1350 held by night fork, middle margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, middle standing 1260 held by operator, middle margin 60
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, middle standing 1200 held by dawn fork, middle margin 94.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, middle standing 1105.714286 held by operator, middle margin 165.714286
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, middle standing 998.181818 held by dawn fork, middle margin 58.181818
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, middle standing 998.181818 held by dawn fork, middle margin 58.181818
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, middle standing 998.181818 held by dawn fork, middle margin 158.181818
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, middle standing 998.181818 held by dawn fork, middle margin 158.181818
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, middle standing 840 held by night fork, middle margin 165
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, middle standing 1140 held by operator, middle margin 465
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, middle standing 900 held by operator, middle margin 225
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, middle standing 900 held by operator, middle margin 225
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, middle standing 900 held by operator, middle margin 340
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, middle standing 720 held by night fork, middle margin 160
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, middle standing 720 held by night fork, middle margin 160
+middle counts, marks walked 16, marks with another standing 15, days 3, closest middle margin 58.181818 at 1100 seconds on the first day
