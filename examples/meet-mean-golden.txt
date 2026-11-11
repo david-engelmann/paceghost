@@ -1,0 +1,21 @@
+meet mean, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, mean standing 1350, mean margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, mean standing 1305, mean margin 105
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, mean standing 1275, mean margin 169.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, mean standing 1152.857143, mean margin 212.857143
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, mean standing 1051.948052, mean margin 111.948052
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, mean standing 1069.090909, mean margin 129.090909
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, mean standing 1069.090909, mean margin 229.090909
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, mean standing 1069.090909, mean margin 229.090909
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, mean standing 990, mean margin 315
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, mean standing 1146, mean margin 471
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, mean standing 1026, mean margin 351
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, mean standing 954, mean margin 279
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, mean standing 954, mean margin 394
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, mean standing 810, mean margin 250
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, mean standing 735, mean margin 175
+mean counts, marks walked 16, marks with another standing 15, days 3, closest mean margin 90 at 400 seconds on the first day

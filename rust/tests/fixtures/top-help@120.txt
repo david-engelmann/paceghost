@@ -1,13 +1,13 @@
 0
 %%%STDOUT%%%
 usage: paceghost [-h]
-                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails}
+                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean}
                  ...
 
 Race a recorded run against the ghost of your best run.
 
 positional arguments:
-  {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails}
+  {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean}
     show                print one recorded run
     ghost               print the standing ghost
     race                race a live run against a ghost
@@ -28,6 +28,7 @@ positional arguments:
     spread              print the meet spread for three or more field days
     middle              print the meet middle for three or more field days
     tails               print the meet tails for three or more field days
+    mean                print the meet mean for three or more field days
 
 options:
   -h, --help            show this help message and exit

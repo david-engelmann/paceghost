@@ -340,7 +340,15 @@ struct MarkRecord {
 /// standing empty where no competitor other than the
 /// holder held a standing after the mark, so the tails
 /// reading reads the same pass a twelfth way and no
-/// walk stands for it either.
+/// walk stands for it either. The mean standings
+/// record, after each mark, the mean standing after
+/// that mark, the mean of the whole field behind the
+/// holder, one optional entry per mark in walk order
+/// beside the tails standings, an entry standing
+/// empty where no competitor other than the holder
+/// held a standing after the mark, so the mean
+/// reading reads the same pass a thirteenth way and
+/// no walk stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -355,6 +363,7 @@ struct MeetWalk {
     fields: Vec<usize>,
     middle: Vec<Option<(usize, BigRational)>>,
     tails: Vec<Option<(BigRational, BigRational)>>,
+    mean: Vec<Option<BigRational>>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
 }
@@ -428,9 +437,11 @@ fn select_extreme(
 /// holder, ordered from the lowest figure to the highest,
 /// returned as references into the standing vector. The
 /// middle selection takes its middle figure from this one
-/// collection and the tails selection takes its two means
-/// from it, so the field the two readings state stands in
-/// one body and the two cannot be edited apart. The
+/// collection, the tails selection takes its two means
+/// from it, and the mean selection takes its mean of the
+/// whole field from it, so the field the three readings
+/// state stands in one body and the three cannot be
+/// edited apart. The
 /// helper guards no invariant and carries no expect
 /// string, because it reads no competitor out of the
 /// vector; the emptiness of the field is each caller's
@@ -541,6 +552,33 @@ fn select_tails(
     Some((lower, upper))
 }
 
+/// The mean standing after a mark, over the walk's vectors.
+///
+/// The mean standing is the mean of the whole field behind
+/// the holder, the sum of the ordered figures the one
+/// collection returns divided by the count of those
+/// figures, where the count is the number of competitors
+/// of the field, so where one competitor stands behind the
+/// holder the mean is that competitor's figure whole and
+/// where two stand behind the holder the mean is the
+/// midpoint of their two figures. A mean standing is a
+/// mean of figures and is held by no competitor, so the
+/// selection names no holder for the mean and applies no
+/// tie discipline. No competitor other than the holder
+/// holding a standing after the mark leaves the mean
+/// standing empty.
+fn select_mean(standing: &[Option<BigRational>], holder: usize) -> Option<BigRational> {
+    let figures = field_figures(standing, holder);
+    if figures.is_empty() {
+        return None;
+    }
+    let mut total = BigRational::from(BigInt::from(0));
+    for figure in &figures {
+        total += (*figure).clone();
+    }
+    Some(total / BigRational::from(BigInt::from(figures.len() as i64)))
+}
+
 /// Walk the record progression of one loaded meet once.
 ///
 /// The walk reads the days as one field of competitors, a runner
@@ -597,7 +635,10 @@ fn select_tails(
 /// standing and the upper tail standing after the mark,
 /// the means of the lowest and the highest figures of
 /// the field behind the holder, in the tails standings
-/// the tails reading reads. Handed a meet value built
+/// the tails reading reads, and it records the mean
+/// standing after the mark, the mean of the whole field
+/// behind the holder, in the mean standings the mean
+/// reading reads. Handed a meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -644,6 +685,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut fields: Vec<usize> = Vec::new();
     let mut middle: Vec<Option<(usize, BigRational)>> = Vec::new();
     let mut tails: Vec<Option<(BigRational, BigRational)>> = Vec::new();
+    let mut mean: Vec<Option<BigRational>> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -733,6 +775,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         fields.push(standing.iter().filter(|held| held.is_some()).count());
         middle.push(select_middle(&standing, &set_at, new_holder));
         tails.push(select_tails(&standing, new_holder));
+        mean.push(select_mean(&standing, new_holder));
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -801,6 +844,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         fields,
         middle,
         tails,
+        mean,
         day_standings,
         day_close_lines,
     })
@@ -1713,6 +1757,101 @@ pub fn meet_tails(meet: &Meet) -> Result<Vec<String>, String> {
         }
         _ => lines.push(format!(
             "tails counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
+    Ok(lines)
+}
+
+/// Return the meet mean lines for one loaded meet.
+///
+/// The mean reading reads the one walk a thirteenth way.
+/// One section stands for each day of the meet in meet
+/// order, every day holding a section, and inside a
+/// section one line stands for each mark of the walk
+/// standing in that day, in walk order, naming the place
+/// of the mark in the whole walk, the holder after the
+/// mark and the record figure after it, in the mark form
+/// of the marks reading as far as the record figure, and
+/// then the mean standing after the mark, the mean of the
+/// whole field behind the holder, and the mean margin by
+/// which the record stands ahead of that standing, or the
+/// words and no other standing where no competitor other
+/// than the holder holds a standing after the mark. A
+/// mean standing is a mean of figures and is held by no
+/// competitor, so no mark line names a holder for the
+/// mean. The mean margin is computed on exact values
+/// before any rendering, so it is never negative, and it
+/// stands at zero exactly where every figure of the field
+/// stands at the record figure. The reading closes by
+/// counting the marks the walk walked, the marks with
+/// another standing, and the days, and naming the closest
+/// mean margin and the earliest mark standing at it, the
+/// closest mean margin taken over the marks and never
+/// over the competitors, or by stating that no other
+/// standing stood at any mark where none did. No
+/// competitor is ranked or compared against another
+/// beyond the holder each mark line names.
+pub fn meet_mean(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet mean, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut closest: Option<(BigRational, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record)
+            );
+            match &walk.mean[place - 1] {
+                Some(figure) => {
+                    let margin = figure.clone() - record.record.clone();
+                    with_another += 1;
+                    let nearer = match &closest {
+                        None => true,
+                        Some((smallest, _)) => margin < *smallest,
+                    };
+                    if nearer {
+                        closest = Some((margin.clone(), *record));
+                    }
+                    lines.push(format!(
+                        "{}, mean standing {}, mean margin {}",
+                        head,
+                        format_usage(figure),
+                        format_usage(&margin)
+                    ));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match closest {
+        Some((margin, record)) => lines.push(format!(
+            "mean counts, marks walked {}, marks with another standing {}, days {}, closest mean margin {} at {} seconds on the {} day",
+            walk.marks_walked,
+            with_another,
+            meet.days.len(),
+            format_usage(&margin),
+            format_seconds_fraction(&record.mark),
+            ORDINALS[record.day_index]
+        )),
+        None => lines.push(format!(
+            "mean counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
             walk.marks_walked,
             with_another,
             meet.days.len()

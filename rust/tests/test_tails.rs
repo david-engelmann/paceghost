@@ -11,8 +11,11 @@
 //! its tails separating from the first figured mark on,
 //! under T-4 at its separating marks, and under T-6 at every
 //! mark after the first, that last stated as a claim until
-//! the round executes it. Pin 2 fails under T-6 wherever a
-//! mark moves the record, stated as a claim until executed.
+//! the round executes it. Pin 2 passes under T-6 at every
+//! mark, the mark line prefix it compares standing rendered
+//! from the walk's mark records, which the pre mark tails
+//! vector does not touch, the lag T-6 introduces living
+//! only in the tails figures behind the prefix.
 //! Pin 3 fails under T-1 at every closing mark, under T-2 at
 //! the closing marks whose fields stand odd, its closes
 //! carrying fields of three and five behind, and under T-3
