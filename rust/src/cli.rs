@@ -1,6 +1,6 @@
 //! The paceghost command line surface.
 //!
-//! Twenty commands read recorded runs from local files and
+//! Twenty one commands read recorded runs from local files and
 //! print reports. The show command prints one run or its
 //! defects, the
 //! ghost command prints the standing ghost for a task, and the race
@@ -36,8 +36,10 @@
 //! mark. The tails
 //! command prints the meet tails for a meet, the same walk
 //! read mark by mark with the lower tail standing and the
-//! upper tail standing behind each mark. Nothing
-//! here touches the network.
+//! upper tail standing behind each mark. The mean
+//! command prints the meet mean for a meet, the same walk
+//! read mark by mark with the mean standing behind each
+//! mark. Nothing here touches the network.
 //!
 //! The dispatch is a pure function of the argument list and a file
 //! reading function, returning the lines each stream carries and
@@ -58,8 +60,9 @@
 use crate::fieldday::{field_day_report, load_field_day_text, FieldDay};
 use crate::ladder::{ladder_report, load_ladder_text, Ladder};
 use crate::meet::{
-    load_meet_text, meet_days, meet_forks, meet_margins, meet_marks, meet_middle, meet_reign,
-    meet_report, meet_spread, meet_standings, meet_table, meet_tails, meet_traces, Meet,
+    load_meet_text, meet_days, meet_forks, meet_margins, meet_marks, meet_mean, meet_middle,
+    meet_reign, meet_report, meet_spread, meet_standings, meet_table, meet_tails, meet_traces,
+    Meet,
 };
 use crate::pynum::format_seconds;
 use crate::pytext::PText;
@@ -84,7 +87,7 @@ impl CliOutcome {
     }
 }
 
-const COMMANDS: [&str; 20] = [
+const COMMANDS: [&str; 21] = [
     "show",
     "ghost",
     "race",
@@ -105,9 +108,10 @@ const COMMANDS: [&str; 20] = [
     "spread",
     "middle",
     "tails",
+    "mean",
 ];
 
-const COMMAND_HELPS: [(&str, &str); 20] = [
+const COMMAND_HELPS: [(&str, &str); 21] = [
     ("show", "print one recorded run"),
     ("ghost", "print the standing ghost"),
     ("race", "race a live run against a ghost"),
@@ -149,10 +153,11 @@ const COMMAND_HELPS: [(&str, &str); 20] = [
         "print the meet middle for three or more field days",
     ),
     ("tails", "print the meet tails for three or more field days"),
+    ("mean", "print the meet mean for three or more field days"),
 ];
 
 const CHOICES_HEADER: &str =
-    "{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails}";
+    "{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean}";
 
 /// The static shape of one subcommand.
 struct Spec {
@@ -255,6 +260,11 @@ fn spec_for(command: &str) -> Spec {
         },
         "tails" => Spec {
             name: "tails",
+            positionals: &["file"],
+            variadic: false,
+        },
+        "mean" => Spec {
+            name: "mean",
             positionals: &["file"],
             variadic: false,
         },
@@ -371,6 +381,7 @@ fn sub_parser_info(spec: &Spec) -> ParserInfo {
             "spread" => "paceghost spread",
             "middle" => "paceghost middle",
             "tails" => "paceghost tails",
+            "mean" => "paceghost mean",
             _ => "paceghost ladder",
         },
         description: None,
@@ -1138,7 +1149,7 @@ pub fn dispatch_with_columns(
                 out,
                 &main_usage,
                 format!(
-                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails')",
+                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean')",
                     py_repr(token)
                 ),
             );
@@ -1158,7 +1169,7 @@ pub fn dispatch_with_columns(
                     out,
                     &main_usage,
                     format!(
-                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails')",
+                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean')",
                         py_repr(token)
                     ),
                 );
@@ -1335,6 +1346,7 @@ fn run_command(
         "spread" => command_spread(&positionals[0], read_file, out),
         "middle" => command_middle(&positionals[0], read_file, out),
         "tails" => command_tails(&positionals[0], read_file, out),
+        "mean" => command_mean(&positionals[0], read_file, out),
         _ => command_ladder(&positionals[0], read_file, out),
     }
 }
@@ -1765,6 +1777,18 @@ fn command_tails(file: &PText, read_file: &dyn Fn(&[u8]) -> Option<String>, out:
         Some(meet) => meet,
     };
     let lines = meet_tails(&meet).expect("a loaded meet satisfies the tails preconditions");
+    out.stdout.extend(lines);
+}
+
+fn command_mean(file: &PText, read_file: &dyn Fn(&[u8]) -> Option<String>, out: &mut CliOutcome) {
+    let meet = match load_meet_or_print_defects(file, read_file, out) {
+        None => {
+            out.code = 1;
+            return;
+        }
+        Some(meet) => meet,
+    };
+    let lines = meet_mean(&meet).expect("a loaded meet satisfies the mean preconditions");
     out.stdout.extend(lines);
 }
 

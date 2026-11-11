@@ -30,8 +30,8 @@
 //! what the suite believes.
 
 use paceghost::meet::{
-    load_meet_text, meet_days, meet_margins, meet_marks, meet_middle, meet_reign, meet_report,
-    meet_spread, meet_standings, meet_table, meet_tails, meet_traces,
+    load_meet_text, meet_days, meet_margins, meet_marks, meet_mean, meet_middle, meet_reign,
+    meet_report, meet_spread, meet_standings, meet_table, meet_tails, meet_traces,
 };
 use paceghost::pynum::Num;
 use paceghost::runs::load_run_text;
@@ -1874,6 +1874,361 @@ fn test_generated_meets_close_under_the_tails_reading() {
                     );
                     assert!(
                         (upper_value - record_value - upper_margin_value).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                }
+                _ => panic!("the day close relation fails, seed {}", seed),
+            }
+        }
+    }
+}
+
+// The mean pin of the generated family, added with Round
+// 18 beside the tails pin above. It fails before the round
+// by the absence of meet_mean from this suite's imports,
+// and on the built tree it fails against a mean
+// construction that drifts from the marks, standings,
+// margins, spread, or tails readings over generated
+// shapes, which is the drift charge the family exists to
+// catch. Its relations are the closings of PG-38 computed
+// from the printed lines of the readings alone, the line
+// by line agreement with the marks reading, the mean
+// margin arithmetic of every mark line, the bracketing
+// chain of PG-38 at every mark with its equalities
+// standing where the bracket figures equal the figures
+// they bracket against, the zero relation in both
+// directions where the shapes produce it, the day close
+// relation against the standings reading with the mean
+// taken over all the figures of the competitors other
+// than the closing holder, the counts arithmetic, and
+// the closing naming the earliest mark at the smallest
+// mean margin. The pin carries no closest tie posture:
+// the family's closest mean margin is not hand counted,
+// and the closing is checked against the printed mark
+// lines alone.
+
+/// The figures of one mean mark line: the record figure,
+/// and where another standing stands, the mean figure and
+/// the mean margin.
+fn mean_mark_parts(line: &str) -> (String, Option<(String, String)>) {
+    let start = line
+        .find("at a projection of ")
+        .expect("a mark line names its record figure");
+    let figure_start = start + "at a projection of ".len();
+    let figure_end = line[figure_start..]
+        .find(',')
+        .map(|offset| figure_start + offset)
+        .expect("a record figure ends at a comma");
+    let record = line[figure_start..figure_end].to_string();
+    if line.ends_with(", and no other standing") {
+        return (record, None);
+    }
+    let mean_start = line
+        .find(", mean standing ")
+        .expect("a figured mark line names its mean standing")
+        + ", mean standing ".len();
+    let mean_end = line[mean_start..]
+        .find(", mean margin ")
+        .map(|offset| mean_start + offset)
+        .expect("a mean standing names its margin");
+    let figure = line[mean_start..mean_end].to_string();
+    let margin = line[mean_end + ", mean margin ".len()..].to_string();
+    (record, Some((figure, margin)))
+}
+
+/// The elapsed figure and ordinal phrase a mean mark line
+/// names, read the way the margins helper reads them.
+fn mean_mark_position(line: &str) -> (String, String) {
+    margins_mark_position(line)
+}
+
+#[test]
+fn test_generated_meets_close_under_the_mean_reading() {
+    for index in 0..8u64 {
+        let seed = MEET_SEED + index;
+        let mut gen = Gen::new(seed);
+        let text = meet_text(&mut gen);
+        let (meet, defects) = load_meet_text(&text);
+        assert_eq!(defects, Vec::<String>::new(), "seed {}", seed);
+        let meet = meet.expect("the generated meet loads");
+
+        let marks = meet_marks(&meet).expect("the marks read");
+        let margins = meet_margins(&meet).expect("the margins read");
+        let spread = meet_spread(&meet).expect("the spread read");
+        let tails = meet_tails(&meet).expect("the tails read");
+        let mean = meet_mean(&meet).expect("the mean read");
+        let standings = meet_standings(&meet).expect("the standings read");
+
+        let reading_marks: Vec<&String> = marks
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let margin_marks: Vec<&String> = margins
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let spread_marks: Vec<&String> = spread
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let tails_marks: Vec<&String> = tails
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let mean_marks: Vec<&String> = mean
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        assert_eq!(mean_marks.len(), reading_marks.len(), "seed {}", seed);
+        assert_eq!(mean_marks.len(), margin_marks.len(), "seed {}", seed);
+        assert_eq!(mean_marks.len(), spread_marks.len(), "seed {}", seed);
+        assert_eq!(mean_marks.len(), tails_marks.len(), "seed {}", seed);
+
+        // The line by line agreement of PG-38, the mean
+        // margin arithmetic of every mark line, the zero
+        // relation in both directions where the shapes
+        // produce it, and the bracketing chain of PG-38
+        // against the margins, tails, and spread readings
+        // at the same mark.
+        let mut with_another = 0usize;
+        for ((((mean_line, mark_line), margin_line), spread_line), tails_line) in mean_marks
+            .iter()
+            .zip(reading_marks.iter())
+            .zip(margin_marks.iter())
+            .zip(spread_marks.iter())
+            .zip(tails_marks.iter())
+        {
+            assert!(
+                mean_line.starts_with(&margins_record_prefix(mark_line)),
+                "seed {}",
+                seed
+            );
+            let (record, mean_part) = mean_mark_parts(mean_line);
+            let (_margin_record, nearest) = margins_mark_parts(margin_line);
+            let (_spread_record, _field, farthest) = spread_mark_parts(spread_line);
+            let (_tails_record, tails_part) = tails_mark_parts(tails_line);
+            if let Some((mean_figure, mean_margin)) = mean_part {
+                with_another += 1;
+                let record_value: f64 = record.parse().expect("a record figure parses");
+                let mean_value: f64 = mean_figure.parse().expect("a mean figure parses");
+                let mean_margin_value: f64 = mean_margin.parse().expect("a mean margin parses");
+                assert!(mean_margin_value >= 0.0, "seed {}", seed);
+                assert!(
+                    (mean_value - record_value - mean_margin_value).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                if mean_margin == "0" {
+                    assert_eq!(mean_figure, record, "seed {}", seed);
+                }
+                if mean_figure == record {
+                    assert_eq!(mean_margin, "0", "seed {}", seed);
+                }
+                let (nearest_figure, _nearest_label, margin_figure) =
+                    nearest.expect("the margins line states a nearest standing");
+                let margin_value: f64 = margin_figure.parse().expect("a margin figure parses");
+                let (farthest_figure, _farthest_label, spread_figure) =
+                    farthest.expect("the spread line states a farthest standing");
+                let spread_value: f64 = spread_figure.parse().expect("a spread figure parses");
+                let (lower_figure, lower_margin, upper_figure, upper_margin) =
+                    tails_part.expect("the tails line states its tails");
+                let lower_value: f64 = lower_figure.parse().expect("a lower tail figure parses");
+                let lower_margin_value: f64 =
+                    lower_margin.parse().expect("a lower tail margin parses");
+                let upper_value: f64 = upper_figure.parse().expect("an upper tail figure parses");
+                let upper_margin_value: f64 =
+                    upper_margin.parse().expect("an upper tail margin parses");
+                if mean_margin == "0" {
+                    assert_eq!(nearest_figure, record, "seed {}", seed);
+                    assert_eq!(lower_figure, record, "seed {}", seed);
+                }
+                assert!(
+                    margin_value <= lower_margin_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    lower_margin_value <= mean_margin_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    mean_margin_value <= upper_margin_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    upper_margin_value <= spread_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                if lower_figure == mean_figure {
+                    assert_eq!(lower_margin, mean_margin, "seed {}", seed);
+                }
+                if lower_margin == mean_margin {
+                    assert!(
+                        (lower_value - mean_value).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                }
+                if upper_figure == mean_figure {
+                    assert_eq!(upper_margin, mean_margin, "seed {}", seed);
+                }
+                if upper_margin == mean_margin {
+                    assert!(
+                        (upper_value - mean_value).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                }
+                let _ = farthest_figure;
+            } else {
+                assert!(nearest.is_none(), "seed {}", seed);
+                assert!(farthest.is_none(), "seed {}", seed);
+                assert!(tails_part.is_none(), "seed {}", seed);
+            }
+        }
+
+        // The counts arithmetic of PG-38, and the closing
+        // naming the earliest mark at the smallest mean
+        // margin.
+        let counts = mean.last().expect("the mean close");
+        let walked = count_after(counts, "marks walked ");
+        assert_eq!(walked, mean_marks.len(), "seed {}", seed);
+        let stated_with = count_after(counts, "marks with another standing ");
+        assert_eq!(stated_with, with_another, "seed {}", seed);
+        let stated_days = count_after(counts, "days ");
+        let no_other = mean_marks
+            .iter()
+            .filter(|line| line.ends_with(", and no other standing"))
+            .count();
+        assert_eq!(with_another + no_other, walked, "seed {}", seed);
+        if with_another > 0 {
+            let closest_part = counts
+                .split("closest mean margin ")
+                .nth(1)
+                .expect("the counts line names its closest mean margin");
+            let (closest_figure, rest) = closest_part
+                .split_once(" at ")
+                .expect("the closest mean margin names its mark");
+            let (closest_elapsed, closest_ordinal) = rest
+                .split_once(" seconds on the ")
+                .expect("the closest mean margin names its seconds");
+            let closest_ordinal = closest_ordinal
+                .strip_suffix(" day")
+                .expect("the closest mean margin names its day");
+            let stated: f64 = closest_figure.parse().expect("a closest figure parses");
+            let smallest = mean_marks
+                .iter()
+                .filter_map(|line| mean_mark_parts(line).1)
+                .map(|(_, margin)| margin.parse::<f64>().expect("a mean margin parses"))
+                .fold(f64::INFINITY, f64::min);
+            assert!((stated - smallest).abs() <= 0.000002, "seed {}", seed);
+            let first = mean_marks
+                .iter()
+                .find(|line| {
+                    mean_mark_parts(line)
+                        .1
+                        .map(|(_, margin)| {
+                            (margin.parse::<f64>().expect("a mean margin parses") - smallest).abs()
+                                <= 0.000002
+                        })
+                        .unwrap_or(false)
+                })
+                .expect("a mark line states the smallest mean margin");
+            assert_eq!(
+                mean_mark_position(first),
+                (closest_elapsed.to_string(), closest_ordinal.to_string()),
+                "seed {}",
+                seed
+            );
+            let named = mean_mark_parts(first).1.expect("the named mark is figured");
+            assert_eq!(named.1, closest_figure, "seed {}", seed);
+        } else {
+            assert!(
+                counts.ends_with(", and, no other standing at any mark"),
+                "seed {}",
+                seed
+            );
+        }
+
+        // The day close relation of PG-38, computed from
+        // the standings sections and the mean sections,
+        // the mean taken over all the figures of the
+        // competitors other than the closing holder.
+        let mut standing_sections: Vec<Vec<String>> = Vec::new();
+        for line in &standings {
+            if line.starts_with("day, the ") {
+                standing_sections.push(Vec::new());
+            }
+            if let Some(section) = standing_sections.last_mut() {
+                section.push(line.clone());
+            }
+        }
+        let mut mean_sections: Vec<Vec<&String>> = Vec::new();
+        for line in &mean {
+            if line.starts_with("day, the ") {
+                mean_sections.push(Vec::new());
+            }
+            if let Some(section) = mean_sections.last_mut() {
+                section.push(line);
+            }
+        }
+        assert_eq!(
+            standing_sections.len(),
+            mean_sections.len(),
+            "seed {}",
+            seed
+        );
+        assert_eq!(stated_days, standing_sections.len(), "seed {}", seed);
+        for (section, mean_section) in standing_sections.iter().zip(mean_sections.iter()) {
+            let day_marks: Vec<&&String> = mean_section
+                .iter()
+                .filter(|line| line.starts_with("mark "))
+                .collect();
+            if day_marks.is_empty() {
+                continue;
+            }
+            let closing = section
+                .iter()
+                .find(|line| line.starts_with("close of the "))
+                .expect("a standings section closes");
+            let holder = closing
+                .split("record held by ")
+                .nth(1)
+                .and_then(|rest| rest.split(" at a projection of ").next())
+                .expect("a closing line names its holder");
+            let record = closing
+                .rsplit("at a projection of ")
+                .next()
+                .expect("a closing line names its record figure");
+            let record_value: f64 = record.parse().expect("a record figure parses");
+            let others: Vec<f64> = section
+                .iter()
+                .filter(|line| line.starts_with("competitor "))
+                .filter(|line| !line.starts_with(&format!("competitor {},", holder)))
+                .filter_map(|line| {
+                    line.strip_prefix("competitor ")
+                        .and_then(|rest| rest.split_once(", standing projection "))
+                        .and_then(|(_, rest)| {
+                            rest.strip_suffix(" at the close")
+                                .and_then(|figure| figure.parse::<f64>().ok())
+                        })
+                })
+                .collect();
+            let last = day_marks.last().expect("the day holds a mark");
+            let (_last_record, last_mean) = mean_mark_parts(last);
+            match (others.is_empty(), last_mean) {
+                (true, None) => {}
+                (false, Some((mean_figure, mean_margin))) => {
+                    let expected = others.iter().sum::<f64>() / others.len() as f64;
+                    let mean_value: f64 = mean_figure.parse().expect("a mean figure parses");
+                    assert!((mean_value - expected).abs() <= 0.000002, "seed {}", seed);
+                    let mean_margin_value: f64 = mean_margin.parse().expect("a mean margin parses");
+                    assert!(
+                        (mean_value - record_value - mean_margin_value).abs() <= 0.000002,
                         "seed {}",
                         seed
                     );

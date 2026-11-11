@@ -1,0 +1,12 @@
+meet mean, 3 days
+day, the first day, marks 2
+mark 1, at 100 seconds on the first day, alpha at a projection of 400, mean standing 600, mean margin 200
+mark 2, at 200 seconds on the first day, alpha at a projection of 400, mean standing 550, mean margin 150
+day, the second day, marks 2
+mark 3, at 100 seconds on the second day, alpha at a projection of 500, mean standing 550, mean margin 50
+mark 4, at 200 seconds on the second day, alpha at a projection of 500, mean standing 700, mean margin 200
+day, the third day, marks 3
+mark 5, at 100 seconds on the third day, beta at a projection of 300, mean standing 500, mean margin 200
+mark 6, at 200 seconds on the third day, alpha at a projection of 250, mean standing 300, mean margin 50
+mark 7, at 300 seconds on the third day, alpha at a projection of 200, mean standing 300, mean margin 100
+mean counts, marks walked 7, marks with another standing 7, days 3, closest mean margin 50 at 100 seconds on the second day

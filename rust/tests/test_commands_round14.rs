@@ -115,7 +115,7 @@ fn test_margins_with_an_extra_argument_is_a_usage_outcome() {
         outcome.stderr,
         vec![
             "usage: paceghost [-h]",
-            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails}",
+            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean}",
             "                 ...",
             "paceghost: error: unrecognized arguments: b.json",
         ]
