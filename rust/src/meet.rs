@@ -348,7 +348,15 @@ struct MarkRecord {
 /// empty where no competitor other than the holder
 /// held a standing after the mark, so the mean
 /// reading reads the same pass a thirteenth way and
-/// no walk stands for it either.
+/// no walk stands for it either. The median
+/// standings record, after each mark, the median
+/// standing after that mark, the median of the field
+/// behind the holder, one optional entry per mark in
+/// walk order beside the mean standings, an entry
+/// standing empty where no competitor other than the
+/// holder held a standing after the mark, so the
+/// median reading reads the same pass a fourteenth
+/// way and no walk stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -364,6 +372,7 @@ struct MeetWalk {
     middle: Vec<Option<(usize, BigRational)>>,
     tails: Vec<Option<(BigRational, BigRational)>>,
     mean: Vec<Option<BigRational>>,
+    median: Vec<Option<BigRational>>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
 }
@@ -438,10 +447,11 @@ fn select_extreme(
 /// returned as references into the standing vector. The
 /// middle selection takes its middle figure from this one
 /// collection, the tails selection takes its two means
-/// from it, and the mean selection takes its mean of the
-/// whole field from it, so the field the three readings
-/// state stands in one body and the three cannot be
-/// edited apart. The
+/// from it, the mean selection takes its mean of the
+/// whole field from it, and the median selection takes
+/// its middle figure or its two middle figures from
+/// it, so the field the four readings state stands in
+/// one body and the four cannot be edited apart. The
 /// helper guards no invariant and carries no expect
 /// string, because it reads no competitor out of the
 /// vector; the emptiness of the field is each caller's
@@ -579,6 +589,43 @@ fn select_mean(standing: &[Option<BigRational>], holder: usize) -> Option<BigRat
     Some(total / BigRational::from(BigInt::from(figures.len() as i64)))
 }
 
+/// The median standing after a mark, over the walk's vectors.
+///
+/// The median standing is the figure standing at the
+/// middle place of the ordered figures the one collection
+/// returns where the count of those figures is odd, the
+/// middle place being the place (m + 1) div 2 where m
+/// counts the competitors of the field and places count
+/// from one, and the mean of the two figures standing at
+/// the middle places where the count is even, the middle
+/// places being the places m div 2 and m div 2 + 1, so
+/// where one competitor stands behind the holder the
+/// median is that competitor's figure whole, where two
+/// stand behind the holder the median is the midpoint of
+/// their two figures, where three stand behind the holder
+/// the median is the middle of their three figures, and
+/// where four stand behind the holder the median is the
+/// midpoint of the two middle figures of their four. A
+/// median standing is a statistic of the figures of the
+/// field and is held by no competitor, so the selection
+/// names no holder for the median and applies no tie
+/// discipline. No competitor other than the holder
+/// holding a standing after the mark leaves the median
+/// standing empty.
+fn select_median(standing: &[Option<BigRational>], holder: usize) -> Option<BigRational> {
+    let figures = field_figures(standing, holder);
+    if figures.is_empty() {
+        return None;
+    }
+    if figures.len() % 2 == 1 {
+        Some(figures[figures.len() / 2].clone())
+    } else {
+        let lower = figures[figures.len() / 2 - 1].clone();
+        let upper = figures[figures.len() / 2].clone();
+        Some((lower + upper) / BigRational::from(BigInt::from(2)))
+    }
+}
+
 /// Walk the record progression of one loaded meet once.
 ///
 /// The walk reads the days as one field of competitors, a runner
@@ -638,7 +685,10 @@ fn select_mean(standing: &[Option<BigRational>], holder: usize) -> Option<BigRat
 /// the tails reading reads, and it records the mean
 /// standing after the mark, the mean of the whole field
 /// behind the holder, in the mean standings the mean
-/// reading reads. Handed a meet value built
+/// reading reads, and it records the median standing
+/// after the mark, the median of the field behind the
+/// holder, in the median standings the median reading
+/// reads. Handed a meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -686,6 +736,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut middle: Vec<Option<(usize, BigRational)>> = Vec::new();
     let mut tails: Vec<Option<(BigRational, BigRational)>> = Vec::new();
     let mut mean: Vec<Option<BigRational>> = Vec::new();
+    let mut median: Vec<Option<BigRational>> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -776,6 +827,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         middle.push(select_middle(&standing, &set_at, new_holder));
         tails.push(select_tails(&standing, new_holder));
         mean.push(select_mean(&standing, new_holder));
+        median.push(select_median(&standing, new_holder));
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -845,6 +897,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         middle,
         tails,
         mean,
+        median,
         day_standings,
         day_close_lines,
     })
@@ -1852,6 +1905,104 @@ pub fn meet_mean(meet: &Meet) -> Result<Vec<String>, String> {
         )),
         None => lines.push(format!(
             "mean counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
+    Ok(lines)
+}
+
+/// Return the meet median lines for one loaded meet.
+///
+/// The median reading reads the one walk a fourteenth
+/// way. One section stands for each day of the meet in
+/// meet order, every day holding a section, and inside
+/// a section one line stands for each mark of the walk
+/// standing in that day, in walk order, naming the
+/// place of the mark in the whole walk, the holder
+/// after the mark and the record figure after it, in
+/// the mark form of the marks reading as far as the
+/// record figure, and then the median standing after
+/// the mark, the median of the field behind the
+/// holder, and the median margin by which the record
+/// stands ahead of that standing, or the words and no
+/// other standing where no competitor other than the
+/// holder holds a standing after the mark. A median
+/// standing is a statistic of the figures of the field
+/// and is held by no competitor, so no mark line names
+/// a holder for the median. The median margin is
+/// computed on exact values before any rendering, so
+/// it is never negative, and it stands at zero exactly
+/// where every figure standing at a middle place of
+/// the field stands at the record figure. The reading
+/// closes by counting the marks the walk walked, the
+/// marks with another standing, and the days, and
+/// naming the closest median margin and the earliest
+/// mark standing at it, the closest median margin
+/// taken over the marks and never over the competitors,
+/// or by stating that no other standing stood at any
+/// mark where none did. No competitor is ranked or
+/// compared against another beyond the holder each
+/// mark line names.
+pub fn meet_median(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet median, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut closest: Option<(BigRational, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record)
+            );
+            match &walk.median[place - 1] {
+                Some(figure) => {
+                    let margin = figure.clone() - record.record.clone();
+                    with_another += 1;
+                    let nearer = match &closest {
+                        None => true,
+                        Some((smallest, _)) => margin < *smallest,
+                    };
+                    if nearer {
+                        closest = Some((margin.clone(), *record));
+                    }
+                    lines.push(format!(
+                        "{}, median standing {}, median margin {}",
+                        head,
+                        format_usage(figure),
+                        format_usage(&margin)
+                    ));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match closest {
+        Some((margin, record)) => lines.push(format!(
+            "median counts, marks walked {}, marks with another standing {}, days {}, closest median margin {} at {} seconds on the {} day",
+            walk.marks_walked,
+            with_another,
+            meet.days.len(),
+            format_usage(&margin),
+            format_seconds_fraction(&record.mark),
+            ORDINALS[record.day_index]
+        )),
+        None => lines.push(format!(
+            "median counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
             walk.marks_walked,
             with_another,
             meet.days.len()

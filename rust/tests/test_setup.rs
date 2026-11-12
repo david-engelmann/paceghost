@@ -129,8 +129,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 19 standing built and in review, so the count
     // stood at one, the slice 19 status line, until the
     // Round 18 closure landed slice 19 and the count
-    // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // returned to zero. Adjusted again with the
+    // Round 19 slice, as the named mechanical consequence
+    // of slice 20 standing built and in review, so the count
+    // stands at one, the slice 20 status line, until the
+    // Round 19 closure lands slice 20 and the count returns
+    // to zero.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -317,6 +322,24 @@ fn test_readme_reports_the_round_eighteen_status() {
 fn test_contract_carries_the_round_eighteen_obligations() {
     let text = read("CONTRACT.md");
     for label in ["PG-37", "PG-38"] {
+        assert!(text.contains(label), "the contract carries {}", label);
+    }
+}
+
+#[test]
+fn test_readme_reports_the_round_nineteen_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-39 and PG-40 now stand in full form in CONTRACT.md under the Round 19 obligations, and their standing is not claimed here, as Round 19 has not closed.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 20 is built and in review. It carries the median reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the median standing held after it by the field behind its holder, and the median margin by which the record stands ahead of the median standing, and the median command, with the golden median readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the median standing after each mark, and the seeded generated fixture family extended to the median reading.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 18 of 100"));
+}
+
+#[test]
+fn test_contract_carries_the_round_nineteen_obligations() {
+    let text = read("CONTRACT.md");
+    for label in ["PG-39", "PG-40"] {
         assert!(text.contains(label), "the contract carries {}", label);
     }
 }

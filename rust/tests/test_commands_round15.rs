@@ -115,7 +115,7 @@ fn test_an_extra_argument_draws_the_usage_outcome() {
         outcome.stderr,
         vec![
             "usage: paceghost [-h]",
-            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean}",
+            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median}",
             "                 ...",
             "paceghost: error: unrecognized arguments: b.json",
         ]
