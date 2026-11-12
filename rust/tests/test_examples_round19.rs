@@ -7,12 +7,14 @@
 //! hand count pins close the closing counts of both goldens
 //! against the counts stated in the design note. Pin by pin
 //! under the round's mutations: pin 16 fails under P-1 at
-//! every figured mark, under P-2 at its fields of two behind
-//! the holder, whose midpoint the lower figure replaces,
-//! its fields of one passing there by design, under P-5,
-//! and under P-6, and it passes under P-3 by design, the
-//! shipped meet standing as the round's widest coincidence
-//! cell, its median figure equalling its mean figure at
+//! the first figured mark, the second mark's median
+//! becoming 1305 against the golden's 1350, under P-2 at
+//! its fields of two behind the holder, whose midpoint
+//! the lower figure replaces, its fields of one passing
+//! there by design, under P-5, and under P-6, and it
+//! passes under P-3 by design, the shipped meet standing
+//! as the round's widest coincidence cell, its median
+//! figure equalling its mean figure at
 //! every one of its fifteen figured marks, so a margin
 //! printed off the mean standing moves nothing on it, and
 //! under P-4 by design, the shipped closest standing
@@ -59,12 +61,14 @@
 //! Pin 22 asserts the README median section's example
 //! block stands byte for byte as the shipped median
 //! golden whole, under the first line in the form of the
-//! command's invocation. It fails under P-1, P-2, P-5,
-//! and P-6 with the golden it mirrors, the README text
-//! standing still while the golden moves, and it passes
-//! under P-3 by design on the shipped coincidence and
-//! under P-4 by design, the pin comparing the produced
-//! golden and never a counts line's closest naming. Pin
+//! command's invocation. It passes under all six
+//! mutations by construction, comparing two standing
+//! texts, the README block and the golden file, which no
+//! mutation of the reading reaches, and its
+//! discrimination stands at the pre round tree, where
+//! neither the golden nor the README median section
+//! stands, and wherever the block and the golden
+//! diverge. Pin
 //! 23 asserts the README Usage section for the median
 //! reading stands in its standing form, its heading, its
 //! prose paragraph, and its example block standing where

@@ -2314,6 +2314,26 @@ fn median_mark_position(line: &str) -> (String, String) {
     margins_mark_position(line)
 }
 
+/// The record figure a marks reading line names, read
+/// the way the family's helpers read it. The median pin
+/// compares it against the median line's own record
+/// figure, because the prefix the line by line agreement
+/// opens with ends at the figure's last digit, and a
+/// median line naming a longer figure under the same
+/// opening digits would pass the prefix while its record
+/// stood apart from the marks record.
+fn marks_record_figure(line: &str) -> String {
+    let start = line
+        .find("at a projection of ")
+        .expect("a mark line names its record figure");
+    let figure_start = start + "at a projection of ".len();
+    let figure_end = line[figure_start..]
+        .find(',')
+        .map(|offset| figure_start + offset)
+        .expect("a record figure ends at a comma");
+    line[figure_start..figure_end].to_string()
+}
+
 #[test]
 fn test_generated_meets_close_under_the_median_reading() {
     let mut mean_above = 0usize;
@@ -2395,6 +2415,7 @@ fn test_generated_meets_close_under_the_median_reading() {
                 seed
             );
             let (record, median_part) = median_mark_parts(median_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
             let (_margin_record, nearest) = margins_mark_parts(margin_line);
             let (_spread_record, field, farthest) = spread_mark_parts(spread_line);
             let (_middle_record, middle_part) = middle_mark_parts(middle_line);
