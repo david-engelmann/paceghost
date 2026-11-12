@@ -438,6 +438,35 @@ mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, mean
 mean counts, marks walked 16, marks with another standing 15, days 3, closest mean margin 90 at 400 seconds on the first day
 ```
 
+### median
+
+The median command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, the median standing held after it by the field behind its holder, and the median margin by which the record stands ahead of the median standing.
+
+```text
+$ paceghost median examples/meet.json
+meet median, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, median standing 1350, median margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, median standing 1305, median margin 105
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, median standing 1275, median margin 169.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, median standing 1152.857143, median margin 212.857143
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, median standing 1051.948052, median margin 111.948052
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, median standing 1069.090909, median margin 129.090909
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, median standing 1069.090909, median margin 229.090909
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, median standing 1069.090909, median margin 229.090909
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, median standing 990, median margin 315
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, median standing 1146, median margin 471
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, median standing 1026, median margin 351
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, median standing 954, median margin 279
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, median standing 954, median margin 394
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, median standing 810, median margin 250
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, median standing 735, median margin 175
+median counts, marks walked 16, marks with another standing 15, days 3, closest median margin 90 at 400 seconds on the first day
+```
+
 ## Status
 
 Seeded in October 2026. Setup has landed, and Rounds 1 to 18 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
@@ -462,6 +491,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 18 have closed, with a
 - Contract, PG-33 and PG-34 met. They stand in full form in CONTRACT.md under the Round 16 obligations, and Round 16 closed on the merged slice 17 after three reviews, with the standards Minor repaired in the slice and the red team's one Minor standing against the evidence record and not the slice.
 - Contract, PG-35 and PG-36 met. They stand in full form in CONTRACT.md under the Round 17 obligations, and Round 17 closed on the merged slice 18 after three reviews, with the M-6 evidence item closed by execution and its record corrected in the slice, the refuted pin 2 header claim restated in the slice by a disclosed repair commit, and the red team's one Major standing against the build record and not the slice.
 - Contract, PG-37 and PG-38 met. They stand in full form in CONTRACT.md under the Round 18 obligations, and Round 18 closed on the merged slice 19 after three reviews, with the header postures restated to their executed form and the design plan's README pins landed in the slice.
+- Contract, PG-39 and PG-40 now stand in full form in CONTRACT.md under the Round 19 obligations, and their standing is not claimed here, as Round 19 has not closed.
 - Slice 2 has landed. It carries the recorded run loader that names every malformed field, the ghost rule, the race report, the ghost change report, and the show, ghost, and race commands, with two synthetic example runs and a golden race report under examples.
 - The Round 2 slice has landed. It carries the season report over a recorded field of runs grouped by model and the live board over recorded timed reads, with the season and board commands, a synthetic example field, a synthetic ghost record carrying a usage figure, a synthetic example run carrying timed reads, and golden renderings under examples. PG-5 and PG-6 stand in full form in CONTRACT.md with the Round 2 repair amendment, and Round 2 closed on the merged slice after three reviews, a repair pass, a micro repair, and re-reviews approving the final head. The board reads a finished recording, and watching a real run while it runs remains future work.
 - Slice 4 has landed. It carries the field day loader that names every malformed field, the stolen record report that walks the record progression of one window across a field of recorded runs, and the fieldday command, with a synthetic example field day and its golden report under examples.
@@ -480,6 +510,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 18 have closed, with a
 - Slice 17 has landed. It carries the middle reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the middle standing held after it by a competitor other than its holder, and the middle margin by which the record stands ahead of that middle standing, and the middle command, with the golden middle readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the middle standing after each mark, and the seeded generated fixture family extended to the middle reading.
 - Slice 18 has landed. It carries the tails reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the lower tail standing and the upper tail standing held after it by the field behind its holder, and the lower tail margin and the upper tail margin by which the record stands ahead of each tail standing, and the tails command, with the golden tails readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the lower tail standing and the upper tail standing after each mark, and the seeded generated fixture family extended to the tails reading.
 - Slice 19 has landed. It carries the mean reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the mean standing held after it by the field behind its holder, and the mean margin by which the record stands ahead of the mean standing, and the mean command, with the golden mean readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the mean standing after each mark, and the seeded generated fixture family extended to the mean reading.
+- Slice 20 is built and in review. It carries the median reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the median standing held after it by the field behind its holder, and the median margin by which the record stands ahead of the median standing, and the median command, with the golden median readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the median standing after each mark, and the seeded generated fixture family extended to the median reading.
 - The Rust port has landed. It carries the behavior the Python package carried, checked against the same goldens, and the Python tree stands removed under PORT-10.
 - Local gate, cargo test, cargo fmt --check, and cargo clippy --all-targets -- -D warnings. CI runs the same commands.
 

@@ -1,0 +1,21 @@
+meet median, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, median standing 1350, median margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, median standing 1305, median margin 105
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, median standing 1275, median margin 169.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, median standing 1152.857143, median margin 212.857143
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, median standing 1051.948052, median margin 111.948052
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, median standing 1069.090909, median margin 129.090909
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, median standing 1069.090909, median margin 229.090909
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, median standing 1069.090909, median margin 229.090909
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, median standing 990, median margin 315
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, median standing 1146, median margin 471
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, median standing 1026, median margin 351
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, median standing 954, median margin 279
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, median standing 954, median margin 394
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, median standing 810, median margin 250
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, median standing 735, median margin 175
+median counts, marks walked 16, marks with another standing 15, days 3, closest median margin 90 at 400 seconds on the first day
