@@ -439,7 +439,7 @@ fn test_contract_carries_the_round_twenty_obligations() {
         "### PG-42 full form, the quartiles reading over a meet",
     ] {
         assert!(
-            lines.iter().any(|found| *found == heading),
+            lines.contains(&heading),
             "the contract carries the heading {}",
             heading
         );
