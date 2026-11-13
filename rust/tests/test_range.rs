@@ -185,16 +185,13 @@ fn range_of(mark_line: &str) -> Option<f64> {
 }
 
 struct QuartileMark {
-    prefix: String,
     lower: Option<(f64, f64)>,
     upper: Option<(f64, f64)>,
 }
 
 fn quartiles_mark_parts(mark_line: &str) -> QuartileMark {
-    let prefix = record_prefix(mark_line);
     if mark_line.contains(", and no other standing") {
         return QuartileMark {
-            prefix,
             lower: None,
             upper: None,
         };
@@ -220,7 +217,6 @@ fn quartiles_mark_parts(mark_line: &str) -> QuartileMark {
         .and_then(|rest| rest.split(',').next())
         .unwrap_or_else(|| panic!("an upper quartile margin stands in {}", mark_line));
     QuartileMark {
-        prefix,
         lower: Some((
             lower_figure_text
                 .parse()
