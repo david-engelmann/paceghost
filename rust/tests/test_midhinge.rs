@@ -30,10 +30,20 @@
 //! becoming 100, 125, and 125, and under S-6 as under S-1,
 //! under S-2 at its first four marks on value, the median
 //! margins standing at 0, 0, 25, and 37.5, under S-3 at its
-//! first mark alone on value, the mean margin standing at 30
-//! against 22.5, and under S-5, the lagged margins standing
-//! at the no other standing form and then 22.5, 22.5, 35, and
-//! 41.25, and it passes under S-4 by design. Pin 6 fails
+//! first mark and at its edge case on value, the mean
+//! margins standing at 30 against 22.5 and at 18 against 0,
+//! the edge field of 100, 100, 100, 100, and 190 carrying
+//! its mean at 118 whole, and under S-5, the lagged margins
+//! standing at the no other standing form and then 22.5,
+//! 22.5, 35, and 41.25, and it passes under S-4 by design.
+//! The edge case holds under S-1 and under S-6, the enlarged
+//! field standing at a midhinge of 100 whole, and under
+//! S-2, the median of the edge field standing at 100 whole,
+//! and it passes under S-4 and fails under S-5, its closest
+//! margin standing at its one mark alone so the loosened
+//! scan cannot rename it and its one mark lagging to the no
+//! other standing form under the lag, the two postures
+//! computed from its single mark shape. Pin 6 fails
 //! under S-1 at both marks on its pinned values, the
 //! midhinges becoming 140 and 140, and under S-6 as under
 //! S-1, under S-2 at both marks, the median margins standing
@@ -612,7 +622,17 @@ fn test_the_midhinge_margin_stands_at_zero_exactly_where_both_sub_fields_middle_
     // place figure of the highest figures standing at the
     // record figure together, holds at the fifth mark
     // alone, checked in both directions at every mark from
-    // the fields the fixture states.
+    // the fields the fixture states. The edge case stands
+    // in a meet of its own behind the same holder, its
+    // field standing at 100, 100, 100, 100, and 190, the
+    // lower sub-field at 100, 100, and 100 and the upper
+    // sub-field at 100, 100, and 190, so the 190 stands in
+    // the upper sub-field away from its middle place while
+    // every middle place figure of both sub-fields stands
+    // at the record, and its midhinge stands at 100 with a
+    // margin of zero, the zero condition holding there in
+    // both directions on a field one figure of which stands
+    // away from the record.
     let meet = load_meet(&[
         day(
             1000,
@@ -688,6 +708,32 @@ fn test_the_midhinge_margin_stands_at_zero_exactly_where_both_sub_fields_middle_
     assert_eq!(count_after(counts, "marks walked "), 5);
     assert_eq!(count_after(counts, "marks with another standing "), 5);
     assert_eq!(count_after(counts, "days "), 3);
+    let edge = load_meet(&[
+        day(
+            1000,
+            "a",
+            &format!(
+                "[{}, {}, {}, {}, {}, {}]",
+                run("a", 500, &[(100, 10)]),
+                run("b", 400, &[(100, 10)]),
+                run("c", 300, &[(100, 10)]),
+                run("d", 250, &[(100, 10)]),
+                run("e", 200, &[(100, 10)]),
+                run("f", 150, &[(100, 19)])
+            ),
+        ),
+        quiet_day(1000, "a", "a"),
+        quiet_day(1000, "a", "a"),
+    ]);
+    let edge_lines = meet_midhinge(&edge).expect("the midhinge read");
+    let edge_marks = mark_lines(&edge_lines);
+    assert_eq!(edge_marks.len(), 1);
+    let edge_standing = midhinge_of(edge_marks[0]).expect("a midhinge stands");
+    assert_eq!(edge_standing, (100.0, 0.0));
+    assert_eq!(
+        edge_standing.1 == 0.0,
+        midhinge_zero_condition_holds(&[100.0, 100.0, 100.0, 100.0, 190.0], 100.0)
+    );
 }
 
 #[test]
