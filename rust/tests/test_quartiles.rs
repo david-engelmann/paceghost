@@ -497,7 +497,7 @@ fn test_the_last_mark_of_a_day_agrees_with_the_standings_reading() {
             day_index + 1
         );
         others.sort_by(|a, b| a.partial_cmp(b).expect("figures order"));
-        let count = (others.len() + 1) / 2;
+        let count = others.len().div_ceil(2);
         let median_of = |part: &[f64]| {
             if part.len() % 2 == 1 {
                 part[part.len() / 2]

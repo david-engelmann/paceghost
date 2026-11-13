@@ -319,7 +319,7 @@ fn test_the_day_close_relation_holds_over_the_shipped_example() {
         }
         assert_eq!(figures.len(), 2, "the close field counted, day {}", index);
         figures.sort_by(|a, b| a.partial_cmp(b).expect("figures order"));
-        let count = (figures.len() + 1) / 2;
+        let count = figures.len().div_ceil(2);
         let median_of = |part: &[f64]| {
             if part.len() % 2 == 1 {
                 part[part.len() / 2]

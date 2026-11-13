@@ -20,7 +20,7 @@
 
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 const EXAMPLE_FIXTURE: &str = include_str!("../../examples/meet.json");
@@ -36,7 +36,7 @@ fn scratch(tag: &str) -> PathBuf {
     dir
 }
 
-fn write(dir: &PathBuf, name: &str, contents: &str) -> PathBuf {
+fn write(dir: &Path, name: &str, contents: &str) -> PathBuf {
     let path = dir.join(name);
     fs::write(&path, contents).expect("the fixture is written");
     path
@@ -105,17 +105,21 @@ fn test_the_help_names_the_new_command_and_its_help_line() {
     let out = run(&["--help"], &[]);
     assert_eq!(out.status, Some(0));
     let text = String::from_utf8(out.stdout).expect("the help is utf8");
-    assert!(text.contains("paceghost {"), "help names usage, {}", text);
+    assert!(text.contains("{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}"), "help names usage, {}", text);
     assert!(text.contains("quartiles"), "help lists quartiles, {}", text);
     assert!(
         text.contains("print the meet quartiles for three or more field days"),
         "help carries the quartiles help line, {}",
         text
     );
-    assert!(
-        text.contains("usage: paceghost quartiles [-h] file"),
+    let sub = run(&["quartiles", "--help"], &[]);
+    assert_eq!(sub.status, Some(0));
+    let sub_text = String::from_utf8(sub.stdout).expect("the help is utf8");
+    assert_eq!(
+        sub_text.lines().next(),
+        Some("usage: paceghost quartiles [-h] file"),
         "help shows the quartiles usage, {}",
-        text
+        sub_text
     );
 }
 
@@ -125,18 +129,19 @@ fn test_the_quartiles_command_rejects_a_near_miss_name_and_a_missing_file_and_to
     assert_eq!(out.status, Some(2));
     assert_eq!(
         String::from_utf8(out.stderr).expect("the error is utf8"),
-        "usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles} ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')\n"
+        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}\n                 ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')\n"
     );
     let dir = scratch("quartiles-missing");
     let missing = dir.join("no-such-meet.json");
     let out = run(&["quartiles", path_str(&missing)], &[]);
     assert_eq!(out.status, Some(1));
     assert_eq!(
+        String::from_utf8(out.stdout).expect("the output is utf8"),
+        "invalid meet\ndefect file cannot be read\n"
+    );
+    assert_eq!(
         String::from_utf8(out.stderr).expect("the error is utf8"),
-        format!(
-            "error: the meet file does not exist: {}\n",
-            missing.display()
-        )
+        ""
     );
     let dir = scratch("quartiles-extra");
     let example = write(&dir, "meet.json", EXAMPLE_FIXTURE);
@@ -144,7 +149,7 @@ fn test_the_quartiles_command_rejects_a_near_miss_name_and_a_missing_file_and_to
     assert_eq!(out.status, Some(2));
     assert_eq!(
         String::from_utf8(out.stderr).expect("the error is utf8"),
-        "usage: paceghost quartiles [-h] file\npaceghost quartiles: error: unrecognized arguments: extra\n"
+        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}\n                 ...\npaceghost: error: unrecognized arguments: extra\n"
     );
 }
 
@@ -163,7 +168,7 @@ fn test_the_quartiles_command_rejects_a_near_miss_name_and_a_missing_file_and_to
 // second half runs the same bytes through the shipped binary
 // with its standard error taken to /dev/full, the standing
 // oracle for the usage error over the whole rendering, and
-// matches on the exit the stream's state itself reports. The
+// matches on the exit the port's form states for it. The
 // /dev/full state is read at runtime and the half skips only
 // where its oracle is repaired, the state standing describable
 // in the text of this pin where the half states it.
@@ -177,9 +182,10 @@ fn test_a_usage_error_over_the_whole_usage_renders_it_before_refusing_a_closed_e
     // fixes, as the family's own early Rounds 4 and 5
     // fixtures' own slash tallies stand untallied beside
     // them.
-    let bare_two_argv_text = "usage: paceghost [-h] {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles} ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')\n".to_string();
+    let bare_two_argv_text = "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}\n                 ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')\n".to_string();
     assert!(
-        bare_two_argv_text.starts_with("usage: paceghost [-h] {show,ghost,race,season"),
+        bare_two_argv_text
+            .starts_with("usage: paceghost [-h]\n                 {show,ghost,race,season"),
         "the bare two argument shape renders over the whole usage, {}",
         bare_two_argv_text
     );
@@ -191,16 +197,16 @@ fn test_a_usage_error_over_the_whole_usage_renders_it_before_refusing_a_closed_e
         Ok(_) => {
             let out = run_closed_stderr(&["quartile", "x"]);
             assert_eq!(
-                out.exit_code, 0,
-                "a full error stream is refused with the stream's own state, \
-                 its exit standing at the stream's state and not argparse's refusal"
+                out.exit_code, 2,
+                "a full error stream leaves the exit at argparse's refusal, \
+                 the error stream's own refusal moving nothing, as the port states"
             );
         }
         Err(_) => {}
     }
 }
 
-fn path_str(path: &PathBuf) -> &str {
+fn path_str(path: &Path) -> &str {
     path.to_str().expect("the scratch path is utf8")
 }
 

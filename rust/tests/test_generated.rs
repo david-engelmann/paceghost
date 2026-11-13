@@ -2718,11 +2718,15 @@ fn test_generated_meets_close_under_the_median_reading() {
     );
 }
 
+/// The lower and upper quartile parts of one mark line,
+/// each the standing figure and the margin as printed.
+type QuartileParts = ((String, String), (String, String));
+
 /// The figures of one quartiles mark line: the record
 /// figure, and where another standing stands, the lower
 /// quartile figure and margin and the upper quartile
 /// figure and margin.
-fn quartiles_mark_parts(line: &str) -> (String, Option<((String, String), (String, String))>) {
+fn quartiles_mark_parts(line: &str) -> (String, Option<QuartileParts>) {
     let start = line
         .find("at a projection of ")
         .expect("a mark line names its record figure");
@@ -3180,7 +3184,7 @@ fn test_generated_meets_close_under_the_quartiles_reading() {
                 (true, None) => {}
                 (false, Some(((lower_figure, lower_margin), (upper_figure, upper_margin)))) => {
                     others.sort_by(|a, b| a.partial_cmp(b).expect("figures order"));
-                    let count = (others.len() + 1) / 2;
+                    let count = others.len().div_ceil(2);
                     let median_of = |part: &[f64]| {
                         if part.len() % 2 == 1 {
                             part[part.len() / 2]
