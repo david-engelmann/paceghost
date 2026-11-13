@@ -1,0 +1,12 @@
+meet range, 3 days
+day, the first day, marks 2
+mark 1, at 100 seconds on the first day, alpha at a projection of 400, interquartile range 0
+mark 2, at 200 seconds on the first day, alpha at a projection of 400, interquartile range 0
+day, the second day, marks 2
+mark 3, at 100 seconds on the second day, alpha at a projection of 500, interquartile range 0
+mark 4, at 200 seconds on the second day, alpha at a projection of 500, interquartile range 0
+day, the third day, marks 3
+mark 5, at 100 seconds on the third day, beta at a projection of 300, interquartile range 0
+mark 6, at 200 seconds on the third day, alpha at a projection of 250, interquartile range 0
+mark 7, at 300 seconds on the third day, alpha at a projection of 200, interquartile range 0
+range counts, marks walked 7, marks with another standing 7, days 3, narrowest interquartile range 0 at 100 seconds on the first day

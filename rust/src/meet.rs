@@ -366,6 +366,15 @@ struct MarkRecord {
 /// competitor other than the holder held a standing
 /// after the mark, so the quartiles reading reads the
 /// same pass a fifteenth way and no walk stands for it
+/// either. The range standings record, after each
+/// mark, the interquartile range after that mark, the
+/// upper quartile standing less the lower quartile
+/// standing of the field behind the holder, one
+/// optional entry per mark in walk order beside the
+/// quartiles standings, an entry standing empty where
+/// no competitor other than the holder held a standing
+/// after the mark, so the range reading reads the
+/// same pass a sixteenth way and no walk stands for it
 /// either.
 struct MeetWalk {
     lines: Vec<String>,
@@ -384,6 +393,7 @@ struct MeetWalk {
     mean: Vec<Option<BigRational>>,
     median: Vec<Option<BigRational>>,
     quartiles: Vec<Option<(BigRational, BigRational)>>,
+    range: Vec<Option<BigRational>>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
 }
@@ -462,9 +472,11 @@ fn select_extreme(
 /// whole field from it, and the median selection takes
 /// its middle figure or its two middle figures from
 /// it, and the quartiles selection takes its two
-/// sub-field medians from it, so the field the five
-/// readings state stands in one body and the five
-/// cannot be edited apart. The
+/// sub-field medians from it, and the range selection
+/// takes the difference of its two sub-field medians
+/// from it, so the field the six readings state
+/// stands in one body and the six cannot be edited
+/// apart. The
 /// helper guards no invariant and carries no expect
 /// string, because it reads no competitor out of the
 /// vector; the emptiness of the field is each caller's
@@ -694,6 +706,55 @@ fn select_quartiles(
     Some((lower, upper))
 }
 
+/// The interquartile range after a mark, over the walk's vectors.
+///
+/// The interquartile range is the upper quartile
+/// standing less the lower quartile standing of the
+/// field behind the holder, the quartile standings
+/// being the medians of the lowest and the highest
+/// figures of that field, the lowest and the highest
+/// counting the (m + 1) div 2 figures where m counts
+/// the competitors of the field, the median of a part
+/// being the figure standing at its middle place
+/// where the part counts odd and the mean of the two
+/// figures standing at its middle places where the
+/// part counts even, so where one competitor stands
+/// behind the holder the range is zero, that
+/// competitor's figure standing at each quartile
+/// whole, where two stand behind the holder the
+/// range is the higher of their two figures less the
+/// lower, and where five stand behind the holder the
+/// range is the middle figure of the three highest
+/// figures less the middle figure of the three lowest,
+/// the count at which the range first stands apart
+/// from the difference of the tails. The range is
+/// computed on exact values, so it is never negative.
+/// A range is a statistic of the figures of the field
+/// and is held by no competitor, so the selection
+/// names no holder for the range and applies no tie
+/// discipline. No competitor other than the holder
+/// holding a standing after the mark leaves the range
+/// empty.
+fn select_range(standing: &[Option<BigRational>], holder: usize) -> Option<BigRational> {
+    let figures = field_figures(standing, holder);
+    if figures.is_empty() {
+        return None;
+    }
+    let count = figures.len().div_ceil(2);
+    let median = |part: &[&BigRational]| {
+        if part.len() % 2 == 1 {
+            part[part.len() / 2].clone()
+        } else {
+            let lower = part[part.len() / 2 - 1].clone();
+            let upper = part[part.len() / 2].clone();
+            (lower + upper) / BigRational::from(BigInt::from(2))
+        }
+    };
+    let lower = median(&figures[..count]);
+    let upper = median(&figures[figures.len() - count..]);
+    Some(upper - lower)
+}
+
 /// Walk the record progression of one loaded meet once.
 ///
 /// The walk reads the days as one field of competitors, a runner
@@ -760,7 +821,12 @@ fn select_quartiles(
 /// and the upper quartile standing after the mark,
 /// the medians of the lowest and the highest figures
 /// of the field behind the holder, in the quartiles
-/// standings the quartiles reading reads. Handed a
+/// standings the quartiles reading reads, and it
+/// records the interquartile range after the mark,
+/// the upper quartile standing less the lower
+/// quartile standing of the field behind the holder,
+/// in the range standings the range reading reads.
+/// Handed a
 /// meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
@@ -811,6 +877,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut mean: Vec<Option<BigRational>> = Vec::new();
     let mut median: Vec<Option<BigRational>> = Vec::new();
     let mut quartiles: Vec<Option<(BigRational, BigRational)>> = Vec::new();
+    let mut range: Vec<Option<BigRational>> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -903,6 +970,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         mean.push(select_mean(&standing, new_holder));
         median.push(select_median(&standing, new_holder));
         quartiles.push(select_quartiles(&standing, new_holder));
+        range.push(select_range(&standing, new_holder));
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -974,6 +1042,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         mean,
         median,
         quartiles,
+        range,
         day_standings,
         day_close_lines,
     })
@@ -2198,6 +2267,103 @@ pub fn meet_quartiles(meet: &Meet) -> Result<Vec<String>, String> {
         }
         _ => lines.push(format!(
             "quartiles counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
+    Ok(lines)
+}
+
+/// Return the meet range lines for one loaded meet.
+///
+/// The range reading reads the one walk a sixteenth
+/// way. One section stands for each day of the meet in
+/// meet order, every day holding a section, and inside
+/// a section one line stands for each mark of the walk
+/// standing in that day, in walk order, naming the
+/// place of the mark in the whole walk, the holder
+/// after the mark and the record figure after it, in
+/// the mark form of the marks reading as far as the
+/// record figure, and then the interquartile range
+/// after the mark, the upper quartile standing less
+/// the lower quartile standing of the field behind the
+/// holder, or the words and no other standing where no
+/// competitor other than the holder holds a standing
+/// after the mark. A range is a statistic of the
+/// figures of the field and is held by no competitor,
+/// so no mark line names a holder for the range. The
+/// range is computed on exact values before any
+/// rendering, so it is never negative, and it stands
+/// at zero exactly where every figure standing at a
+/// middle place of the lowest figures of the field and
+/// every figure standing at a middle place of the
+/// highest figures stand at one and the same figure.
+/// The reading closes by counting the marks the walk
+/// walked, the marks with another standing, and the
+/// days, and naming the narrowest interquartile range
+/// and the earliest mark standing at it, the narrowest
+/// range taken over the marks and never over the
+/// competitors, or by stating that no other standing
+/// stood at any mark where none did. No competitor is
+/// ranked or compared against another beyond the
+/// holder each mark line names.
+pub fn meet_range(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet range, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut narrowest: Option<(BigRational, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record)
+            );
+            match &walk.range[place - 1] {
+                Some(range) => {
+                    with_another += 1;
+                    let narrower = match &narrowest {
+                        None => true,
+                        Some((smallest, _)) => range < smallest,
+                    };
+                    if narrower {
+                        narrowest = Some((range.clone(), *record));
+                    }
+                    lines.push(format!(
+                        "{}, interquartile range {}",
+                        head,
+                        format_usage(range)
+                    ));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match narrowest {
+        Some((range, record)) => lines.push(format!(
+            "range counts, marks walked {}, marks with another standing {}, days {}, narrowest interquartile range {} at {} seconds on the {} day",
+            walk.marks_walked,
+            with_another,
+            meet.days.len(),
+            format_usage(&range),
+            format_seconds_fraction(&record.mark),
+            ORDINALS[record.day_index]
+        )),
+        None => lines.push(format!(
+            "range counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
             walk.marks_walked,
             with_another,
             meet.days.len()

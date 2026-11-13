@@ -192,7 +192,7 @@ fn test_a_separator_with_a_token_after_it_stands_as_the_command_value() {
         assert_eq!(outcome.code, 2);
         assert_eq!(
             outcome.stderr.last().map(|line| line.as_str()),
-            Some("paceghost: error: argument command: invalid choice: '--' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')")
+            Some("paceghost: error: argument command: invalid choice: '--' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range')")
         );
     }
 }
@@ -243,7 +243,7 @@ fn test_an_invalid_choice_echoes_argument_bytes_as_escape_text() {
     assert_eq!(outcome.code, 2);
     assert_eq!(
         outcome.stderr.last().map(|line| line.as_str()),
-        Some("paceghost: error: argument command: invalid choice: '\\udcff\\udcfe' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')")
+        Some("paceghost: error: argument command: invalid choice: '\\udcff\\udcfe' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range')")
     );
 }
 
