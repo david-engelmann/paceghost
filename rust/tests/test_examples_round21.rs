@@ -12,7 +12,7 @@
 //! against 90 there, and under R-6 as under R-1, and it
 //! passes under R-2 and R-3 by design, every figured
 //! field of the shipped meet counting one or two behind
-//! its holder, so each mark's range is its spread whole
+//! its holder, so each mark's range is its field width whole
 //! and its difference of the tails whole, the widest
 //! coincidence cell of the round, stated here rather
 //! than left for a reviewer to find, and under R-4 by
@@ -39,8 +39,8 @@
 //! R-3 by design, both statistics standing at 0 at the
 //! same second mark and nowhere smaller. Pin 21 passes
 //! under R-2, R-3, and R-4 by design, its closes standing
-//! at fields of two where the range is the spread and
-//! the difference of the tails whole, and comparing
+//! at fields of two where the range is the field width
+//! and the difference of the tails whole, and comparing
 //! figures at the closes and never a narrowest naming,
 //! and it fails under R-1 and R-6, the first day's
 //! enlarged closing field carrying its range to 150

@@ -29,7 +29,7 @@
 //! under R-2, R-3, R-4, and R-5 by design. Pin 5 fails under
 //! R-1 from its second mark onward in its zero set, the
 //! ranges becoming 45, 0, 50, 50, and 0, under R-3 in value
-//! at every mark but the fifth, the spreads standing at 90
+//! at every mark but the fifth, the field widths standing at 90
 //! against the ranges, under R-5 at its third mark, the
 //! lagged vector printing 45 against 70 there, and under
 //! R-6 as under R-1, and it passes under R-2 by design at
@@ -39,19 +39,19 @@
 //! narrowest naming. Pin 6 fails under R-1 at both marks,
 //! the ranges becoming 190 and 70, under R-2 at both marks,
 //! its designed catcher in dedicated form, under R-3 at
-//! both marks, the spreads standing at 200 and 100, under
+//! both marks, the field widths standing at 200 and 100, under
 //! R-5 at its second mark, and under R-6 as under R-1, and
 //! it passes under R-4 by design. Pin 7 fails under R-1 at
 //! every mark, the ranges becoming 35, 50, and 70, under
 //! R-2 at its third mark alone, under R-3 at its second and
-//! third marks, its designed catcher in dedicated form, the
-//! first mark holding where the range is the spread whole,
-//! under R-5 at its second mark, and under R-6 as under
-//! R-1, and it passes under R-4 by design. Pin 8 fails
+//! third marks, its designed catcher in dedicated form,
+//! the first mark holding where the range is the field
+//! width whole, under R-5 at its second mark, and under
+//! R-6 as under R-1, and it passes under R-4 by design. Pin 8 fails
 //! under R-1, the ranges becoming 65, 80, and 40 and the
 //! counting naming the third mark at 40, under R-3, the
-//! printed ranges becoming the spreads 70, 100, and 50 and
-//! the counting naming the third mark, under R-4, its
+//! printed ranges becoming the field widths 70, 100, and
+//! 50 and the counting naming the third mark, under R-4, its
 //! designed catcher, the fixture tying its range at the
 //! first and third marks so the loosened scan names the
 //! third, under R-5, and under R-6 as under R-1, and it
@@ -69,10 +69,11 @@
 //! standing at 46.666667 against the range's 40 while the
 //! identity and bound clauses hold by design, under R-3 at
 //! its field of three on the identity, the lower quartile
-//! margin and the spread summing past the upper quartile
-//! margin there, under R-5 at its second mark, and under
-//! R-6 on its pinned values as under R-1, and it passes
-//! under R-4 by design, reading mark lines alone. Pin 11
+//! margin and the field width summing past the upper
+//! quartile margin there, under R-5 at its second mark,
+//! and under R-6 on its pinned values as under R-1, and
+//! it passes under R-4 by design, reading mark lines
+//! alone. Pin 11
 //! passes under all six mutations by design, no mark
 //! standing for any selection, vector, or closing scan to
 //! move. Pins 12 to 15 pass under all six mutations by
@@ -290,10 +291,12 @@ fn farthest_figure_of(mark_line: &str) -> Option<f64> {
     )
 }
 
-/// The spread of the field itself at a mark, the
+/// The width of the field itself at a mark, the
 /// farthest standing figure less the nearest standing
 /// figure, read across the spread and margins readings.
-fn field_spread(spread_line: &str, margin_line: &str) -> Option<f64> {
+/// The width is not the spread of PG-32, which stands
+/// at the farthest figure less the record figure.
+fn field_width(spread_line: &str, margin_line: &str) -> Option<f64> {
     match (
         farthest_figure_of(spread_line),
         nearest_figure_of(margin_line),
@@ -376,7 +379,7 @@ fn test_the_range_reading_over_a_hand_built_meet_line_by_line() {
     let spread = meet_spread(&meet).expect("the spread read");
     let margins = meet_margins(&meet).expect("the margins read");
     assert_eq!(
-        field_spread(mark_lines(&spread)[4], mark_lines(&margins)[4]),
+        field_width(mark_lines(&spread)[4], mark_lines(&margins)[4]),
         Some(100.0)
     );
 }
@@ -743,17 +746,22 @@ fn test_the_range_separates_from_the_difference_of_the_tails_in_both_directions(
 }
 
 #[test]
-fn test_the_range_separates_from_the_spread() {
+fn test_the_range_separates_from_the_field_width() {
     // At the first mark the field stands at 150 and 170 and
-    // the range stands at 20, equal to the spread there by
-    // the count two coincidence, asserted as equality. At
+    // the range stands at 20, equal to the field width there
+    // by the count two coincidence, asserted as equality. At
     // the second mark the field stands at 120, 150, and 170
-    // and the range stands at 25 against a spread of 50. At
-    // the third mark the field stands at 120, 150, 170,
-    // 190, and 220 and the range stands at 40 against a
-    // spread of 100, the separation standing from the field
-    // of three onward, where a sub-field median first stands
-    // inside the field's extremes.
+    // and the range stands at 25 against a field width of
+    // 50. At the third mark the field stands at 120, 150,
+    // 170, 190, and 220 and the range stands at 40 against
+    // a field width of 100, the separation standing from the
+    // field of three onward, where a sub-field median first
+    // stands inside the field's extremes. The width here is
+    // the farthest standing figure less the nearest, not
+    // the spread of PG-32, which stands at the farthest
+    // figure less the record figure of 100 and reads 70,
+    // 70, and 120 at these three marks, so the range stands
+    // apart from the spread at every mark of the fixture.
     let meet = load_meet(&[
         day(
             1000,
@@ -779,11 +787,11 @@ fn test_the_range_separates_from_the_spread() {
     let margin_marks = mark_lines(&margins);
     assert_eq!(marks.len(), 3);
     assert_eq!(range_of(marks[0]), Some(20.0));
-    assert_eq!(field_spread(spread_marks[0], margin_marks[0]), Some(20.0));
+    assert_eq!(field_width(spread_marks[0], margin_marks[0]), Some(20.0));
     assert_eq!(range_of(marks[1]), Some(25.0));
-    assert_eq!(field_spread(spread_marks[1], margin_marks[1]), Some(50.0));
+    assert_eq!(field_width(spread_marks[1], margin_marks[1]), Some(50.0));
     assert_eq!(range_of(marks[2]), Some(40.0));
-    assert_eq!(field_spread(spread_marks[2], margin_marks[2]), Some(100.0));
+    assert_eq!(field_width(spread_marks[2], margin_marks[2]), Some(100.0));
 }
 
 #[test]
@@ -865,16 +873,22 @@ fn test_the_range_steps_as_the_field_grows() {
 }
 
 #[test]
-fn test_the_quartile_margin_identity_and_the_spread_bound_hold_line_by_line() {
+fn test_the_quartile_margin_identity_and_the_field_width_bound_hold_line_by_line() {
     // The identity and the bound of PG-44 over the hand
     // built meet of pin 1. At every mark the lower quartile
     // margin and the interquartile range sum to the upper
     // quartile margin, the range is the upper quartile
     // standing less the lower quartile standing, and the
-    // range stands at or below the spread, the five ranges
-    // pinned at 0, 20, 25, 45, and 40 against the five
-    // spreads 0, 20, 50, 70, and 100, and at the first mark
-    // the identity holds as 50 and 0 summing to 50.
+    // range stands at or below the field width, the five
+    // ranges pinned at 0, 20, 25, 45, and 40 against the
+    // five field widths 0, 20, 50, 70, and 100, and at the
+    // first mark the identity holds as 50 and 0 summing
+    // to 50. The bound pinned here is the field width
+    // bound, the range standing at or below the farthest
+    // figure less the nearest, and the field width stands
+    // at or below the spread of PG-32 at the same mark,
+    // the nearest figure standing at or above the record
+    // figure, so the bound of PG-44 holds through it.
     let meet = range_meet();
     let range = meet_range(&meet).expect("the range read");
     let quartiles = meet_quartiles(&meet).expect("the quartiles read");
@@ -887,7 +901,7 @@ fn test_the_quartile_margin_identity_and_the_spread_bound_hold_line_by_line() {
     assert_eq!(range_marks.len(), quartile_marks.len());
     assert_eq!(range_marks.len(), spread_marks.len());
     let expected_ranges = [0.0, 20.0, 25.0, 45.0, 40.0];
-    let expected_spreads = [0.0, 20.0, 50.0, 70.0, 100.0];
+    let expected_widths = [0.0, 20.0, 50.0, 70.0, 100.0];
     for (place, (((range_line, quartile_line), spread_line), margin_line)) in range_marks
         .iter()
         .zip(quartile_marks.iter())
@@ -899,9 +913,9 @@ fn test_the_quartile_margin_identity_and_the_spread_bound_hold_line_by_line() {
         let parts = quartiles_mark_parts(quartile_line);
         let (lower_figure, lower_margin) = parts.lower.expect("a lower quartile stands");
         let (upper_figure, upper_margin) = parts.upper.expect("an upper quartile stands");
-        let spread = field_spread(spread_line, margin_line).expect("a field spread stands");
+        let width = field_width(spread_line, margin_line).expect("a field width stands");
         assert_eq!(range, expected_ranges[place], "mark {}", place + 1);
-        assert_eq!(spread, expected_spreads[place], "mark {}", place + 1);
+        assert_eq!(width, expected_widths[place], "mark {}", place + 1);
         assert!(
             (range - (upper_figure - lower_figure)).abs() <= 0.000002,
             "mark {}",
@@ -912,7 +926,7 @@ fn test_the_quartile_margin_identity_and_the_spread_bound_hold_line_by_line() {
             "mark {}",
             place + 1
         );
-        assert!(range <= spread + 0.000002, "mark {}", place + 1);
+        assert!(range <= width + 0.000002, "mark {}", place + 1);
         assert!(range >= 0.0, "mark {}", place + 1);
         if place == 0 {
             assert_eq!((lower_margin, range, upper_margin), (50.0, 0.0, 50.0));
