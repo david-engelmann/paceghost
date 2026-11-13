@@ -144,8 +144,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 22 standing built and in review, so the count
     // stood at one, the slice 22 status line, until the
     // Round 21 closure landed slice 22 and the count returned
+    // to zero. Adjusted again with the
+    // Round 22 slice, as the named mechanical consequence
+    // of slice 23 standing built and in review, so the count
+    // stands at one, the slice 23 status line, until the
+    // Round 22 closure lands slice 23 and the count returns
     // to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
