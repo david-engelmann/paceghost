@@ -81,6 +81,24 @@
 //! scan, and they fail on a built tree whose reading
 //! skipped the FIX-PG-10 figure guard, the FIX-PG-11 label
 //! fencing, or the day count preconditions of PG-43.
+//! The exact subtraction pin, added in the Round 21
+//! repair, stands after the guard pins in this file and
+//! carries no number in the round's pin sequence, the
+//! numbers above standing as built. On the built tree
+//! it fails under the rounding variant that rounds both
+//! quartile standings to six decimal places before
+//! subtracting, the variant printing a range of 0 at
+//! its third mark against the exact range the pin
+//! states in full, under R-1 and under R-6 as under
+//! R-1, the holder's own figure entering the field so
+//! a range stands at its first mark where the pin
+//! states none, and under R-5, the lagged vector
+//! printing 0 at its third mark, and it passes under
+//! R-2 and R-3 by design, every figured field of its
+//! fixture counting two or fewer, where the range, the
+//! field width, and the difference of the tails stand
+//! at one figure, and under R-4 by design, its
+//! narrowest range standing unique at its second mark.
 
 use paceghost::fieldday::{DayRun, FieldDay};
 use paceghost::meet::{
@@ -1038,4 +1056,65 @@ fn test_a_hand_built_break_bearing_label_draws_the_named_error_through_range() {
     };
     let error = meet_range(&meet).expect_err("the reading names the precondition");
     assert_eq!(error, "a runner label holds a line break");
+}
+
+// The exact subtraction pin of the Round 21 repair. The
+// range of PG-44 is computed on exact values, and this
+// pin states a mark whose two quartile standings render
+// alike at six decimal places while their exact
+// difference does not stand at zero.
+
+#[test]
+fn test_the_range_is_the_exact_difference_of_quartiles_that_render_alike() {
+    // The lower quartile standing of the third mark is
+    // the standing of the first competitor behind the
+    // holder, 4194305 / 4194304, which is 1 + 2^-22, and
+    // the upper quartile standing is the standing of the
+    // second, 2097153 / 2097152, which is 1 + 2^-21, the
+    // field counting two so each quartile is one figure
+    // whole. Each quartile renders as 1 at six decimal
+    // places, so a range computed by subtracting the
+    // rendered quartiles would stand at 0. The exact
+    // range is 2^-22, a nonzero figure below the six
+    // place bound, so it renders at full precision
+    // under the discipline of FIX-PG-7, and the third
+    // mark line states it whole. The holder stands at
+    // a projection of 1 whole, read under the first
+    // day's window at the window itself.
+    let meet = load_meet(&[
+        day(
+            4194305,
+            "a",
+            &format!(
+                "[{}, {}]",
+                run("a", 500, &[(4194305, 1)]),
+                run("b", 400, &[(4194304, 1)])
+            ),
+        ),
+        day(
+            2097153,
+            "a",
+            &format!(
+                "[{}, {}, {}]",
+                run("a", 500, &[]),
+                run("b", 400, &[]),
+                run("c", 300, &[(2097152, 1)])
+            ),
+        ),
+        quiet_day(1000, "a", "a"),
+    ]);
+    let lines = meet_range(&meet).expect("the range read");
+    assert_eq!(
+        lines,
+        vec![
+            "meet range, 3 days",
+            "day, the first day, marks 2",
+            "mark 1, at 4194304 seconds on the first day, b at a projection of 1, and no other standing",
+            "mark 2, at 4194305 seconds on the first day, a at a projection of 1, interquartile range 0",
+            "day, the second day, marks 1",
+            "mark 3, at 2097152 seconds on the second day, a at a projection of 1, interquartile range 0.0000002384185791015625",
+            "day, the third day, marks 0",
+            "range counts, marks walked 3, marks with another standing 2, days 3, narrowest interquartile range 0 at 4194305 seconds on the first day",
+        ]
+    );
 }
