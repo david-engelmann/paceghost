@@ -597,7 +597,7 @@ fn test_the_quartile_margins_stand_at_zero_exactly_where_their_sub_fields_middle
     // and 190 and its lower quartile stands at zero while
     // its median margin stands at 25, separating the
     // quartile's zero set from the median's in one fixture.
-    // At the fourth mark the field stands at 100, 130, 150,
+    // At the fourth mark the field stands at 100, 125, 150,
     // and 190 and its lower quartile stands at 112.5, outside
     // the lower zero set, while the margin of PG-30 stands
     // at zero at every mark of the meet through the
