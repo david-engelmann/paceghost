@@ -5,17 +5,26 @@
 //! Written for Round 23 in the shape of the Round 21
 //! example tests. The two byte for byte pins fail before
 //! the round by the absence of the goldens and of the
-//! reading. Pin by pin under the round's mutations: pins
-//! 17 and 18, the two golden pins, pins 19 and 20, the
-//! two counts pins, pin 21, the shipped closest names the
-//! second mark pin, and pin 22, the day close relation
-//! pin, fail under S-1, S-5, and S-6 and pass under S-2,
-//! S-3, and S-4 by design, on the same written-meet
-//! ground as the commands pins, every figured field of
-//! both written meets counting two or fewer, where the
-//! median and the mean stand at the midhinge and the
-//! closest margins stand unique in the shipped meet and
-//! at the earliest of two marks in the constructed meet.
+//! reading. Pin by pin under the round's mutations: pin
+//! 17, the shipped golden pin, pin 21, the shipped
+//! closest names the second mark pin, and pin 22, the
+//! day close relation pin, fail under S-1, S-5, and S-6
+//! and pass under S-2, S-3, and S-4 by design, on the
+//! same written-meet ground as the commands pins, every
+//! figured field of both written meets counting two or
+//! fewer, where the median and the mean stand at the
+//! midhinge and the closest margin stands unique in the
+//! shipped meet. Pin 18, the constructed golden pin,
+//! fails under S-1, S-5, and S-6 and passes under S-2
+//! and S-3 by design on the same ground, and it fails
+//! under S-4, the constructed meet's closest margin
+//! standing tied at 50, so the loosened scan renames
+//! its closest seat and the pin stands as an S-4
+//! catcher beside pin 8 of the reading file. Pins 19
+//! and 20, the two counts pins, pass under all six
+//! mutations by design, counting from the golden text
+//! alone and never calling the reading, the Round 21
+//! form, so no mutation of the reading moves them.
 //! Pins 23 and 24, the two README pins, pass under all
 //! six mutations by design, standing as static text, and
 //! their discrimination stands at the pre round tree,

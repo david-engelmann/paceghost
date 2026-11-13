@@ -3661,6 +3661,14 @@ fn midhinge_zero_condition_holds(field: &[f64], record: f64) -> bool {
     figures.iter().all(|figure| *figure == record)
 }
 
+// The midhinge pin of the generated family, added with
+// Round 23 beside the reading closings above. On the
+// built tree it fails under S-1, S-2, S-3, S-5, and S-6,
+// and it passes under S-4 by design, the closest
+// midhinge margin standing unique in every seed of the
+// family, so the loosened scan names the same seat in
+// every seed, its S-4 catcher standing as pin 8 of
+// test_midhinge.rs and not here.
 #[test]
 fn test_generated_meets_close_under_the_midhinge_reading() {
     let mut family_figured = 0usize;

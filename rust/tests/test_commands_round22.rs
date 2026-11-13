@@ -7,12 +7,19 @@
 //! command's absence, the CLI carrying no midhinge entry,
 //! the midhinge name standing as an invalid choice on the
 //! pre round tree and the help text carrying twenty four
-//! names. On the built tree, the shipped meet pin and the
-//! constructed meet pin fail under S-1, S-5, and S-6, and
-//! pass under S-2, S-3, and S-4 by design, every figured
-//! field of both written meets counting two or fewer,
-//! where the median and the mean stand at the midhinge and
-//! the closest margins stand unique. The malformed meet
+//! names. On the built tree, the shipped meet pin fails
+//! under S-1, S-5, and S-6, and passes under S-2, S-3,
+//! and S-4 by design, every figured field of both
+//! written meets counting two or fewer, where the
+//! median and the mean stand at the midhinge and the
+//! closest margin stands unique in the shipped meet.
+//! The constructed meet pin fails under S-1, S-5, and
+//! S-6, and passes under S-2 and S-3 by design on the
+//! same ground, and it fails under S-4, the constructed
+//! meet's closest margin standing tied at 50, so the
+//! loosened scan renames its closest seat and the pin
+//! stands as an S-4 catcher beside pin 8 of the
+//! reading file. The malformed meet
 //! pin and the command surface pin pass under all six
 //! mutations by design. The closed-stream pin passes
 //! under all six mutations by design, the edits reaching
