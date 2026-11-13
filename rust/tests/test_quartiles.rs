@@ -75,6 +75,16 @@
 //! built tree whose reading skipped the FIX-PG-10 figure
 //! guard, the FIX-PG-11 label fencing, or the day count
 //! preconditions of PG-41.
+//! Pin 16 fails under Q-1, the holder's own figure entering
+//! each witness field and moving the printed margins against
+//! the conditions the stated fields compute, under Q-3 at
+//! its first witness, the printed quartile margins becoming
+//! the mean margins there, under Q-5, its one mark meets
+//! holding no earlier mark for a lagged vector to print, and
+//! under Q-6 as under Q-1, and it passes under Q-2 by design,
+//! its fields counting three where the quartiles are the
+//! tails whole, and under Q-4 by design, reading mark lines
+//! alone.
 
 use paceghost::fieldday::{DayRun, FieldDay};
 use paceghost::meet::{
@@ -295,6 +305,35 @@ fn spread_of(mark_line: &str) -> Option<f64> {
         text.parse()
             .unwrap_or_else(|_| panic!("the spread parses in {}", mark_line)),
     )
+}
+
+fn median_of(figures: &[f64]) -> f64 {
+    let count = figures.len();
+    if count % 2 == 1 {
+        figures[count / 2]
+    } else {
+        (figures[count / 2 - 1] + figures[count / 2]) / 2.0
+    }
+}
+
+fn chain_conditions(field: &[f64]) -> [bool; 4] {
+    let m = field.len();
+    let tail_count = m.div_ceil(2);
+    let count = (tail_count + 2) / 2;
+    let nearest = field[0];
+    let farthest = field[m - 1];
+    let middle = field[tail_count - 1];
+    let median = median_of(field);
+    let lowest = &field[..tail_count];
+    let highest = &field[m - tail_count..];
+    [
+        field[..count].iter().all(|figure| *figure == nearest),
+        lowest[tail_count - count..]
+            .iter()
+            .all(|figure| *figure == middle),
+        highest[..count].iter().all(|figure| *figure == median),
+        field[m - count..].iter().all(|figure| *figure == farthest),
+    ]
 }
 
 fn quartile_meet() -> Meet {
@@ -1239,4 +1278,108 @@ fn test_a_hand_built_break_bearing_label_draws_the_named_error_through_quartiles
     };
     let error = meet_quartiles(&meet).expect_err("the reading names the precondition");
     assert_eq!(error, "a runner label holds a line break");
+}
+
+#[test]
+fn test_the_chain_equalities_hold_exactly_where_their_conditions_hold() {
+    // The four equality conditions of PG-42 in their stated
+    // count form, ((m + 1) div 2 + 2) div 2, over three hand
+    // built fields of three behind a record of 100. At the
+    // first field, 120, 120, and 150, the lowest two figures
+    // stand at the nearest figure and at the middle figure,
+    // so the margin and the lower quartile margin stand
+    // equal at 20 and the lower quartile margin and the
+    // middle margin stand equal at 20, while the median
+    // margin of 20 stands below the upper quartile margin
+    // of 35 and the spread stands at 50. At the second
+    // field, 110, 140, and 150, no governing pair of figures
+    // stands together at its neighbouring figure, and the
+    // chain stands at 10, 25, 40, 40, 45, and 50 in chain
+    // order, every conditioned link strict. At the third
+    // field, 110, 150, and 150, the highest two figures
+    // stand at the median figure and at the farthest
+    // figure, so the median margin and the upper quartile
+    // margin stand equal at 50 and the upper quartile
+    // margin and the spread stand equal at 50, while the
+    // margin of 10 stands below the lower quartile margin
+    // of 30 and that below the middle margin of 50. The pin
+    // fails if any link of the chain stands equal where its
+    // condition fails or stands apart where its condition
+    // holds, at any of the three fields.
+    let witnesses: [([i64; 3], [f64; 3], (f64, f64, f64, f64, f64, f64)); 3] = [
+        (
+            [12, 12, 15],
+            [120.0, 120.0, 150.0],
+            (20.0, 20.0, 20.0, 20.0, 35.0, 50.0),
+        ),
+        (
+            [11, 14, 15],
+            [110.0, 140.0, 150.0],
+            (10.0, 25.0, 40.0, 40.0, 45.0, 50.0),
+        ),
+        (
+            [11, 15, 15],
+            [110.0, 150.0, 150.0],
+            (10.0, 30.0, 50.0, 50.0, 50.0, 50.0),
+        ),
+    ];
+    for (usages, field, expected) in witnesses {
+        let meet = load_meet(&[
+            day(
+                1000,
+                "a",
+                &format!(
+                    "[{}, {}, {}, {}]",
+                    run("a", 500, &[(100, 10)]),
+                    run("b", 400, &[(100, usages[0])]),
+                    run("c", 300, &[(100, usages[1])]),
+                    run("d", 250, &[(100, usages[2])])
+                ),
+            ),
+            quiet_day(1000, "a", "a"),
+            quiet_day(1000, "a", "a"),
+        ]);
+        let quartiles = meet_quartiles(&meet).expect("the quartiles read");
+        let margins = meet_margins(&meet).expect("the margins read");
+        let middle = meet_middle(&meet).expect("the middle read");
+        let median = meet_median(&meet).expect("the median read");
+        let spread_lines = meet_spread(&meet).expect("the spread read");
+        let parts = quartiles_mark_parts(mark_lines(&quartiles)[0]);
+        let lower_margin = parts.lower.expect("a lower quartile stands").1;
+        let upper_margin = parts.upper.expect("an upper quartile stands").1;
+        let margin = margin_of(mark_lines(&margins)[0]).expect("a margin stands");
+        let middle_margin =
+            middle_margin_of(mark_lines(&middle)[0]).expect("a middle margin stands");
+        let median_margin =
+            median_margin_of(mark_lines(&median)[0]).expect("a median margin stands");
+        let spread = spread_of(mark_lines(&spread_lines)[0]).expect("a spread stands");
+        assert_eq!(
+            (
+                margin,
+                lower_margin,
+                middle_margin,
+                median_margin,
+                upper_margin,
+                spread
+            ),
+            expected,
+            "field {:?}",
+            field
+        );
+        let conditions = chain_conditions(&field);
+        assert_eq!(margin == lower_margin, conditions[0], "field {:?}", field);
+        assert_eq!(
+            lower_margin == middle_margin,
+            conditions[1],
+            "field {:?}",
+            field
+        );
+        assert_eq!(
+            median_margin == upper_margin,
+            conditions[2],
+            "field {:?}",
+            field
+        );
+        assert_eq!(upper_margin == spread, conditions[3], "field {:?}", field);
+    }
 }
