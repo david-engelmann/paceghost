@@ -134,8 +134,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 20 standing built and in review, so the count
     // stood at one, the slice 20 status line, until the
     // Round 19 closure landed slice 20 and the count
+    // returned to zero. Adjusted again with the
+    // Round 20 slice, as the named mechanical consequence
+    // of slice 21 standing built and in review, so the count
+    // stood at one, the slice 21 status line, until the
+    // Round 20 closure landed slice 21 and the count
     // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -419,4 +424,86 @@ fn test_readme_testing_names_the_gate_and_the_device() {
     assert!(lines.iter().any(|found| found == gate));
     let device = "One pin in the suite, the closed stream pin in rust/tests/test_cli_widths.rs, opens /dev/full and expects the write to fail. The pin stands skipped on a machine where that path is absent or is not a character device, and it names the state it found in its output when it skips.";
     assert!(lines.iter().any(|found| found == device));
+}
+
+#[test]
+fn test_contract_carries_the_round_twenty_obligations() {
+    let text = read("CONTRACT.md");
+    for label in ["PG-41", "PG-42"] {
+        assert!(text.contains(label), "the contract carries {}", label);
+    }
+}
+
+#[test]
+fn test_readme_reports_the_round_twenty_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-41 and PG-42 stand in full form in CONTRACT.md under the Round 20 obligations.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 21 is built and in review. It carries the quartiles reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the lower quartile standing and the upper quartile standing held after it by the field behind its holder, and the lower quartile margin and the upper quartile margin by which the record stands ahead of each, and the quartiles command, with the golden quartiles readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the lower quartile standing and the upper quartile standing after each mark, and the seeded generated fixture family extended to the quartiles reading, and the record prefix repair across the five standing generated pins, and the README Usage sections for the marks, standings, traces, and margins readings and the standing form guard over the Usage block.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 19 of 100"));
+}
+
+#[test]
+fn test_the_readme_usage_headings_stand_in_the_commands_order() {
+    let text = read("README.md");
+    let lines: Vec<&str> = text.lines().collect();
+    let usage = lines
+        .iter()
+        .position(|line| *line == "## Usage")
+        .expect("the Usage heading stands");
+    let status = lines
+        .iter()
+        .position(|line| *line == "## Status")
+        .expect("the Status heading stands");
+    let headings: Vec<String> = lines[usage..status]
+        .iter()
+        .filter(|line| line.starts_with("### "))
+        .map(|line| line.trim_start_matches("### ").to_string())
+        .collect();
+    let expected: Vec<String> = [
+        "show",
+        "ghost",
+        "race",
+        "season",
+        "board",
+        "fieldday",
+        "ladder",
+        "rematch",
+        "meet",
+        "table",
+        "reign",
+        "days",
+        "forks",
+        "marks",
+        "standings",
+        "traces",
+        "margins",
+        "spread",
+        "middle",
+        "tails",
+        "mean",
+        "median",
+        "quartiles",
+    ]
+    .iter()
+    .map(|name| name.to_string())
+    .collect();
+    assert_eq!(headings, expected);
+    for name in &expected {
+        let heading = format!("### {}", name);
+        let start = lines
+            .iter()
+            .position(|line| *line == heading)
+            .expect("the command heading stands");
+        let fence = lines[start..]
+            .iter()
+            .position(|line| *line == "```text")
+            .expect("the section carries its example block");
+        assert!(
+            lines[start + fence + 1].starts_with(&format!("$ paceghost {} ", name)),
+            "the {} block opens with its invocation",
+            name
+        );
+    }
 }
