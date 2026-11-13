@@ -1,6 +1,6 @@
 //! The paceghost command line surface.
 //!
-//! Twenty four commands read recorded runs from local files and
+//! Twenty five commands read recorded runs from local files and
 //! print reports. The show command prints one run or its
 //! defects, the
 //! ghost command prints the standing ghost for a task, and the race
@@ -48,6 +48,9 @@
 //! The range command prints the meet range for a meet, the same
 //! walk read mark by mark with the interquartile range behind
 //! each mark.
+//! The midhinge command prints the meet midhinge for a meet, the
+//! same walk read mark by mark with the midhinge standing behind
+//! each mark.
 //! Nothing here touches the network.
 //!
 //! The dispatch is a pure function of the argument list and a file
@@ -70,8 +73,8 @@ use crate::fieldday::{field_day_report, load_field_day_text, FieldDay};
 use crate::ladder::{ladder_report, load_ladder_text, Ladder};
 use crate::meet::{
     load_meet_text, meet_days, meet_forks, meet_margins, meet_marks, meet_mean, meet_median,
-    meet_middle, meet_quartiles, meet_range, meet_reign, meet_report, meet_spread, meet_standings,
-    meet_table, meet_tails, meet_traces, Meet,
+    meet_middle, meet_midhinge, meet_quartiles, meet_range, meet_reign, meet_report, meet_spread,
+    meet_standings, meet_table, meet_tails, meet_traces, Meet,
 };
 use crate::pynum::format_seconds;
 use crate::pytext::PText;
@@ -96,7 +99,7 @@ impl CliOutcome {
     }
 }
 
-const COMMANDS: [&str; 24] = [
+const COMMANDS: [&str; 25] = [
     "show",
     "ghost",
     "race",
@@ -121,9 +124,10 @@ const COMMANDS: [&str; 24] = [
     "median",
     "quartiles",
     "range",
+    "midhinge",
 ];
 
-const COMMAND_HELPS: [(&str, &str); 24] = [
+const COMMAND_HELPS: [(&str, &str); 25] = [
     ("show", "print one recorded run"),
     ("ghost", "print the standing ghost"),
     ("race", "race a live run against a ghost"),
@@ -175,10 +179,14 @@ const COMMAND_HELPS: [(&str, &str); 24] = [
         "print the meet quartiles for three or more field days",
     ),
     ("range", "print the meet range for three or more field days"),
+    (
+        "midhinge",
+        "print the meet midhinge for three or more field days",
+    ),
 ];
 
 const CHOICES_HEADER: &str =
-    "{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range}";
+    "{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge}";
 
 /// The static shape of one subcommand.
 struct Spec {
@@ -304,6 +312,11 @@ fn spec_for(command: &str) -> Spec {
             positionals: &["file"],
             variadic: false,
         },
+        "midhinge" => Spec {
+            name: "midhinge",
+            positionals: &["file"],
+            variadic: false,
+        },
         _ => Spec {
             name: "ladder",
             positionals: &["file"],
@@ -421,6 +434,7 @@ fn sub_parser_info(spec: &Spec) -> ParserInfo {
             "median" => "paceghost median",
             "quartiles" => "paceghost quartiles",
             "range" => "paceghost range",
+            "midhinge" => "paceghost midhinge",
             _ => "paceghost ladder",
         },
         description: None,
@@ -1188,7 +1202,7 @@ pub fn dispatch_with_columns(
                 out,
                 &main_usage,
                 format!(
-                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range')",
+                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge')",
                     py_repr(token)
                 ),
             );
@@ -1208,7 +1222,7 @@ pub fn dispatch_with_columns(
                     out,
                     &main_usage,
                     format!(
-                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range')",
+                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge')",
                         py_repr(token)
                     ),
                 );
@@ -1389,6 +1403,7 @@ fn run_command(
         "median" => command_median(&positionals[0], read_file, out),
         "quartiles" => command_quartiles(&positionals[0], read_file, out),
         "range" => command_range(&positionals[0], read_file, out),
+        "midhinge" => command_midhinge(&positionals[0], read_file, out),
         _ => command_ladder(&positionals[0], read_file, out),
     }
 }
@@ -1871,6 +1886,22 @@ fn command_range(file: &PText, read_file: &dyn Fn(&[u8]) -> Option<String>, out:
         Some(meet) => meet,
     };
     let lines = meet_range(&meet).expect("a loaded meet satisfies the range preconditions");
+    out.stdout.extend(lines);
+}
+
+fn command_midhinge(
+    file: &PText,
+    read_file: &dyn Fn(&[u8]) -> Option<String>,
+    out: &mut CliOutcome,
+) {
+    let meet = match load_meet_or_print_defects(file, read_file, out) {
+        None => {
+            out.code = 1;
+            return;
+        }
+        Some(meet) => meet,
+    };
+    let lines = meet_midhinge(&meet).expect("a loaded meet satisfies the midhinge preconditions");
     out.stdout.extend(lines);
 }
 

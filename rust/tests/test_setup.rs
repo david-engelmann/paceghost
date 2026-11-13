@@ -617,12 +617,20 @@ fn test_readme_reports_the_round_twenty_two_status() {
 }
 
 #[test]
-fn test_the_command_surface_stands_at_twenty_four_with_range_last() {
+fn test_the_command_surface_keeps_the_twenty_four_commands_in_order_with_midhinge_last() {
+    // Restated in place at the Round 23 build commit as a
+    // forced restatement, the pin's Round 22 assertion of
+    // a surface of twenty four with range last standing
+    // falsified by the midhinge landing itself. The pin
+    // now asserts the form the landing leaves, the twenty
+    // four commands of the earlier rounds standing in
+    // their order with range twenty fourth and midhinge
+    // appended last of twenty five.
     let text = read("rust/src/cli.rs");
     let lines: Vec<&str> = text.lines().collect();
     let start = lines
         .iter()
-        .position(|line| *line == "const COMMANDS: [&str; 24] = [")
+        .position(|line| *line == "const COMMANDS: [&str; 25] = [")
         .expect("the command table stands");
     let names: Vec<&str> = lines[start + 1..]
         .iter()
@@ -654,6 +662,7 @@ fn test_the_command_surface_stands_at_twenty_four_with_range_last() {
         "median",
         "quartiles",
         "range",
+        "midhinge",
     ];
     assert_eq!(names, expected);
 }

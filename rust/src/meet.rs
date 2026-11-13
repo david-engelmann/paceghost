@@ -375,7 +375,16 @@ struct MarkRecord {
 /// no competitor other than the holder held a standing
 /// after the mark, so the range reading reads the
 /// same pass a sixteenth way and no walk stands for it
-/// either.
+/// either. The midhinge standings record, after each
+/// mark, the midhinge standing after that mark, the
+/// mean of the lower quartile standing and the upper
+/// quartile standing of the field behind the holder,
+/// one optional entry per mark in walk order beside
+/// the range standings, an entry standing empty where
+/// no competitor other than the holder held a standing
+/// after the mark, so the midhinge reading reads the
+/// same pass a seventeenth way and no walk stands for
+/// it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -394,6 +403,7 @@ struct MeetWalk {
     median: Vec<Option<BigRational>>,
     quartiles: Vec<Option<(BigRational, BigRational)>>,
     range: Vec<Option<BigRational>>,
+    midhinge: Vec<Option<BigRational>>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
 }
@@ -474,9 +484,10 @@ fn select_extreme(
 /// it, and the quartiles selection takes its two
 /// sub-field medians from it, and the range selection
 /// takes the difference of its two sub-field medians
-/// from it, so the field the six readings state
-/// stands in one body and the six cannot be edited
-/// apart. The
+/// from it, and the midhinge selection takes the mean
+/// of its two sub-field medians from it, so the field
+/// the seven readings state stands in one body and
+/// the seven cannot be edited apart. The
 /// helper guards no invariant and carries no expect
 /// string, because it reads no competitor out of the
 /// vector; the emptiness of the field is each caller's
@@ -755,6 +766,54 @@ fn select_range(standing: &[Option<BigRational>], holder: usize) -> Option<BigRa
     Some(upper - lower)
 }
 
+/// The midhinge standing after a mark, over the walk's vectors.
+///
+/// The midhinge standing is the mean of the lower
+/// quartile standing and the upper quartile standing
+/// of the field behind the holder, the quartile
+/// standings being the medians of the lowest and the
+/// highest figures of that field, the lowest and the
+/// highest counting the (m + 1) div 2 figures where m
+/// counts the competitors of the field, the median of
+/// a part being the figure standing at its middle
+/// place where the part counts odd and the mean of
+/// the two figures standing at its middle places
+/// where the part counts even, so where one competitor
+/// stands behind the holder the midhinge is that
+/// competitor's figure whole, each quartile standing
+/// at it, where two stand behind the holder the
+/// midhinge is the midpoint of their two figures,
+/// where three stand behind the holder the midhinge
+/// is the mean of the mean of the two lowest figures
+/// and the mean of the two highest, and where five
+/// stand behind the holder the midhinge is the
+/// midpoint of the second figure and the fourth
+/// figure of the field. A midhinge standing is a
+/// statistic of the figures of the field and is held
+/// by no competitor, so the selection names no holder
+/// for the midhinge and applies no tie discipline. No
+/// competitor other than the holder holding a standing
+/// after the mark leaves the midhinge standing empty.
+fn select_midhinge(standing: &[Option<BigRational>], holder: usize) -> Option<BigRational> {
+    let figures = field_figures(standing, holder);
+    if figures.is_empty() {
+        return None;
+    }
+    let count = figures.len().div_ceil(2);
+    let median = |part: &[&BigRational]| {
+        if part.len() % 2 == 1 {
+            part[part.len() / 2].clone()
+        } else {
+            let lower = part[part.len() / 2 - 1].clone();
+            let upper = part[part.len() / 2].clone();
+            (lower + upper) / BigRational::from(BigInt::from(2))
+        }
+    };
+    let lower = median(&figures[..count]);
+    let upper = median(&figures[figures.len() - count..]);
+    Some((lower + upper) / BigRational::from(BigInt::from(2)))
+}
+
 /// Walk the record progression of one loaded meet once.
 ///
 /// The walk reads the days as one field of competitors, a runner
@@ -825,7 +884,12 @@ fn select_range(standing: &[Option<BigRational>], holder: usize) -> Option<BigRa
 /// records the interquartile range after the mark,
 /// the upper quartile standing less the lower
 /// quartile standing of the field behind the holder,
-/// in the range standings the range reading reads.
+/// in the range standings the range reading reads, and
+/// it records the midhinge standing after the mark,
+/// the mean of the lower quartile standing and the
+/// upper quartile standing of the field behind the
+/// holder, in the midhinge standings the midhinge
+/// reading reads.
 /// Handed a
 /// meet value built
 /// by hand holding no days, or more days than the ordinal table
@@ -878,6 +942,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut median: Vec<Option<BigRational>> = Vec::new();
     let mut quartiles: Vec<Option<(BigRational, BigRational)>> = Vec::new();
     let mut range: Vec<Option<BigRational>> = Vec::new();
+    let mut midhinge: Vec<Option<BigRational>> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -971,6 +1036,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         median.push(select_median(&standing, new_holder));
         quartiles.push(select_quartiles(&standing, new_holder));
         range.push(select_range(&standing, new_holder));
+        midhinge.push(select_midhinge(&standing, new_holder));
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -1043,6 +1109,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         median,
         quartiles,
         range,
+        midhinge,
         day_standings,
         day_close_lines,
     })
@@ -2364,6 +2431,105 @@ pub fn meet_range(meet: &Meet) -> Result<Vec<String>, String> {
         )),
         None => lines.push(format!(
             "range counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
+    Ok(lines)
+}
+
+/// Return the meet midhinge lines for one loaded meet.
+///
+/// The midhinge reading reads the one walk a
+/// seventeenth way. One section stands for each day of
+/// the meet in meet order, every day holding a section,
+/// and inside a section one line stands for each mark
+/// of the walk standing in that day, in walk order,
+/// naming the place of the mark in the whole walk, the
+/// holder after the mark and the record figure after
+/// it, in the mark form of the marks reading as far as
+/// the record figure, and then the midhinge standing
+/// after the mark, the mean of the lower quartile
+/// standing and the upper quartile standing of the
+/// field behind the holder, and the midhinge margin by
+/// which the record stands ahead of that standing, or
+/// the words and no other standing where no competitor
+/// other than the holder holds a standing after the
+/// mark. A midhinge standing is a statistic of the
+/// figures of the field and is held by no competitor,
+/// so no mark line names a holder for the midhinge.
+/// Each midhinge margin is computed on exact values
+/// before any rendering, so it is never negative, and
+/// it stands at zero exactly where the lower quartile
+/// standing and the upper quartile standing both stand
+/// at the record figure. The reading closes by counting
+/// the marks the walk walked, the marks with another
+/// standing, and the days, and naming the closest
+/// midhinge margin and the earliest mark standing at
+/// it, the closest margin taken over the marks and
+/// never over the competitors, or by stating that no
+/// other standing stood at any mark where none did. No
+/// competitor is ranked or compared against another
+/// beyond the holder each mark line names.
+pub fn meet_midhinge(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet midhinge, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut closest: Option<(BigRational, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record)
+            );
+            match &walk.midhinge[place - 1] {
+                Some(figure) => {
+                    let margin = figure.clone() - record.record.clone();
+                    with_another += 1;
+                    let nearer = match &closest {
+                        None => true,
+                        Some((smallest, _)) => margin < *smallest,
+                    };
+                    if nearer {
+                        closest = Some((margin.clone(), *record));
+                    }
+                    lines.push(format!(
+                        "{}, midhinge standing {}, midhinge margin {}",
+                        head,
+                        format_usage(figure),
+                        format_usage(&margin)
+                    ));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match closest {
+        Some((margin, record)) => lines.push(format!(
+            "midhinge counts, marks walked {}, marks with another standing {}, days {}, closest midhinge margin {} at {} seconds on the {} day",
+            walk.marks_walked,
+            with_another,
+            meet.days.len(),
+            format_usage(&margin),
+            format_seconds_fraction(&record.mark),
+            ORDINALS[record.day_index]
+        )),
+        None => lines.push(format!(
+            "midhinge counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
             walk.marks_walked,
             with_another,
             meet.days.len()
