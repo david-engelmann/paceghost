@@ -117,7 +117,7 @@ fn test_the_cli_middle_command_with_an_extra_argument_prints_the_usage_message()
         outcome.stderr,
         vec![
             "usage: paceghost [-h]",
-            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median}",
+            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}",
             "                 ...",
             "paceghost: error: unrecognized arguments: b.json",
         ]

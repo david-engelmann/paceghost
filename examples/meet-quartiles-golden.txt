@@ -1,0 +1,21 @@
+meet quartiles, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, lower quartile standing 1350, lower quartile margin 90, upper quartile standing 1350, upper quartile margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, lower quartile standing 1260, lower quartile margin 60, upper quartile standing 1350, upper quartile margin 150
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, lower quartile standing 1200, lower quartile margin 94.285714, upper quartile standing 1350, upper quartile margin 244.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, lower quartile standing 1105.714286, lower quartile margin 165.714286, upper quartile standing 1200, upper quartile margin 260
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, lower quartile standing 998.181818, lower quartile margin 58.181818, upper quartile standing 1105.714286, upper quartile margin 165.714286
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, lower quartile standing 998.181818, lower quartile margin 58.181818, upper quartile standing 1140, upper quartile margin 200
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, lower quartile standing 998.181818, lower quartile margin 158.181818, upper quartile standing 1140, upper quartile margin 300
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, lower quartile standing 998.181818, lower quartile margin 158.181818, upper quartile standing 1140, upper quartile margin 300
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, lower quartile standing 840, lower quartile margin 165, upper quartile standing 1140, upper quartile margin 465
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, lower quartile standing 1140, lower quartile margin 465, upper quartile standing 1152, upper quartile margin 477
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, lower quartile standing 900, lower quartile margin 225, upper quartile standing 1152, upper quartile margin 477
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, lower quartile standing 900, lower quartile margin 225, upper quartile standing 1008, upper quartile margin 333
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, lower quartile standing 900, lower quartile margin 340, upper quartile standing 1008, upper quartile margin 448
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, lower quartile standing 720, lower quartile margin 160, upper quartile standing 900, upper quartile margin 340
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, lower quartile standing 720, lower quartile margin 160, upper quartile standing 750, upper quartile margin 190
+quartiles counts, marks walked 16, marks with another standing 15, days 3, closest lower quartile margin 58.181818 at 1100 seconds on the first day, closest upper quartile margin 90 at 400 seconds on the first day

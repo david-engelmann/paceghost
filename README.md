@@ -322,6 +322,122 @@ close, days stood in 1, marks stood at 0, spells held 0, no standing projection 
 forks counts, competitors 4, marks stood at 45, spells 5
 ```
 
+### marks
+
+The marks command prints the meet read mark by mark, naming the place of each mark in the whole walk, the holder after it, the record figure after it, and the standing the mark took against the state that stood before it.
+
+```text
+$ paceghost marks examples/meet.json
+meet marks, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, set the standing record
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, stood below the standing record of 1260
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, took the record from operator, displacing a projection of 1260
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, took the record from dawn fork, displacing a projection of 1200
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, took the record from operator, displacing a projection of 1105.714286
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, stood below the standing record of 940
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, stood below the standing record of 940
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, extended its own record, displacing a projection of 940
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, stood below the standing record of 840
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, took the record from night fork, displacing a projection of 840
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, stood below the standing record of 675
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, stood below the standing record of 675
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, stood below the standing record of 675
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, extended its own record, displacing a projection of 675
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, stood below the standing record of 560
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, stood below the standing record of 560
+marks counts, marks walked 16, record marks 7, days 3
+```
+
+### standings
+
+The standings command prints the meet read at the close of each day, naming every competitor's standing at every day's close and closing each section with the closing line of the meet report for that day.
+
+```text
+$ paceghost standings examples/meet.json
+meet standings, 3 days, 4 competitors
+day, the first day, standings 3
+competitor operator, standing projection 1140 at the close
+competitor night fork, standing projection 840 at the close
+competitor dawn fork, standing projection 998.181818 at the close
+competitor quiet fork, no standing projection at the close
+close of the first day, record held by night fork at a projection of 840
+day, the second day, standings 3
+competitor operator, standing projection 900 at the close
+competitor night fork, standing projection 1008 at the close
+competitor dawn fork, standing projection 675 at the close
+competitor quiet fork, no standing projection at the close
+close of the second day, record held by dawn fork at a projection of 675
+day, the third day, standings 3
+competitor operator, standing projection 750 at the close
+competitor night fork, standing projection 720 at the close
+competitor dawn fork, standing projection 560 at the close
+competitor quiet fork, no standing projection at the close
+close of the third day, record held by dawn fork at a projection of 560
+standings counts, days 3, competitors 4, standings held 9
+```
+
+### traces
+
+The traces command prints the meet read competitor by competitor at the close of each day, naming every competitor's standing at the close of each day in one section of its own and the closes at which it held a standing.
+
+```text
+$ paceghost traces examples/meet.json
+meet traces, 3 days, 4 competitors
+competitor operator
+the first day, standing projection 1140 at the close
+the second day, standing projection 900 at the close
+the third day, standing projection 750 at the close
+close, standings held at 3 closes, standing projection 750 at the close
+competitor night fork
+the first day, standing projection 840 at the close
+the second day, standing projection 1008 at the close
+the third day, standing projection 720 at the close
+close, standings held at 3 closes, standing projection 720 at the close
+competitor dawn fork
+the first day, standing projection 998.181818 at the close
+the second day, standing projection 675 at the close
+the third day, standing projection 560 at the close
+close, standings held at 3 closes, standing projection 560 at the close
+competitor quiet fork
+the first day, no standing projection at the close
+the second day, no standing projection at the close
+the third day, no standing projection at the close
+close, standings held at 0 closes, no standing projection at the close
+traces counts, competitors 4, days 3, standings held 9
+```
+
+### margins
+
+The margins command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, the nearest standing held after it by a competitor other than its holder, and the margin by which the record stands ahead of that nearest standing.
+
+```text
+$ paceghost margins examples/meet.json
+meet margins, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, nearest standing 1350 held by night fork, margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, nearest standing 1260 held by operator, margin 60
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, nearest standing 1200 held by dawn fork, margin 94.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, nearest standing 1105.714286 held by operator, margin 165.714286
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, nearest standing 998.181818 held by dawn fork, margin 58.181818
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, nearest standing 998.181818 held by dawn fork, margin 58.181818
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, nearest standing 998.181818 held by dawn fork, margin 158.181818
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, nearest standing 998.181818 held by dawn fork, margin 158.181818
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, nearest standing 840 held by night fork, margin 165
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, nearest standing 1140 held by operator, margin 465
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, nearest standing 900 held by operator, margin 225
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, nearest standing 900 held by operator, margin 225
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, nearest standing 900 held by operator, margin 340
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, nearest standing 720 held by night fork, margin 160
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, nearest standing 720 held by night fork, margin 160
+margins counts, marks walked 16, marks with another standing 15, days 3, closest margin 58.181818 at 1100 seconds on the first day
+```
+
 ### spread
 
 The spread command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, the count of competitors holding a standing after it, the farthest standing held after it by a competitor other than its holder, and the spread by which that farthest standing stands behind the record.
@@ -467,6 +583,35 @@ mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, medi
 median counts, marks walked 16, marks with another standing 15, days 3, closest median margin 90 at 400 seconds on the first day
 ```
 
+### quartiles
+
+The quartiles command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, the lower quartile standing and the upper quartile standing held after it by the field behind its holder, and the lower quartile margin and the upper quartile margin by which the record stands ahead of each.
+
+```text
+$ paceghost quartiles examples/meet.json
+meet quartiles, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, lower quartile standing 1350, lower quartile margin 90, upper quartile standing 1350, upper quartile margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, lower quartile standing 1260, lower quartile margin 60, upper quartile standing 1350, upper quartile margin 150
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, lower quartile standing 1200, lower quartile margin 94.285714, upper quartile standing 1350, upper quartile margin 244.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, lower quartile standing 1105.714286, lower quartile margin 165.714286, upper quartile standing 1200, upper quartile margin 260
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, lower quartile standing 998.181818, lower quartile margin 58.181818, upper quartile standing 1105.714286, upper quartile margin 165.714286
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, lower quartile standing 998.181818, lower quartile margin 58.181818, upper quartile standing 1140, upper quartile margin 200
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, lower quartile standing 998.181818, lower quartile margin 158.181818, upper quartile standing 1140, upper quartile margin 300
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, lower quartile standing 998.181818, lower quartile margin 158.181818, upper quartile standing 1140, upper quartile margin 300
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, lower quartile standing 840, lower quartile margin 165, upper quartile standing 1140, upper quartile margin 465
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, lower quartile standing 1140, lower quartile margin 465, upper quartile standing 1152, upper quartile margin 477
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, lower quartile standing 900, lower quartile margin 225, upper quartile standing 1152, upper quartile margin 477
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, lower quartile standing 900, lower quartile margin 225, upper quartile standing 1008, upper quartile margin 333
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, lower quartile standing 900, lower quartile margin 340, upper quartile standing 1008, upper quartile margin 448
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, lower quartile standing 720, lower quartile margin 160, upper quartile standing 900, upper quartile margin 340
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, lower quartile standing 720, lower quartile margin 160, upper quartile standing 750, upper quartile margin 190
+quartiles counts, marks walked 16, marks with another standing 15, days 3, closest lower quartile margin 58.181818 at 1100 seconds on the first day, closest upper quartile margin 90 at 400 seconds on the first day
+```
+
 ## Status
 
 Seeded in October 2026. Setup has landed, and Rounds 1 to 19 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
@@ -492,6 +637,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 19 have closed, with a
 - Contract, PG-35 and PG-36 met. They stand in full form in CONTRACT.md under the Round 17 obligations, and Round 17 closed on the merged slice 18 after three reviews, with the M-6 evidence item closed by execution and its record corrected in the slice, the refuted pin 2 header claim restated in the slice by a disclosed repair commit, and the red team's one Major standing against the build record and not the slice.
 - Contract, PG-37 and PG-38 met. They stand in full form in CONTRACT.md under the Round 18 obligations, and Round 18 closed on the merged slice 19 after three reviews, with the header postures restated to their executed form and the design plan's README pins landed in the slice.
 - Contract, PG-39 and PG-40 met. They stand in full form in CONTRACT.md under the Round 19 obligations, and Round 19 closed on the merged slice 20 after three reviews approving with findings, with the pin headers restated to their executed postures and the generated median pin's record comparison repaired in the slice, and the red team's local execution set carried as named debt to the Round 20 design.
+- Contract, PG-41 and PG-42 stand in full form in CONTRACT.md under the Round 20 obligations.
 - Slice 2 has landed. It carries the recorded run loader that names every malformed field, the ghost rule, the race report, the ghost change report, and the show, ghost, and race commands, with two synthetic example runs and a golden race report under examples.
 - The Round 2 slice has landed. It carries the season report over a recorded field of runs grouped by model and the live board over recorded timed reads, with the season and board commands, a synthetic example field, a synthetic ghost record carrying a usage figure, a synthetic example run carrying timed reads, and golden renderings under examples. PG-5 and PG-6 stand in full form in CONTRACT.md with the Round 2 repair amendment, and Round 2 closed on the merged slice after three reviews, a repair pass, a micro repair, and re-reviews approving the final head. The board reads a finished recording, and watching a real run while it runs remains future work.
 - Slice 4 has landed. It carries the field day loader that names every malformed field, the stolen record report that walks the record progression of one window across a field of recorded runs, and the fieldday command, with a synthetic example field day and its golden report under examples.
@@ -511,6 +657,7 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 19 have closed, with a
 - Slice 18 has landed. It carries the tails reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the lower tail standing and the upper tail standing held after it by the field behind its holder, and the lower tail margin and the upper tail margin by which the record stands ahead of each tail standing, and the tails command, with the golden tails readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the lower tail standing and the upper tail standing after each mark, and the seeded generated fixture family extended to the tails reading.
 - Slice 19 has landed. It carries the mean reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the mean standing held after it by the field behind its holder, and the mean margin by which the record stands ahead of the mean standing, and the mean command, with the golden mean readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the mean standing after each mark, and the seeded generated fixture family extended to the mean reading.
 - Slice 20 has landed. It carries the median reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the median standing held after it by the field behind its holder, and the median margin by which the record stands ahead of the median standing, and the median command, with the golden median readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the median standing after each mark, and the seeded generated fixture family extended to the median reading.
+- Slice 21 is built and in review. It carries the quartiles reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the lower quartile standing and the upper quartile standing held after it by the field behind its holder, and the lower quartile margin and the upper quartile margin by which the record stands ahead of each, and the quartiles command, with the golden quartiles readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the lower quartile standing and the upper quartile standing after each mark, and the seeded generated fixture family extended to the quartiles reading, and the record prefix repair across the five standing generated pins, and the README Usage sections for the marks, standings, traces, and margins readings and the standing form guard over the Usage block.
 - The Rust port has landed. It carries the behavior the Python package carried, checked against the same goldens, and the Python tree stands removed under PORT-10.
 - Local gate, cargo test, cargo fmt --check, and cargo clippy --all-targets -- -D warnings. CI runs the same commands.
 

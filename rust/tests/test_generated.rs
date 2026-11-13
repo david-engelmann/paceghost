@@ -31,7 +31,8 @@
 
 use paceghost::meet::{
     load_meet_text, meet_days, meet_margins, meet_marks, meet_mean, meet_median, meet_middle,
-    meet_reign, meet_report, meet_spread, meet_standings, meet_table, meet_tails, meet_traces,
+    meet_quartiles, meet_reign, meet_report, meet_spread, meet_standings, meet_table, meet_tails,
+    meet_traces,
 };
 use paceghost::pynum::Num;
 use paceghost::runs::load_run_text;
@@ -602,6 +603,7 @@ fn test_generated_meets_close_under_the_margins_reading() {
                 seed
             );
             let (record, nearest) = margins_mark_parts(margin_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
             if let Some((figure, _label, margin)) = nearest {
                 with_another += 1;
                 let record_value: f64 = record.parse().expect("a record figure parses");
@@ -871,6 +873,7 @@ fn test_generated_meets_close_under_the_spread_reading() {
                 seed
             );
             let (record, _field, farthest) = spread_mark_parts(spread_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
             let (_margin_record, nearest) = margins_mark_parts(margin_line);
             if let Some((figure, _label, spread_figure)) = farthest {
                 with_another += 1;
@@ -1173,6 +1176,7 @@ fn test_generated_meets_close_under_the_middle_reading() {
                 seed
             );
             let (record, middle_part) = middle_mark_parts(middle_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
             let (_margin_record, nearest) = margins_mark_parts(margin_line);
             let (_spread_record, _field, farthest) = spread_mark_parts(spread_line);
             if let Some((figure, _label, middle_margin)) = middle_part {
@@ -1532,6 +1536,7 @@ fn test_generated_meets_close_under_the_tails_reading() {
                 seed
             );
             let (record, tails_part) = tails_mark_parts(tails_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
             let (_margin_record, nearest) = margins_mark_parts(margin_line);
             let (_spread_record, _field, farthest) = spread_mark_parts(spread_line);
             let (_middle_record, middle_part) = middle_mark_parts(middle_line);
@@ -2005,6 +2010,7 @@ fn test_generated_meets_close_under_the_mean_reading() {
                 seed
             );
             let (record, mean_part) = mean_mark_parts(mean_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
             let (_margin_record, nearest) = margins_mark_parts(margin_line);
             let (_spread_record, _field, farthest) = spread_mark_parts(spread_line);
             let (_tails_record, tails_part) = tails_mark_parts(tails_line);
@@ -2709,5 +2715,536 @@ fn test_generated_meets_close_under_the_median_reading() {
     assert!(
         mean_below > 0,
         "the mean margin stands below the median margin at some mark of the family"
+    );
+}
+
+/// The lower and upper quartile parts of one mark line,
+/// each the standing figure and the margin as printed.
+type QuartileParts = ((String, String), (String, String));
+
+/// The figures of one quartiles mark line: the record
+/// figure, and where another standing stands, the lower
+/// quartile figure and margin and the upper quartile
+/// figure and margin.
+fn quartiles_mark_parts(line: &str) -> (String, Option<QuartileParts>) {
+    let start = line
+        .find("at a projection of ")
+        .expect("a mark line names its record figure");
+    let figure_start = start + "at a projection of ".len();
+    let figure_end = line[figure_start..]
+        .find(',')
+        .map(|offset| figure_start + offset)
+        .expect("a record figure ends at a comma");
+    let record = line[figure_start..figure_end].to_string();
+    if line.ends_with(", and no other standing") {
+        return (record, None);
+    }
+    let lower_start = line
+        .find(", lower quartile standing ")
+        .expect("a figured mark line names its lower quartile standing")
+        + ", lower quartile standing ".len();
+    let lower_end = line[lower_start..]
+        .find(", lower quartile margin ")
+        .map(|offset| lower_start + offset)
+        .expect("a lower quartile standing names its margin");
+    let lower_figure = line[lower_start..lower_end].to_string();
+    let lower_margin_start = lower_end + ", lower quartile margin ".len();
+    let lower_margin_end = line[lower_margin_start..]
+        .find(", upper quartile standing ")
+        .map(|offset| lower_margin_start + offset)
+        .expect("a lower quartile margin names the upper quartile standing");
+    let lower_margin = line[lower_margin_start..lower_margin_end].to_string();
+    let upper_start = lower_margin_end + ", upper quartile standing ".len();
+    let upper_end = line[upper_start..]
+        .find(", upper quartile margin ")
+        .map(|offset| upper_start + offset)
+        .expect("an upper quartile standing names its margin");
+    let upper_figure = line[upper_start..upper_end].to_string();
+    let upper_margin = line[upper_end + ", upper quartile margin ".len()..].to_string();
+    (
+        record,
+        Some(((lower_figure, lower_margin), (upper_figure, upper_margin))),
+    )
+}
+
+/// The elapsed figure and ordinal phrase a quartiles mark
+/// line names, read the way the margins helper reads
+/// them.
+fn quartiles_mark_position(line: &str) -> (String, String) {
+    margins_mark_position(line)
+}
+
+#[test]
+fn test_generated_meets_close_under_the_quartiles_reading() {
+    let mut lower_above = 0usize;
+    let mut lower_below = 0usize;
+    let mut upper_above = 0usize;
+    let mut upper_below = 0usize;
+    for index in 0..8u64 {
+        let seed = MEET_SEED + index;
+        let mut gen = Gen::new(seed);
+        let text = meet_text(&mut gen);
+        let (meet, defects) = load_meet_text(&text);
+        assert_eq!(defects, Vec::<String>::new(), "seed {}", seed);
+        let meet = meet.expect("the generated meet loads");
+
+        let marks = meet_marks(&meet).expect("the marks read");
+        let margins = meet_margins(&meet).expect("the margins read");
+        let spread = meet_spread(&meet).expect("the spread read");
+        let middle = meet_middle(&meet).expect("the middle read");
+        let median = meet_median(&meet).expect("the median read");
+        let tails = meet_tails(&meet).expect("the tails read");
+        let quartiles = meet_quartiles(&meet).expect("the quartiles read");
+        let standings = meet_standings(&meet).expect("the standings read");
+
+        let reading_marks: Vec<&String> = marks
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let margin_marks: Vec<&String> = margins
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let spread_marks: Vec<&String> = spread
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let middle_marks: Vec<&String> = middle
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let median_marks: Vec<&String> = median
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let tails_marks: Vec<&String> = tails
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let quartiles_marks: Vec<&String> = quartiles
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        assert_eq!(quartiles_marks.len(), reading_marks.len(), "seed {}", seed);
+        assert_eq!(quartiles_marks.len(), margin_marks.len(), "seed {}", seed);
+        assert_eq!(quartiles_marks.len(), spread_marks.len(), "seed {}", seed);
+        assert_eq!(quartiles_marks.len(), middle_marks.len(), "seed {}", seed);
+        assert_eq!(quartiles_marks.len(), median_marks.len(), "seed {}", seed);
+        assert_eq!(quartiles_marks.len(), tails_marks.len(), "seed {}", seed);
+
+        // The line by line agreement of PG-42, the
+        // quartile margin arithmetic of every mark line,
+        // the zero relation's clauses in their
+        // conditional form, the bracketing chain of
+        // PG-42 against the margins, middle, median, and
+        // spread readings at the same mark, and the no
+        // fixed order relations against the tails reading
+        // counted in both directions.
+        let mut with_another = 0usize;
+        for (
+            (((((quartile_line, mark_line), margin_line), spread_line), middle_line), median_line),
+            tails_line,
+        ) in quartiles_marks
+            .iter()
+            .zip(reading_marks.iter())
+            .zip(margin_marks.iter())
+            .zip(spread_marks.iter())
+            .zip(middle_marks.iter())
+            .zip(median_marks.iter())
+            .zip(tails_marks.iter())
+        {
+            assert!(
+                quartile_line.starts_with(&margins_record_prefix(mark_line)),
+                "seed {}",
+                seed
+            );
+            let (record, quartile_part) = quartiles_mark_parts(quartile_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
+            let (_margin_record, nearest) = margins_mark_parts(margin_line);
+            let (_spread_record, _field, farthest) = spread_mark_parts(spread_line);
+            let (_middle_record, middle_part) = middle_mark_parts(middle_line);
+            let (_median_record, median_part) = median_mark_parts(median_line);
+            let (_tails_record, tails_part) = tails_mark_parts(tails_line);
+            if let Some(((lower_figure, lower_margin), (upper_figure, upper_margin))) =
+                quartile_part
+            {
+                with_another += 1;
+                let record_value: f64 = record.parse().expect("a record figure parses");
+                let lower_value: f64 = lower_figure
+                    .parse()
+                    .expect("a lower quartile figure parses");
+                let lower_margin_value: f64 = lower_margin
+                    .parse()
+                    .expect("a lower quartile margin parses");
+                let upper_value: f64 = upper_figure
+                    .parse()
+                    .expect("an upper quartile figure parses");
+                let upper_margin_value: f64 = upper_margin
+                    .parse()
+                    .expect("an upper quartile margin parses");
+                assert!(lower_margin_value >= 0.0, "seed {}", seed);
+                assert!(upper_margin_value >= 0.0, "seed {}", seed);
+                assert!(
+                    (lower_value - record_value - lower_margin_value).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    (upper_value - record_value - upper_margin_value).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                if lower_margin == "0" {
+                    assert_eq!(lower_figure, record, "seed {}", seed);
+                }
+                if lower_figure == record {
+                    assert_eq!(lower_margin, "0", "seed {}", seed);
+                }
+                if upper_margin == "0" {
+                    assert_eq!(upper_figure, record, "seed {}", seed);
+                }
+                if upper_figure == record {
+                    assert_eq!(upper_margin, "0", "seed {}", seed);
+                }
+                let (_nearest_figure, _nearest_label, margin_figure) =
+                    nearest.expect("the margins line states a nearest standing");
+                let margin_value: f64 = margin_figure.parse().expect("a margin figure parses");
+                let (_farthest_figure, _farthest_label, spread_figure) =
+                    farthest.expect("the spread line states a farthest standing");
+                let spread_value: f64 = spread_figure.parse().expect("a spread figure parses");
+                let (_middle_figure, _middle_label, middle_margin) =
+                    middle_part.expect("the middle line states a middle standing");
+                let middle_margin_value: f64 =
+                    middle_margin.parse().expect("a middle margin parses");
+                let (_median_figure, median_margin) =
+                    median_part.expect("the median line states a median standing");
+                let median_margin_value: f64 =
+                    median_margin.parse().expect("a median margin parses");
+                let (_lower_tail_figure, lower_tail_margin, _upper_tail_figure, upper_tail_margin) =
+                    tails_part.expect("the tails line states its tails");
+                let lower_tail_margin_value: f64 = lower_tail_margin
+                    .parse()
+                    .expect("a lower tail margin parses");
+                let upper_tail_margin_value: f64 = upper_tail_margin
+                    .parse()
+                    .expect("an upper tail margin parses");
+                assert!(
+                    margin_value <= lower_margin_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    lower_margin_value <= middle_margin_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    middle_margin_value <= median_margin_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    median_margin_value <= upper_margin_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    upper_margin_value <= spread_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                if lower_margin_value > lower_tail_margin_value + 0.000002 {
+                    lower_above += 1;
+                }
+                if lower_margin_value + 0.000002 < lower_tail_margin_value {
+                    lower_below += 1;
+                }
+                if upper_margin_value > upper_tail_margin_value + 0.000002 {
+                    upper_above += 1;
+                }
+                if upper_margin_value + 0.000002 < upper_tail_margin_value {
+                    upper_below += 1;
+                }
+            } else {
+                assert!(nearest.is_none(), "seed {}", seed);
+                assert!(farthest.is_none(), "seed {}", seed);
+                assert!(middle_part.is_none(), "seed {}", seed);
+                assert!(median_part.is_none(), "seed {}", seed);
+                assert!(tails_part.is_none(), "seed {}", seed);
+            }
+        }
+
+        // The counts arithmetic of PG-42, and the two
+        // closings naming the earliest mark at each
+        // smallest quartile margin.
+        let counts = quartiles.last().expect("the quartiles close");
+        let walked = count_after(counts, "marks walked ");
+        assert_eq!(walked, quartiles_marks.len(), "seed {}", seed);
+        let stated_with = count_after(counts, "marks with another standing ");
+        assert_eq!(stated_with, with_another, "seed {}", seed);
+        let stated_days = count_after(counts, "days ");
+        let no_other = quartiles_marks
+            .iter()
+            .filter(|line| line.ends_with(", and no other standing"))
+            .count();
+        assert_eq!(with_another + no_other, walked, "seed {}", seed);
+        if with_another > 0 {
+            let lower_part = counts
+                .split("closest lower quartile margin ")
+                .nth(1)
+                .expect("the counts line names its closest lower quartile margin");
+            let (lower_closest_figure, lower_rest) = lower_part
+                .split_once(" at ")
+                .expect("the closest lower quartile margin names its mark");
+            let (lower_closest_elapsed, lower_rest) = lower_rest
+                .split_once(" seconds on the ")
+                .expect("the closest lower quartile margin names its seconds");
+            let (lower_closest_ordinal, upper_part) = lower_rest
+                .split_once(" day, closest upper quartile margin ")
+                .expect("the counts line names its closest upper quartile margin");
+            let (upper_closest_figure, upper_rest) = upper_part
+                .split_once(" at ")
+                .expect("the closest upper quartile margin names its mark");
+            let (upper_closest_elapsed, upper_closest_ordinal) = upper_rest
+                .split_once(" seconds on the ")
+                .expect("the closest upper quartile margin names its seconds");
+            let upper_closest_ordinal = upper_closest_ordinal
+                .strip_suffix(" day")
+                .expect("the closest upper quartile margin names its day");
+            let lower_stated: f64 = lower_closest_figure
+                .parse()
+                .expect("a closest lower figure parses");
+            let lower_smallest = quartiles_marks
+                .iter()
+                .filter_map(|line| quartiles_mark_parts(line).1)
+                .map(|((_, margin), _)| {
+                    margin
+                        .parse::<f64>()
+                        .expect("a lower quartile margin parses")
+                })
+                .fold(f64::INFINITY, f64::min);
+            assert!(
+                (lower_stated - lower_smallest).abs() <= 0.000002,
+                "seed {}",
+                seed
+            );
+            let lower_first = quartiles_marks
+                .iter()
+                .find(|line| {
+                    quartiles_mark_parts(line)
+                        .1
+                        .map(|((_, margin), _)| {
+                            (margin
+                                .parse::<f64>()
+                                .expect("a lower quartile margin parses")
+                                - lower_smallest)
+                                .abs()
+                                <= 0.000002
+                        })
+                        .unwrap_or(false)
+                })
+                .expect("a mark line states the smallest lower quartile margin");
+            assert_eq!(
+                quartiles_mark_position(lower_first),
+                (
+                    lower_closest_elapsed.to_string(),
+                    lower_closest_ordinal.to_string()
+                ),
+                "seed {}",
+                seed
+            );
+            let lower_named = quartiles_mark_parts(lower_first)
+                .1
+                .expect("the named mark is figured");
+            assert_eq!(lower_named.0 .1, lower_closest_figure, "seed {}", seed);
+            let upper_stated: f64 = upper_closest_figure
+                .parse()
+                .expect("a closest upper figure parses");
+            let upper_smallest = quartiles_marks
+                .iter()
+                .filter_map(|line| quartiles_mark_parts(line).1)
+                .map(|(_, (_, margin))| {
+                    margin
+                        .parse::<f64>()
+                        .expect("an upper quartile margin parses")
+                })
+                .fold(f64::INFINITY, f64::min);
+            assert!(
+                (upper_stated - upper_smallest).abs() <= 0.000002,
+                "seed {}",
+                seed
+            );
+            let upper_first = quartiles_marks
+                .iter()
+                .find(|line| {
+                    quartiles_mark_parts(line)
+                        .1
+                        .map(|(_, (_, margin))| {
+                            (margin
+                                .parse::<f64>()
+                                .expect("an upper quartile margin parses")
+                                - upper_smallest)
+                                .abs()
+                                <= 0.000002
+                        })
+                        .unwrap_or(false)
+                })
+                .expect("a mark line states the smallest upper quartile margin");
+            assert_eq!(
+                quartiles_mark_position(upper_first),
+                (
+                    upper_closest_elapsed.to_string(),
+                    upper_closest_ordinal.to_string()
+                ),
+                "seed {}",
+                seed
+            );
+            let upper_named = quartiles_mark_parts(upper_first)
+                .1
+                .expect("the named mark is figured");
+            assert_eq!(upper_named.1 .1, upper_closest_figure, "seed {}", seed);
+        } else {
+            assert!(
+                counts.ends_with(", and, no other standing at any mark"),
+                "seed {}",
+                seed
+            );
+        }
+
+        // The day close relation of PG-42, computed
+        // from the standings sections and the quartiles
+        // sections, the quartiles taken over the figures
+        // of the competitors other than the closing
+        // holder in the order and at the count PG-41
+        // states.
+        let mut standing_sections: Vec<Vec<String>> = Vec::new();
+        for line in &standings {
+            if line.starts_with("day, the ") {
+                standing_sections.push(Vec::new());
+            }
+            if let Some(section) = standing_sections.last_mut() {
+                section.push(line.clone());
+            }
+        }
+        let mut quartiles_sections: Vec<Vec<&String>> = Vec::new();
+        for line in &quartiles {
+            if line.starts_with("day, the ") {
+                quartiles_sections.push(Vec::new());
+            }
+            if let Some(section) = quartiles_sections.last_mut() {
+                section.push(line);
+            }
+        }
+        assert_eq!(
+            standing_sections.len(),
+            quartiles_sections.len(),
+            "seed {}",
+            seed
+        );
+        assert_eq!(stated_days, standing_sections.len(), "seed {}", seed);
+        for (section, quartiles_section) in standing_sections.iter().zip(quartiles_sections.iter())
+        {
+            let day_marks: Vec<&&String> = quartiles_section
+                .iter()
+                .filter(|line| line.starts_with("mark "))
+                .collect();
+            if day_marks.is_empty() {
+                continue;
+            }
+            let closing = section
+                .iter()
+                .find(|line| line.starts_with("close of the "))
+                .expect("a standings section closes");
+            let holder = closing
+                .split("record held by ")
+                .nth(1)
+                .and_then(|rest| rest.split(" at a projection of ").next())
+                .expect("a closing line names its holder");
+            let record = closing
+                .rsplit("at a projection of ")
+                .next()
+                .expect("a closing line names its record figure");
+            let record_value: f64 = record.parse().expect("a record figure parses");
+            let mut others: Vec<f64> = section
+                .iter()
+                .filter(|line| line.starts_with("competitor "))
+                .filter(|line| !line.starts_with(&format!("competitor {},", holder)))
+                .filter_map(|line| {
+                    line.strip_prefix("competitor ")
+                        .and_then(|rest| rest.split_once(", standing projection "))
+                        .and_then(|(_, rest)| {
+                            rest.strip_suffix(" at the close")
+                                .and_then(|figure| figure.parse::<f64>().ok())
+                        })
+                })
+                .collect();
+            let last = day_marks.last().expect("the day holds a mark");
+            let (_last_record, last_quartiles) = quartiles_mark_parts(last);
+            match (others.is_empty(), last_quartiles) {
+                (true, None) => {}
+                (false, Some(((lower_figure, lower_margin), (upper_figure, upper_margin)))) => {
+                    others.sort_by(|a, b| a.partial_cmp(b).expect("figures order"));
+                    let count = others.len().div_ceil(2);
+                    let median_of = |part: &[f64]| {
+                        if part.len() % 2 == 1 {
+                            part[part.len() / 2]
+                        } else {
+                            (part[part.len() / 2 - 1] + part[part.len() / 2]) / 2.0
+                        }
+                    };
+                    let expected_lower = median_of(&others[..count]);
+                    let expected_upper = median_of(&others[others.len() - count..]);
+                    let lower_value: f64 = lower_figure
+                        .parse()
+                        .expect("a lower quartile figure parses");
+                    let upper_value: f64 = upper_figure
+                        .parse()
+                        .expect("an upper quartile figure parses");
+                    assert!(
+                        (lower_value - expected_lower).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                    assert!(
+                        (upper_value - expected_upper).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                    let lower_margin_value: f64 = lower_margin
+                        .parse()
+                        .expect("a lower quartile margin parses");
+                    let upper_margin_value: f64 = upper_margin
+                        .parse()
+                        .expect("an upper quartile margin parses");
+                    assert!(
+                        (lower_value - record_value - lower_margin_value).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                    assert!(
+                        (upper_value - record_value - upper_margin_value).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                }
+                _ => panic!("the day close relation fails, seed {}", seed),
+            }
+        }
+    }
+    assert!(
+        lower_above > 0,
+        "the lower quartile margin stands above the lower tail margin at some mark of the family"
+    );
+    assert!(
+        lower_below > 0,
+        "the lower quartile margin stands below the lower tail margin at some mark of the family"
+    );
+    assert!(
+        upper_above > 0,
+        "the upper quartile margin stands above the upper tail margin at some mark of the family"
+    );
+    assert!(
+        upper_below > 0,
+        "the upper quartile margin stands below the upper tail margin at some mark of the family"
     );
 }
