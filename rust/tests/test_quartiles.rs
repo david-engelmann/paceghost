@@ -1280,6 +1280,8 @@ fn test_a_hand_built_break_bearing_label_draws_the_named_error_through_quartiles
     assert_eq!(error, "a runner label holds a line break");
 }
 
+type ChainWitness = ([i64; 3], [f64; 3], (f64, f64, f64, f64, f64, f64));
+
 #[test]
 fn test_the_chain_equalities_hold_exactly_where_their_conditions_hold() {
     // The four equality conditions of PG-42 in their stated
@@ -1306,7 +1308,7 @@ fn test_the_chain_equalities_hold_exactly_where_their_conditions_hold() {
     // fails if any link of the chain stands equal where its
     // condition fails or stands apart where its condition
     // holds, at any of the three fields.
-    let witnesses: [([i64; 3], [f64; 3], (f64, f64, f64, f64, f64, f64)); 3] = [
+    let witnesses: [ChainWitness; 3] = [
         (
             [12, 12, 15],
             [120.0, 120.0, 150.0],
