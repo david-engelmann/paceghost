@@ -580,3 +580,75 @@ fn test_readme_carries_the_ci_badge_after_its_opening_paragraph() {
     );
     assert!(badge.contains("david-engelmann/paceghost/actions/workflows/ci.yml"));
 }
+
+#[test]
+fn test_contract_carries_the_round_twenty_two_obligations() {
+    let text = read("CONTRACT.md");
+    for label in ["PG-45", "PG-46"] {
+        assert!(text.contains(label), "the contract carries {}", label);
+    }
+    let lines: Vec<&str> = text.lines().collect();
+    for heading in [
+        "## Round 22 obligations, full form",
+        "### PG-45 full form, the execution record of the carried mutations and shapes",
+        "### PG-46 full form, the probe recompositions and their executions",
+    ] {
+        assert!(
+            lines.contains(&heading),
+            "the contract carries the heading {}",
+            heading
+        );
+    }
+}
+
+#[test]
+fn test_readme_reports_the_round_twenty_two_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-45 and PG-46 stand in full form in CONTRACT.md under the Round 22 obligations.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 23 is built and in review. It carries the execution record of the one unexecuted mutation of the Round 21 family and of the census of the opening tree in both shapes, and the probe recompositions of PG-46 over the three probes of the Round 19 record that stood unexecuted as recorded, with no new reading and no new command.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 21 of 100"));
+}
+
+#[test]
+fn test_the_command_surface_stands_at_twenty_four_with_range_last() {
+    let text = read("rust/src/cli.rs");
+    let lines: Vec<&str> = text.lines().collect();
+    let start = lines
+        .iter()
+        .position(|line| *line == "const COMMANDS: [&str; 24] = [")
+        .expect("the command table stands");
+    let names: Vec<&str> = lines[start + 1..]
+        .iter()
+        .take_while(|line| **line != "];")
+        .map(|line| line.trim().trim_end_matches(',').trim_matches('"'))
+        .collect();
+    let expected: Vec<&str> = vec![
+        "show",
+        "ghost",
+        "race",
+        "season",
+        "board",
+        "fieldday",
+        "ladder",
+        "rematch",
+        "meet",
+        "table",
+        "reign",
+        "days",
+        "forks",
+        "marks",
+        "standings",
+        "traces",
+        "margins",
+        "spread",
+        "middle",
+        "tails",
+        "mean",
+        "median",
+        "quartiles",
+        "range",
+    ];
+    assert_eq!(names, expected);
+}
