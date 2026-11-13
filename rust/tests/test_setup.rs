@@ -497,6 +497,7 @@ fn test_the_readme_usage_headings_stand_in_the_commands_order() {
         "mean",
         "median",
         "quartiles",
+        "range",
     ]
     .iter()
     .map(|name| name.to_string())

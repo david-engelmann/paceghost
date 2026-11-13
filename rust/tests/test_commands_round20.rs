@@ -130,7 +130,7 @@ fn test_the_help_names_the_new_command_and_its_help_line() {
     let out = run(&["--help"], &[]);
     assert_eq!(out.status, Some(0));
     let text = String::from_utf8(out.stdout).expect("the help is utf8");
-    assert!(text.contains("{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}"), "help names usage, {}", text);
+    assert!(text.contains("{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range}"), "help names usage, {}", text);
     assert!(text.contains("quartiles"), "help lists quartiles, {}", text);
     assert!(
         text.contains("print the meet quartiles for three or more field days"),
@@ -154,7 +154,7 @@ fn test_the_quartiles_command_rejects_a_near_miss_name_and_a_missing_file_and_to
     assert_eq!(out.status, Some(2));
     assert_eq!(
         String::from_utf8(out.stderr).expect("the error is utf8"),
-        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}\n                 ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')\n"
+        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range}\n                 ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range')\n"
     );
     let dir = scratch("quartiles-missing");
     let missing = dir.join("no-such-meet.json");
@@ -174,7 +174,7 @@ fn test_the_quartiles_command_rejects_a_near_miss_name_and_a_missing_file_and_to
     assert_eq!(out.status, Some(2));
     assert_eq!(
         String::from_utf8(out.stderr).expect("the error is utf8"),
-        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}\n                 ...\npaceghost: error: unrecognized arguments: extra\n"
+        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range}\n                 ...\npaceghost: error: unrecognized arguments: extra\n"
     );
 }
 
@@ -215,7 +215,7 @@ fn test_a_usage_error_over_the_whole_usage_renders_it_before_refusing_a_closed_e
     assert_eq!(out.status, Some(2));
     assert_eq!(
         String::from_utf8(out.stderr).expect("the error is utf8"),
-        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}\n                 ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')\n"
+        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range}\n                 ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range')\n"
     );
     // The shipped half. The same bytes through the shipped
     // binary with its error stream taken to /dev/full, the
