@@ -290,6 +290,18 @@ path = "rust/tests/test_commands_round21.rs"
 name = "test_examples_round21"
 path = "rust/tests/test_examples_round21.rs"
 
+[[test]]
+name = "test_midhinge"
+path = "rust/tests/test_midhinge.rs"
+
+[[test]]
+name = "test_commands_round22"
+path = "rust/tests/test_commands_round22.rs"
+
+[[test]]
+name = "test_examples_round22"
+path = "rust/tests/test_examples_round22.rs"
+
 
 [dependencies]
 libc = "0.2"
