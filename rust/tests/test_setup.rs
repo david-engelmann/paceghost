@@ -432,6 +432,18 @@ fn test_contract_carries_the_round_twenty_obligations() {
     for label in ["PG-41", "PG-42"] {
         assert!(text.contains(label), "the contract carries {}", label);
     }
+    let lines: Vec<&str> = text.lines().collect();
+    for heading in [
+        "## Round 20 obligations, full form",
+        "### PG-41 full form, the quartiles reading's inputs",
+        "### PG-42 full form, the quartiles reading over a meet",
+    ] {
+        assert!(
+            lines.iter().any(|found| *found == heading),
+            "the contract carries the heading {}",
+            heading
+        );
+    }
 }
 
 #[test]
