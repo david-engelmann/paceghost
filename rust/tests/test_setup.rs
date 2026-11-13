@@ -139,8 +139,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 21 standing built and in review, so the count
     // stood at one, the slice 21 status line, until the
     // Round 20 closure landed slice 21 and the count
-    // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // returned to zero. Adjusted again with the
+    // Round 21 slice, as the named mechanical consequence
+    // of slice 22 standing built and in review, so the count
+    // stands at one, the slice 22 status line, until the
+    // Round 21 closure lands slice 22 and the count returns
+    // to zero.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -519,4 +524,59 @@ fn test_the_readme_usage_headings_stand_in_the_commands_order() {
             name
         );
     }
+}
+
+#[test]
+fn test_contract_carries_the_round_twenty_one_obligations() {
+    let text = read("CONTRACT.md");
+    for label in ["PG-43", "PG-44"] {
+        assert!(text.contains(label), "the contract carries {}", label);
+    }
+    let lines: Vec<&str> = text.lines().collect();
+    for heading in [
+        "## Round 21 obligations, full form",
+        "### PG-43 full form, the range reading's inputs",
+        "### PG-44 full form, the range reading over a meet",
+    ] {
+        assert!(
+            lines.contains(&heading),
+            "the contract carries the heading {}",
+            heading
+        );
+    }
+}
+
+#[test]
+fn test_readme_reports_the_round_twenty_one_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-43 and PG-44 stand in full form in CONTRACT.md under the Round 21 obligations.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 22 is built and in review. It carries the range reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, and the interquartile range held after it by the field behind its holder, the upper quartile standing less the lower quartile standing of that field, and the range command, with the golden range readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the interquartile range after each mark, and the seeded generated fixture family extended to the range reading, and the README range section, and the README badge set.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 20 of 100"));
+}
+
+#[test]
+fn test_readme_carries_the_ci_badge_after_its_opening_paragraph() {
+    let text = read("README.md");
+    let badge = "[![ci](https://github.com/david-engelmann/paceghost/actions/workflows/ci.yml/badge.svg)](https://github.com/david-engelmann/paceghost/actions/workflows/ci.yml)";
+    assert_eq!(text.matches(badge).count(), 1);
+    let lines: Vec<&str> = text.lines().collect();
+    let opening = lines
+        .iter()
+        .position(|line| line.starts_with("A recorded run names a task and a runner"))
+        .expect("the opening paragraph stands");
+    let badge_line = lines
+        .iter()
+        .position(|line| *line == badge)
+        .expect("the badge line stands");
+    let block = lines
+        .iter()
+        .position(|line| *line == "```text")
+        .expect("the first captured block stands");
+    assert!(
+        opening < badge_line && badge_line < block,
+        "the badge stands after the opening paragraph and before the first captured block"
+    );
+    assert!(badge.contains("david-engelmann/paceghost/actions/workflows/ci.yml"));
 }
