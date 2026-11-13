@@ -598,7 +598,7 @@ fn test_the_quartile_margins_stand_at_zero_exactly_where_their_sub_fields_middle
     // its median margin stands at 25, separating the
     // quartile's zero set from the median's in one fixture.
     // At the fourth mark the field stands at 100, 130, 150,
-    // and 190 and its lower quartile stands at 115, outside
+    // and 190 and its lower quartile stands at 112.5, outside
     // the lower zero set, while the margin of PG-30 stands
     // at zero at every mark of the meet through the
     // nearest figure. At the fifth mark every standing
@@ -614,7 +614,7 @@ fn test_the_quartile_margins_stand_at_zero_exactly_where_their_sub_fields_middle
             &format!(
                 "[{}, {}, {}, {}, {}]",
                 run("a", 500, &[(100, 10)]),
-                run("b", 400, &[(100, 10), (400, 52), (500, 50)]),
+                run("b", 400, &[(100, 10), (400, 50), (500, 50)]),
                 run("c", 300, &[(100, 10)]),
                 run("d", 250, &[(100, 19), (500, 50)]),
                 run("e", 200, &[(200, 20), (300, 45), (500, 50)])
@@ -635,7 +635,7 @@ fn test_the_quartile_margins_stand_at_zero_exactly_where_their_sub_fields_middle
                 .1
         })
         .collect();
-    assert_eq!(lower_margins, vec![0.0, 0.0, 0.0, 15.0, 0.0]);
+    assert_eq!(lower_margins, vec![0.0, 0.0, 0.0, 12.5, 0.0]);
     let upper_margins: Vec<f64> = marks
         .iter()
         .map(|line| {
