@@ -1,0 +1,12 @@
+meet quartiles, 3 days
+day, the first day, marks 2
+mark 1, at 100 seconds on the first day, alpha at a projection of 400, lower quartile standing 600, lower quartile margin 200, upper quartile standing 600, upper quartile margin 200
+mark 2, at 200 seconds on the first day, alpha at a projection of 400, lower quartile standing 550, lower quartile margin 150, upper quartile standing 550, upper quartile margin 150
+day, the second day, marks 2
+mark 3, at 100 seconds on the second day, alpha at a projection of 500, lower quartile standing 550, lower quartile margin 50, upper quartile standing 550, upper quartile margin 50
+mark 4, at 200 seconds on the second day, alpha at a projection of 500, lower quartile standing 700, lower quartile margin 200, upper quartile standing 700, upper quartile margin 200
+day, the third day, marks 3
+mark 5, at 100 seconds on the third day, beta at a projection of 300, lower quartile standing 500, lower quartile margin 200, upper quartile standing 500, upper quartile margin 200
+mark 6, at 200 seconds on the third day, alpha at a projection of 250, lower quartile standing 300, lower quartile margin 50, upper quartile standing 300, upper quartile margin 50
+mark 7, at 300 seconds on the third day, alpha at a projection of 200, lower quartile standing 300, lower quartile margin 100, upper quartile standing 300, upper quartile margin 100
+quartiles counts, marks walked 7, marks with another standing 7, days 3, closest lower quartile margin 50 at 100 seconds on the second day, closest upper quartile margin 50 at 100 seconds on the second day
