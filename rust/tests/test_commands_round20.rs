@@ -3,20 +3,45 @@
 //! the whole usage error from Round 19.
 //!
 //! Written for Round 20. Each pin's failure mode stands
-//! stated here pin by pin, not as one blanket claim. Pins
-//! 28 to 32 fail before the round, pin 28 and pin 29 by the
-//! command's absence, pin 30 by the help text carrying
-//! twenty two names and pin 31 by the invalid choice error
-//! carrying twenty two names and pin 32 by the usage error
-//! carrying twenty two names in its brace list. On the
+//! stated here pin by pin, not as one blanket claim.
+//! Pins 28 to 34 stand in this file. Pin 28 and pin 29
+//! are the note's pins of those numbers, the shipped and
+//! the constructed example by the command line. The
+//! built pin 30, the help pin, discharges the note's pin
+//! 31, the command surface, asserting the twenty three
+//! name brace list in the top level help, the quartiles
+//! help line verbatim, and the quartiles usage line by
+//! the command's own help. The built pin 31 rejects a
+//! near miss name, a missing file, and too many
+//! arguments, and its third part stands as the argument
+//! count half of the note's pin 32. The built pin 32 is
+//! the standing form repair over the whole usage error,
+//! beside Rounds 16 and 19's repair tests. Pin 33 stands
+//! as the note's pin 30, the malformed meet by the
+//! command line, and pin 34 stands as the closed stdout
+//! half of the note's pin 32.
+//!
+//! Pins 28 to 32 fail before the round, pin 28 and pin
+//! 29 by the command's absence, pin 30 by the help text
+//! carrying twenty two names and pin 31 by the invalid
+//! choice error carrying twenty two names and pin 32 by
+//! the usage error carrying twenty two names in its
+//! brace list, and pins 33 and 34 fail before the round
+//! by the command's absence, the quartiles name standing
+//! as an invalid choice on the pre round tree. On the
 //! built tree, pin 28 passes under all six mutations of
 //! this round, and pin 29 carries the round's one command
 //! level mutation failure mode, failing under Q-4 on the
 //! constructed example, whose closest lower quartile
-//! margin stands at a constructed tie. Pins 30, 31, and 32
-//! pass under all six mutations, no mutation of this round
-//! touching the table, the header, the parse, or the
-//! usage error.
+//! margin stands at a constructed tie. Pins 30, 31, and
+//! 32 pass under all six mutations, no mutation of this
+//! round touching the table, the header, the parse, or
+//! the usage error. Pin 33 passes under all six mutations
+//! by design, the loader standing ahead of every
+//! selection, and pin 34 passes under all six by
+//! construction, its assertions standing on exit codes
+//! alone over the shipped meet, no mutation of this round
+//! touching the output stream discipline.
 
 use std::fs;
 use std::io::Write;
@@ -204,6 +229,89 @@ fn test_a_usage_error_over_the_whole_usage_renders_it_before_refusing_a_closed_e
         }
         Err(_) => {}
     }
+}
+
+// Pin 33, the note's pin 30, a malformed meet by the
+// command line. The fixture is the malformed discipline
+// of Round 19's median pin carried to this round's
+// command, one day holding a window of zero and no
+// operator and no runs, drawing four defects in the
+// loader's own order, the day count first and then the
+// day's three in the order the day loader draws them.
+// The pin breaks if the quartiles command loads the
+// meet by any second loading of its own, its defect
+// text parting from the meet command's, or if it
+// answers a malformed meet with any status but one.
+
+#[test]
+fn test_the_quartiles_command_prints_what_meet_prints_for_a_malformed_meet() {
+    let dir = scratch("quartiles-malformed");
+    let bad = write(&dir, "meet.json", "{\"days\": [{\"window_seconds\": 0}]}");
+    let quartiles = run(&["quartiles", path_str(&bad)], &[]);
+    let meet = run(&["meet", path_str(&bad)], &[]);
+    assert_eq!(quartiles.status, Some(1));
+    assert_eq!(meet.status, Some(1));
+    assert_eq!(quartiles.stdout, meet.stdout);
+    assert_eq!(
+        String::from_utf8(quartiles.stdout).expect("the output is utf8"),
+        "invalid meet\ndefect field days holds one day\ndefect day 0 field window_seconds must be positive\ndefect day 0 missing field operator\ndefect day 0 missing field runs\n"
+    );
+}
+
+// Pin 34, the closed stdout half of the note's pin 32,
+// in the standing form of the closed stream pin of
+// rust/tests/test_cli_widths.rs and of the closed half
+// of Round 19's closing pin. The pin reads the state
+// of /dev/full before it opens it. Where the path is
+// absent the open would fail on a healthy tree, and
+// where the path stands as a regular file the write
+// the pin expects to fail succeeds on a healthy tree,
+// so the pin stands skipped in both states, named by
+// the line it prints, and where the path stands as the
+// character device the pin runs. The pin breaks if the
+// quartiles command prints its reading through an
+// unchecked stream, the failed write at /dev/full
+// leaving the exit at zero, or if the command answers
+// a sound meet with any status but zero on a healthy
+// stream. The argument count half of the note's pin 32
+// stands in the built pin 31's third part and is not
+// duplicated here.
+
+#[test]
+fn test_the_quartiles_command_against_a_closed_output_stream() {
+    use std::os::unix::fs::FileTypeExt;
+    match fs::metadata("/dev/full") {
+        Err(_) => {
+            println!("skipping the closed stream pin, /dev/full is absent on this machine");
+            return;
+        }
+        Ok(metadata) if !metadata.file_type().is_char_device() => {
+            let state = if metadata.file_type().is_file() {
+                "a regular file"
+            } else {
+                "not a character device"
+            };
+            println!(
+                "skipping the closed stream pin, /dev/full is {} on this machine",
+                state
+            );
+            return;
+        }
+        Ok(_) => {}
+    }
+    let dir = scratch("quartiles-closed");
+    let example = write(&dir, "meet.json", EXAMPLE_FIXTURE);
+    let full = fs::File::create("/dev/full").expect("the full device opens");
+    let status = paceghost()
+        .arg("quartiles")
+        .arg(&example)
+        .stdout(full)
+        .stderr(Stdio::null())
+        .status()
+        .expect("the binary runs");
+    assert_eq!(status.code(), Some(1));
+    let out = run(&["quartiles", path_str(&example)], &[]);
+    assert_eq!(out.status, Some(0));
 }
 
 fn path_str(path: &Path) -> &str {
