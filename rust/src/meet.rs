@@ -356,7 +356,17 @@ struct MarkRecord {
 /// standing empty where no competitor other than the
 /// holder held a standing after the mark, so the
 /// median reading reads the same pass a fourteenth
-/// way and no walk stands for it either.
+/// way and no walk stands for it either. The quartiles
+/// standings record, after each mark, the lower
+/// quartile standing and the upper quartile standing
+/// after that mark, the medians of the lowest and the
+/// highest figures of the field behind the holder, one
+/// optional entry per mark in walk order beside the
+/// median standings, an entry standing empty where no
+/// competitor other than the holder held a standing
+/// after the mark, so the quartiles reading reads the
+/// same pass a fifteenth way and no walk stands for it
+/// either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -373,6 +383,7 @@ struct MeetWalk {
     tails: Vec<Option<(BigRational, BigRational)>>,
     mean: Vec<Option<BigRational>>,
     median: Vec<Option<BigRational>>,
+    quartiles: Vec<Option<(BigRational, BigRational)>>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
 }
@@ -450,8 +461,10 @@ fn select_extreme(
 /// from it, the mean selection takes its mean of the
 /// whole field from it, and the median selection takes
 /// its middle figure or its two middle figures from
-/// it, so the field the four readings state stands in
-/// one body and the four cannot be edited apart. The
+/// it, and the quartiles selection takes its two
+/// sub-field medians from it, so the field the five
+/// readings state stands in one body and the five
+/// cannot be edited apart. The
 /// helper guards no invariant and carries no expect
 /// string, because it reads no competitor out of the
 /// vector; the emptiness of the field is each caller's
@@ -626,6 +639,61 @@ fn select_median(standing: &[Option<BigRational>], holder: usize) -> Option<BigR
     }
 }
 
+/// The quartile standings after a mark, over the walk's vectors.
+///
+/// The lower quartile standing is the median of the
+/// lowest figures of the field behind the holder and
+/// the upper quartile standing is the median of the
+/// highest figures of that field, the lowest and the
+/// highest counting the (m + 1) div 2 figures where m
+/// counts the competitors of the field, the median of
+/// a part being the figure standing at its middle
+/// place where the part counts odd and the mean of
+/// the two figures standing at its middle places
+/// where the part counts even, so where one competitor
+/// stands behind the holder each quartile is that
+/// competitor's figure whole, where two stand behind
+/// the holder the lower quartile is the lower of their
+/// two figures and the upper quartile is the higher,
+/// where three stand behind the holder the lower
+/// quartile is the mean of the two lowest figures and
+/// the upper quartile is the mean of the two highest,
+/// where four stand behind the holder the lower
+/// quartile is the mean of the two lowest figures and
+/// the upper quartile is the mean of the two highest,
+/// the two sub-fields standing apart, and where five
+/// stand behind the holder the lower quartile is the
+/// middle figure of the three lowest figures and the
+/// upper quartile is the middle figure of the three
+/// highest. A quartile standing is a statistic of the
+/// figures of a sub-field and is held by no
+/// competitor, so the selection names no holder for
+/// either quartile and applies no tie discipline. No
+/// competitor other than the holder holding a standing
+/// after the mark leaves the quartile standings empty.
+fn select_quartiles(
+    standing: &[Option<BigRational>],
+    holder: usize,
+) -> Option<(BigRational, BigRational)> {
+    let figures = field_figures(standing, holder);
+    if figures.is_empty() {
+        return None;
+    }
+    let count = figures.len().div_ceil(2);
+    let median = |part: &[&BigRational]| {
+        if part.len() % 2 == 1 {
+            part[part.len() / 2].clone()
+        } else {
+            let lower = part[part.len() / 2 - 1].clone();
+            let upper = part[part.len() / 2].clone();
+            (lower + upper) / BigRational::from(BigInt::from(2))
+        }
+    };
+    let lower = median(&figures[..count]);
+    let upper = median(&figures[figures.len() - count..]);
+    Some((lower, upper))
+}
+
 /// Walk the record progression of one loaded meet once.
 ///
 /// The walk reads the days as one field of competitors, a runner
@@ -688,7 +756,12 @@ fn select_median(standing: &[Option<BigRational>], holder: usize) -> Option<BigR
 /// reading reads, and it records the median standing
 /// after the mark, the median of the field behind the
 /// holder, in the median standings the median reading
-/// reads. Handed a meet value built
+/// reads, and it records the lower quartile standing
+/// and the upper quartile standing after the mark,
+/// the medians of the lowest and the highest figures
+/// of the field behind the holder, in the quartiles
+/// standings the quartiles reading reads. Handed a
+/// meet value built
 /// by hand holding no days, or more days than the ordinal table
 /// names, the walk names that precondition as its error, and
 /// handed a day carrying a figure its loader would refuse as not
@@ -737,6 +810,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut tails: Vec<Option<(BigRational, BigRational)>> = Vec::new();
     let mut mean: Vec<Option<BigRational>> = Vec::new();
     let mut median: Vec<Option<BigRational>> = Vec::new();
+    let mut quartiles: Vec<Option<(BigRational, BigRational)>> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -828,6 +902,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         tails.push(select_tails(&standing, new_holder));
         mean.push(select_mean(&standing, new_holder));
         median.push(select_median(&standing, new_holder));
+        quartiles.push(select_quartiles(&standing, new_holder));
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -898,6 +973,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         tails,
         mean,
         median,
+        quartiles,
         day_standings,
         day_close_lines,
     })
@@ -2003,6 +2079,125 @@ pub fn meet_median(meet: &Meet) -> Result<Vec<String>, String> {
         )),
         None => lines.push(format!(
             "median counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
+    Ok(lines)
+}
+
+/// Return the meet quartiles lines for one loaded meet.
+///
+/// The quartiles reading reads the one walk a fifteenth
+/// way. One section stands for each day of the meet in
+/// meet order, every day holding a section, and inside
+/// a section one line stands for each mark of the walk
+/// standing in that day, in walk order, naming the
+/// place of the mark in the whole walk, the holder
+/// after the mark and the record figure after it, in
+/// the mark form of the marks reading as far as the
+/// record figure, and then the lower quartile standing
+/// after the mark, the median of the lowest figures of
+/// the field behind the holder, and the lower quartile
+/// margin by which the record stands ahead of that
+/// standing, and the upper quartile standing after the
+/// mark, the median of the highest figures of that
+/// field, and the upper quartile margin by which the
+/// record stands ahead of that standing, or the words
+/// and no other standing where no competitor other than
+/// the holder holds a standing after the mark. A
+/// quartile standing is a statistic of the figures of
+/// a sub-field and is held by no competitor, so no mark
+/// line names a holder for either quartile. Each
+/// quartile margin is computed on exact values before
+/// any rendering, so it is never negative, and it
+/// stands at zero exactly where every figure standing
+/// at a middle place of its sub-field stands at the
+/// record figure. The reading closes by counting the
+/// marks the walk walked, the marks with another
+/// standing, and the days, and naming the closest
+/// lower quartile margin and the closest upper
+/// quartile margin and the earliest mark standing at
+/// each, the closest margins taken over the marks and
+/// never over the competitors, or by stating that no
+/// other standing stood at any mark where none did. No
+/// competitor is ranked or compared against another
+/// beyond the holder each mark line names.
+pub fn meet_quartiles(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet quartiles, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut closest_lower: Option<(BigRational, &MarkRecord)> = None;
+    let mut closest_upper: Option<(BigRational, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record)
+            );
+            match &walk.quartiles[place - 1] {
+                Some((lower, upper)) => {
+                    let lower_margin = lower.clone() - record.record.clone();
+                    let upper_margin = upper.clone() - record.record.clone();
+                    with_another += 1;
+                    let nearer_lower = match &closest_lower {
+                        None => true,
+                        Some((smallest, _)) => lower_margin < *smallest,
+                    };
+                    if nearer_lower {
+                        closest_lower = Some((lower_margin.clone(), *record));
+                    }
+                    let nearer_upper = match &closest_upper {
+                        None => true,
+                        Some((smallest, _)) => upper_margin < *smallest,
+                    };
+                    if nearer_upper {
+                        closest_upper = Some((upper_margin.clone(), *record));
+                    }
+                    lines.push(format!(
+                        "{}, lower quartile standing {}, lower quartile margin {}, upper quartile standing {}, upper quartile margin {}",
+                        head,
+                        format_usage(lower),
+                        format_usage(&lower_margin),
+                        format_usage(upper),
+                        format_usage(&upper_margin)
+                    ));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match (closest_lower, closest_upper) {
+        (Some((lower_margin, lower_record)), Some((upper_margin, upper_record))) => {
+            lines.push(format!(
+                "quartiles counts, marks walked {}, marks with another standing {}, days {}, closest lower quartile margin {} at {} seconds on the {} day, closest upper quartile margin {} at {} seconds on the {} day",
+                walk.marks_walked,
+                with_another,
+                meet.days.len(),
+                format_usage(&lower_margin),
+                format_seconds_fraction(&lower_record.mark),
+                ORDINALS[lower_record.day_index],
+                format_usage(&upper_margin),
+                format_seconds_fraction(&upper_record.mark),
+                ORDINALS[upper_record.day_index]
+            ))
+        }
+        _ => lines.push(format!(
+            "quartiles counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
             walk.marks_walked,
             with_another,
             meet.days.len()
