@@ -185,11 +185,14 @@ fn test_the_quartiles_command_rejects_a_near_miss_name_and_a_missing_file_and_to
 // the filesystem took the shell's redirection as one more
 // position. The two halves of this pin stand as one test
 // function beside Rounds 16 and 19's repair test. The first
-// half is the regression in unit form, the bare two argument
-// shape of argparse on a synthetic abbreviation, its standing
-// exit unparseable as shipped and no machine able to execute
-// it standing in the repair's record, so the pin states the
-// text the standing form produces on the same bytes. The
+// half is the regression in live form, the bare two argument
+// shape of argparse on a synthetic abbreviation run through
+// the shipped binary, the dispatcher's returned error text
+// on those bytes asserted whole against the text the
+// standing form produces. The repair's first form of this
+// half asserted that same text over a literal of its own,
+// an assertion no binary behaviour could fail, and it
+// stands restated in live form here. The
 // second half runs the same bytes through the shipped binary
 // with its standard error taken to /dev/full, the standing
 // oracle for the usage error over the whole rendering, and
@@ -200,19 +203,19 @@ fn test_the_quartiles_command_rejects_a_near_miss_name_and_a_missing_file_and_to
 
 #[test]
 fn test_a_usage_error_over_the_whole_usage_renders_it_before_refusing_a_closed_error_stream() {
-    // The regression, in unit form. The bare two argument
+    // The regression, in live form. The bare two argument
     // shape of argparse on a synthetic abbreviation renders
-    // the usage error over the whole usage. Triple slash
-    // stands pasted in the two argument shape the note
-    // fixes, as the family's own early Rounds 4 and 5
-    // fixtures' own slash tallies stand untallied beside
-    // them.
-    let bare_two_argv_text = "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}\n                 ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')\n".to_string();
-    assert!(
-        bare_two_argv_text
-            .starts_with("usage: paceghost [-h]\n                 {show,ghost,race,season"),
-        "the bare two argument shape renders over the whole usage, {}",
-        bare_two_argv_text
+    // the usage error over the whole usage, and the error
+    // text the dispatcher returns on those bytes stands
+    // asserted whole. Triple slash stands pasted in the two
+    // argument shape the note fixes, as the family's own
+    // early Rounds 4 and 5 fixtures' own slash tallies stand
+    // untallied beside them.
+    let out = run(&["quartile", "x"], &[]);
+    assert_eq!(out.status, Some(2));
+    assert_eq!(
+        String::from_utf8(out.stderr).expect("the error is utf8"),
+        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles}\n                 ...\npaceghost: error: argument command: invalid choice: 'quartile' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles')\n"
     );
     // The shipped half. The same bytes through the shipped
     // binary with its error stream taken to /dev/full, the
