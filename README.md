@@ -672,6 +672,35 @@ mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, midh
 midhinge counts, marks walked 16, marks with another standing 15, days 3, closest midhinge margin 90 at 400 seconds on the first day
 ```
 
+### midrange
+
+The midrange command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, and the midrange standing held after it by the field behind its holder, the mean of the nearest standing and the farthest standing of that field.
+
+```text
+$ paceghost midrange examples/meet.json
+meet midrange, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, midrange standing 1350, midrange margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, midrange standing 1305, midrange margin 105
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, midrange standing 1275, midrange margin 169.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, midrange standing 1152.857143, midrange margin 212.857143
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, midrange standing 1051.948052, midrange margin 111.948052
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, midrange standing 1069.090909, midrange margin 129.090909
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, midrange standing 1069.090909, midrange margin 229.090909
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, midrange standing 1069.090909, midrange margin 229.090909
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, midrange standing 990, midrange margin 315
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, midrange standing 1146, midrange margin 471
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, midrange standing 1026, midrange margin 351
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, midrange standing 954, midrange margin 279
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, midrange standing 954, midrange margin 394
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, midrange standing 810, midrange margin 250
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, midrange standing 735, midrange margin 175
+midrange counts, marks walked 16, marks with another standing 15, days 3, closest midrange margin 90 at 400 seconds on the first day
+```
+
 ## Status
 
 Seeded in October 2026. Setup has landed, and Rounds 1 to 23 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
@@ -723,7 +752,9 @@ Seeded in October 2026. Setup has landed, and Rounds 1 to 23 have closed, with a
 - Slice 22 has landed. It carries the range reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, and the interquartile range held after it by the field behind its holder, the upper quartile standing less the lower quartile standing of that field, and the range command, with the golden range readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the interquartile range after each mark, and the seeded generated fixture family extended to the range reading, and the README range section, and the README badge set.
 - Slice 23 has landed. It carries the execution record of the one unexecuted mutation of the Round 21 family and of the census of the opening tree in both shapes, and the probe recompositions of PG-46 over the three probes of the Round 19 record that stood unexecuted as recorded, with no new reading and no new command.
 - Contract, PG-47 and PG-48 met. They stand in full form in CONTRACT.md under the Round 23 obligations, and Round 23 closed on the merged slice 24 after three reviews, with FIX-PG-18 spent in the slice on the restatement of PG-47's two first-separation clauses, and with the spec review approving with findings at four Observations standing against records and the standards review approving with findings at one Minor cured in the slice by a comment-only repair and three Observations and the red team approving with findings at four Observations standing against records, its independent transcription reproducing all eight goldens byte for byte and its mutation executions matching the stated splits, and with CodeRabbit's two inline comments standing valid and cured in the slice under FIX-PG-18 and the pin 5 edge case, and with the one erratum the round leaves priced standing as a named records item and not as met work, PG-48's generated paragraph compressing the day-close counts against the family's own computation, its cure standing owed through the amendment mechanism at a later round.
+- Contract, PG-49 and PG-50 stand in full form in CONTRACT.md under the Round 24 obligations.
 - Slice 24 has landed. It carries the midhinge reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the midhinge standing held after it by the field behind its holder, the mean of the lower quartile standing and the upper quartile standing of that field, and the midhinge margin by which the record stands ahead of that standing, and the midhinge command, with the golden midhinge readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the midhinge standing after each mark, and the seeded generated fixture family extended to the midhinge reading, and the README midhinge section.
+- Slice 25 is built and in review. It carries the midrange reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the midrange standing held after it by the field behind its holder, the mean of the nearest standing and the farthest standing of that field, and the midrange margin by which the record stands ahead of that standing, and the midrange command, with the golden midrange readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the midrange standing after each mark, and the seeded generated fixture family extended to the midrange reading, and the README midrange section.
 - The Rust port has landed. It carries the behavior the Python package carried, checked against the same goldens, and the Python tree stands removed under PORT-10.
 - Local gate, cargo test, cargo fmt --check, and cargo clippy --all-targets -- -D warnings. CI runs the same commands.
 

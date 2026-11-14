@@ -145,7 +145,7 @@ fn test_the_midhinge_command_stands_in_the_command_surface() {
     let out = run(&["--help"], &[]);
     assert_eq!(out.status, Some(0));
     let text = String::from_utf8(out.stdout).expect("the help is utf8");
-    assert!(text.contains("{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge}"), "help names usage, {}", text);
+    assert!(text.contains("{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge,midrange}"), "help names usage, {}", text);
     assert!(text.contains("midhinge"), "help lists midhinge, {}", text);
     assert!(
         text.contains("print the meet midhinge for three or more field days"),
@@ -165,7 +165,7 @@ fn test_the_midhinge_command_stands_in_the_command_surface() {
     assert_eq!(out.status, Some(2));
     assert_eq!(
         String::from_utf8(out.stderr).expect("the error is utf8"),
-        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge}\n                 ...\npaceghost: error: argument command: invalid choice: 'midhing' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge')\n"
+        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge,midrange}\n                 ...\npaceghost: error: argument command: invalid choice: 'midhing' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge', 'midrange')\n"
     );
     let dir = scratch("midhinge-missing");
     let missing = dir.join("no-such-meet.json");
@@ -185,7 +185,7 @@ fn test_the_midhinge_command_stands_in_the_command_surface() {
     assert_eq!(out.status, Some(2));
     assert_eq!(
         String::from_utf8(out.stderr).expect("the error is utf8"),
-        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge}\n                 ...\npaceghost: error: unrecognized arguments: extra\n"
+        "usage: paceghost [-h]\n                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge,midrange}\n                 ...\npaceghost: error: unrecognized arguments: extra\n"
     );
 }
 
