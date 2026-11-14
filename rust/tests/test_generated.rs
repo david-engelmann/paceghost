@@ -31,7 +31,7 @@
 
 use paceghost::meet::{
     load_meet_text, meet_days, meet_margins, meet_marks, meet_mean, meet_median, meet_middle,
-    meet_midhinge, meet_quartiles, meet_range, meet_reign, meet_report, meet_spread,
+    meet_midhinge, meet_midrange, meet_quartiles, meet_range, meet_reign, meet_report, meet_spread,
     meet_standings, meet_table, meet_tails, meet_traces,
 };
 use paceghost::pynum::Num;
@@ -4079,5 +4079,454 @@ fn test_generated_meets_close_under_the_midhinge_reading() {
     assert_eq!(family_mean_below, 589);
     assert_eq!(family_mean_equal, 96);
     assert_eq!(family_mean_above, 191);
+    assert_eq!(family_zero, 0);
+}
+
+/// The figures of one midrange mark line, the record
+/// figure and, where another standing stands, the
+/// midrange standing figure and the midrange margin
+/// figure, read the way the median helper reads its line.
+fn midrange_mark_parts(line: &str) -> (String, Option<(String, String)>) {
+    let start = line
+        .find("at a projection of ")
+        .expect("a mark line names its record figure");
+    let figure_start = start + "at a projection of ".len();
+    let figure_end = line[figure_start..]
+        .find(',')
+        .map(|offset| figure_start + offset)
+        .expect("a record figure ends at a comma");
+    let record = line[figure_start..figure_end].to_string();
+    if line.ends_with(", and no other standing") {
+        return (record, None);
+    }
+    let standing_start = line
+        .find(", midrange standing ")
+        .expect("a figured mark line names its midrange standing")
+        + ", midrange standing ".len();
+    let standing_end = line[standing_start..]
+        .find(", midrange margin ")
+        .map(|offset| standing_start + offset)
+        .expect("a midrange standing names its margin");
+    let figure = line[standing_start..standing_end].to_string();
+    let margin = line[standing_end + ", midrange margin ".len()..].to_string();
+    (record, Some((figure, margin)))
+}
+
+/// The elapsed figure and ordinal phrase a midrange mark
+/// line names, read the way the margins helper reads
+/// them.
+fn midrange_mark_position(line: &str) -> (String, String) {
+    margins_mark_position(line)
+}
+
+/// Whether every figure of one ordered field stands at
+/// the record figure, the zero condition of PG-49 in its
+/// field form, the record figure standing as the figure
+/// the field is carried against.
+fn midrange_zero_condition_holds(field: &[f64], record: f64) -> bool {
+    field.iter().all(|figure| *figure == record)
+}
+
+// The midrange pin of the generated family, added with
+// Round 24 beside the reading closings above. On the
+// built tree it fails under S-1, S-2, S-3, S-5, and S-6,
+// and it fails under S-4 as well, seed 1's closest
+// midrange margin standing tied at its 74th and 75th
+// marks, at 479 and 608 seconds on its seventh day, so
+// the loosened scan renames its closest seat there, a
+// posture parting from its midhinge analogue stated in
+// the open, its fellow S-4 catchers standing as pin 8
+// of test_midrange.rs and the constructed pin of
+// test_commands_round23.rs.
+#[test]
+fn test_generated_meets_close_under_the_midrange_reading() {
+    let mut family_figured = 0usize;
+    let mut family_median_below = 0usize;
+    let mut family_median_equal = 0usize;
+    let mut family_median_above = 0usize;
+    let mut family_mean_below = 0usize;
+    let mut family_mean_equal = 0usize;
+    let mut family_mean_above = 0usize;
+    let mut family_midhinge_below = 0usize;
+    let mut family_midhinge_equal = 0usize;
+    let mut family_midhinge_above = 0usize;
+    let mut family_zero = 0usize;
+    for index in 0..8u64 {
+        let seed = MEET_SEED + index;
+        let mut gen = Gen::new(seed);
+        let text = meet_text(&mut gen);
+        let (meet, defects) = load_meet_text(&text);
+        assert_eq!(defects, Vec::<String>::new(), "seed {}", seed);
+        let meet = meet.expect("the generated meet loads");
+
+        let marks = meet_marks(&meet).expect("the marks read");
+        let margins = meet_margins(&meet).expect("the margins read");
+        let spread = meet_spread(&meet).expect("the spread read");
+        let median = meet_median(&meet).expect("the median read");
+        let mean = meet_mean(&meet).expect("the mean read");
+        let midhinge = meet_midhinge(&meet).expect("the midhinge read");
+        let midrange = meet_midrange(&meet).expect("the midrange read");
+        let standings = meet_standings(&meet).expect("the standings read");
+
+        let reading_marks: Vec<&String> = marks
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let margins_marks: Vec<&String> = margins
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let spread_marks: Vec<&String> = spread
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let median_marks: Vec<&String> = median
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let mean_marks: Vec<&String> = mean
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let midhinge_marks: Vec<&String> = midhinge
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let midrange_marks: Vec<&String> = midrange
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        assert_eq!(midrange_marks.len(), reading_marks.len(), "seed {}", seed);
+        assert_eq!(midrange_marks.len(), margins_marks.len(), "seed {}", seed);
+        assert_eq!(midrange_marks.len(), spread_marks.len(), "seed {}", seed);
+        assert_eq!(midrange_marks.len(), median_marks.len(), "seed {}", seed);
+        assert_eq!(midrange_marks.len(), mean_marks.len(), "seed {}", seed);
+        assert_eq!(midrange_marks.len(), midhinge_marks.len(), "seed {}", seed);
+
+        // The closing relations of PG-50 line by line,
+        // the midrange standing as the exact mean of the
+        // nearest standing figure of the margins line and
+        // the farthest standing figure of the spread
+        // line, the midrange margin as the exact mean of
+        // the margin of PG-30 and the spread of PG-32,
+        // the margin chain of PG-50, the zero relation in
+        // its field form, and the no fixed order
+        // relations against the median margin, the mean
+        // margin, and the midhinge margin counted in both
+        // directions.
+        let mut with_another = 0usize;
+        let mut seed_median_below = 0usize;
+        let mut seed_median_above = 0usize;
+        let mut seed_mean_below = 0usize;
+        let mut seed_mean_above = 0usize;
+        let mut seed_midhinge_below = 0usize;
+        let mut seed_midhinge_above = 0usize;
+        for (
+            (((((midrange_line, mark_line), margin_line), spread_line), median_line), mean_line),
+            midhinge_line,
+        ) in midrange_marks
+            .iter()
+            .zip(reading_marks.iter())
+            .zip(margins_marks.iter())
+            .zip(spread_marks.iter())
+            .zip(median_marks.iter())
+            .zip(mean_marks.iter())
+            .zip(midhinge_marks.iter())
+        {
+            assert!(
+                midrange_line.starts_with(&margins_record_prefix(mark_line)),
+                "seed {}",
+                seed
+            );
+            let (record, midrange_part) = midrange_mark_parts(midrange_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
+            let record_value: f64 = record.parse().expect("a record figure parses");
+            let (_margin_record, margin_part) = margins_mark_parts(margin_line);
+            let (_spread_record, _field, farthest) = spread_mark_parts(spread_line);
+            let (_median_record, median_part) = median_mark_parts(median_line);
+            let (_mean_record, mean_part) = mean_mark_parts(mean_line);
+            let (_midhinge_record, midhinge_part) = midhinge_mark_parts(midhinge_line);
+            if let Some((midrange_figure, midrange_margin)) = midrange_part {
+                with_another += 1;
+                family_figured += 1;
+                let midrange_value: f64 =
+                    midrange_figure.parse().expect("a midrange figure parses");
+                let margin_value: f64 = midrange_margin.parse().expect("a midrange margin parses");
+                let (nearest_figure, _nearest_label, nearest_margin) =
+                    margin_part.expect("the margins line states a nearest standing");
+                let nearest_value: f64 = nearest_figure.parse().expect("a nearest figure parses");
+                let nearest_margin_value: f64 = nearest_margin.parse().expect("a margin parses");
+                let (_farthest_figure, _farthest_label, spread_figure) =
+                    farthest.expect("the spread line states a farthest standing");
+                let spread_value: f64 = spread_figure.parse().expect("a spread figure parses");
+                let farthest_value = record_value + spread_value;
+                assert!(
+                    (midrange_value - (nearest_value + farthest_value) / 2.0).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    (margin_value - (nearest_margin_value + spread_value) / 2.0).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(
+                    (midrange_value - record_value - margin_value).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(margin_value >= 0.0, "seed {}", seed);
+                assert!(
+                    nearest_margin_value <= margin_value + 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(margin_value <= spread_value + 0.000002, "seed {}", seed);
+                if midrange_margin == "0" {
+                    assert_eq!(nearest_margin, "0", "seed {}", seed);
+                    assert_eq!(spread_figure, "0", "seed {}", seed);
+                    family_zero += 1;
+                }
+                if nearest_margin == "0" && spread_figure == "0" {
+                    assert_eq!(midrange_margin, "0", "seed {}", seed);
+                }
+                let (_median_figure, median_margin) =
+                    median_part.expect("the median line states its median");
+                let median_margin_value: f64 =
+                    median_margin.parse().expect("a median margin parses");
+                if margin_value > median_margin_value + 0.000002 {
+                    seed_median_above += 1;
+                    family_median_above += 1;
+                } else if margin_value + 0.000002 < median_margin_value {
+                    seed_median_below += 1;
+                    family_median_below += 1;
+                } else {
+                    family_median_equal += 1;
+                }
+                let (_mean_figure, mean_margin) = mean_part.expect("the mean line states its mean");
+                let mean_margin_value: f64 = mean_margin.parse().expect("a mean margin parses");
+                if margin_value > mean_margin_value + 0.000002 {
+                    seed_mean_above += 1;
+                    family_mean_above += 1;
+                } else if margin_value + 0.000002 < mean_margin_value {
+                    seed_mean_below += 1;
+                    family_mean_below += 1;
+                } else {
+                    family_mean_equal += 1;
+                }
+                let (_midhinge_figure, midhinge_margin) =
+                    midhinge_part.expect("the midhinge line states its midhinge");
+                let midhinge_margin_value: f64 =
+                    midhinge_margin.parse().expect("a midhinge margin parses");
+                if margin_value > midhinge_margin_value + 0.000002 {
+                    seed_midhinge_above += 1;
+                    family_midhinge_above += 1;
+                } else if margin_value + 0.000002 < midhinge_margin_value {
+                    seed_midhinge_below += 1;
+                    family_midhinge_below += 1;
+                } else {
+                    family_midhinge_equal += 1;
+                }
+            } else {
+                assert!(margin_part.is_none(), "seed {}", seed);
+                assert!(farthest.is_none(), "seed {}", seed);
+                assert!(median_part.is_none(), "seed {}", seed);
+                assert!(mean_part.is_none(), "seed {}", seed);
+                assert!(midhinge_part.is_none(), "seed {}", seed);
+            }
+        }
+        assert!(seed_median_above > 0, "seed {}", seed);
+        assert!(seed_median_below > 0, "seed {}", seed);
+        assert!(seed_mean_above > 0, "seed {}", seed);
+        assert!(seed_mean_below > 0, "seed {}", seed);
+        assert!(seed_midhinge_above > 0, "seed {}", seed);
+        assert!(seed_midhinge_below > 0, "seed {}", seed);
+
+        // The counts arithmetic of PG-50, and the
+        // closing naming the earliest mark at the
+        // smallest midrange margin, the named mark
+        // standing as the first mark at the smallest
+        // margin, seed 1's smallest midrange margin
+        // standing tied in the family as the design
+        // record counts it, so no uniqueness stands
+        // asserted here.
+        let counts = midrange.last().expect("the midrange closes");
+        let walked = count_after(counts, "marks walked ");
+        assert_eq!(walked, midrange_marks.len(), "seed {}", seed);
+        let stated_with = count_after(counts, "marks with another standing ");
+        assert_eq!(stated_with, with_another, "seed {}", seed);
+        let stated_days = count_after(counts, "days ");
+        let no_other = midrange_marks
+            .iter()
+            .filter(|line| line.ends_with(", and no other standing"))
+            .count();
+        assert_eq!(with_another + no_other, walked, "seed {}", seed);
+        if with_another > 0 {
+            let closest_part = counts
+                .split("closest midrange margin ")
+                .nth(1)
+                .expect("the counts line names its closest margin");
+            let (closest_figure, closest_rest) = closest_part
+                .split_once(" at ")
+                .expect("the closest margin names its mark");
+            let (closest_elapsed, closest_ordinal) = closest_rest
+                .split_once(" seconds on the ")
+                .expect("the closest margin names its seconds");
+            let closest_ordinal = closest_ordinal
+                .strip_suffix(" day")
+                .expect("the closest margin names its day");
+            let closest_stated: f64 = closest_figure.parse().expect("a margin parses");
+            let smallest = midrange_marks
+                .iter()
+                .filter_map(|line| midrange_mark_parts(line).1)
+                .map(|(_, margin)| margin.parse::<f64>().expect("a midrange margin parses"))
+                .fold(f64::INFINITY, f64::min);
+            assert!(
+                (closest_stated - smallest).abs() <= 0.000002,
+                "seed {}",
+                seed
+            );
+            let first = midrange_marks
+                .iter()
+                .find(|line| {
+                    midrange_mark_parts(line)
+                        .1
+                        .map(|(_, margin)| {
+                            (margin.parse::<f64>().expect("a midrange margin parses") - smallest)
+                                .abs()
+                                <= 0.000002
+                        })
+                        .unwrap_or(false)
+                })
+                .expect("a mark line states the smallest margin");
+            assert_eq!(
+                midrange_mark_position(first),
+                (closest_elapsed.to_string(), closest_ordinal.to_string()),
+                "seed {}",
+                seed
+            );
+            let named = midrange_mark_parts(first)
+                .1
+                .expect("the named mark is figured")
+                .1;
+            assert_eq!(named, closest_figure, "seed {}", seed);
+        } else {
+            assert!(
+                counts.ends_with(", and, no other standing at any mark"),
+                "seed {}",
+                seed
+            );
+        }
+
+        // The day close relation of PG-50, computed from
+        // the standings sections, the midrange taken over
+        // the figures of the competitors other than the
+        // closing holder as the mean of the lowest and
+        // the highest of them, with the zero condition
+        // checked in both directions at every close from
+        // the closing field itself.
+        let mut standing_sections: Vec<Vec<String>> = Vec::new();
+        for line in &standings {
+            if line.starts_with("day, the ") {
+                standing_sections.push(Vec::new());
+            }
+            if let Some(section) = standing_sections.last_mut() {
+                section.push(line.clone());
+            }
+        }
+        let mut midrange_sections: Vec<Vec<&String>> = Vec::new();
+        for line in &midrange {
+            if line.starts_with("day, the ") {
+                midrange_sections.push(Vec::new());
+            }
+            if let Some(section) = midrange_sections.last_mut() {
+                section.push(line);
+            }
+        }
+        assert_eq!(
+            standing_sections.len(),
+            midrange_sections.len(),
+            "seed {}",
+            seed
+        );
+        assert_eq!(stated_days, standing_sections.len(), "seed {}", seed);
+        for (section, midrange_section) in standing_sections.iter().zip(midrange_sections.iter()) {
+            let day_marks: Vec<&&String> = midrange_section
+                .iter()
+                .filter(|line| line.starts_with("mark "))
+                .collect();
+            if day_marks.is_empty() {
+                continue;
+            }
+            let closing = section
+                .iter()
+                .find(|line| line.starts_with("close of the "))
+                .expect("a standings section closes");
+            let holder = closing
+                .split("record held by ")
+                .nth(1)
+                .and_then(|rest| rest.split(" at a projection of ").next())
+                .expect("a closing line names its holder");
+            let record_value: f64 = closing
+                .split(" at a projection of ")
+                .nth(1)
+                .and_then(|rest| rest.split(' ').next())
+                .and_then(|word| word.parse().ok())
+                .expect("a closing line names its record figure");
+            let mut others: Vec<f64> = section
+                .iter()
+                .filter(|line| line.starts_with("competitor "))
+                .filter(|line| !line.starts_with(&format!("competitor {},", holder)))
+                .filter_map(|line| {
+                    line.strip_prefix("competitor ")
+                        .and_then(|rest| rest.split_once(", standing projection "))
+                        .and_then(|(_, rest)| {
+                            rest.strip_suffix(" at the close")
+                                .and_then(|figure| figure.parse::<f64>().ok())
+                        })
+                })
+                .collect();
+            let last = day_marks.last().expect("the day holds a mark");
+            let (_last_record, last_midrange) = midrange_mark_parts(last);
+            match (others.is_empty(), last_midrange) {
+                (true, None) => {}
+                (false, Some((midrange_figure, midrange_margin))) => {
+                    others.sort_by(|a, b| a.partial_cmp(b).expect("figures order"));
+                    let expected = (others[0] + others[others.len() - 1]) / 2.0;
+                    let midrange_value: f64 =
+                        midrange_figure.parse().expect("a midrange figure parses");
+                    let margin_value: f64 =
+                        midrange_margin.parse().expect("a midrange margin parses");
+                    assert!(
+                        (midrange_value - expected).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                    assert!(
+                        (margin_value - (expected - record_value)).abs() <= 0.000002,
+                        "seed {}",
+                        seed
+                    );
+                    assert_eq!(
+                        margin_value == 0.0,
+                        midrange_zero_condition_holds(&others, record_value),
+                        "seed {}",
+                        seed
+                    );
+                }
+                _ => panic!("the day close relation fails, seed {}", seed),
+            }
+        }
+    }
+    assert_eq!(family_figured, 876);
+    assert_eq!(family_median_below, 170);
+    assert_eq!(family_median_equal, 34);
+    assert_eq!(family_median_above, 672);
+    assert_eq!(family_mean_below, 157);
+    assert_eq!(family_mean_equal, 34);
+    assert_eq!(family_mean_above, 685);
+    assert_eq!(family_midhinge_below, 167);
+    assert_eq!(family_midhinge_equal, 34);
+    assert_eq!(family_midhinge_above, 675);
     assert_eq!(family_zero, 0);
 }
