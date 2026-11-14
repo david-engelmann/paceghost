@@ -1115,15 +1115,30 @@ fn test_the_extreme_margin_identity_and_the_margin_chain_hold_line_by_line() {
     // line, the margin never more than the midrange margin
     // and the midrange margin never more than the spread,
     // the five midrange margins pinned at 50, 60, 45, 55,
-    // and 70. The midrange margin stands equal to the
-    // margin exactly where the spread equals the margin,
-    // at the first mark of this meet, the field there
+    // and 70. This pin asserts both equalities of the
+    // chain under the one condition, the spread standing
+    // equal to the margin, the midrange margin equal to
+    // the margin exactly where that condition holds, at
+    // the first mark of this meet, the field there
     // counting one figure, and equal to the spread exactly
-    // under the same condition, the two equalities
+    // where the same condition holds, the two equalities
     // standing or falling together at every mark, checked
-    // as biconditionals at every mark, the margin standing
-    // at zero at no mark of this meet, where the three
-    // would stand equal whole.
+    // as biconditionals at every mark. PG-50 as first
+    // stated carried the second equality under another
+    // condition, the margin standing at zero there, and
+    // that clause stood refuted in both directions by
+    // fixtures inside this slice, at the first mark of
+    // this meet the margin and the spread both standing
+    // at 50 with the midrange margin equal to the spread
+    // and the margin standing apart from zero, and at the
+    // first four marks of pin 5 the margin standing at
+    // zero with the midrange margin standing at 45
+    // against a spread of 90. FIX-PG-20 restates the
+    // clause to the condition this pin asserts. The
+    // margin standing at zero at no mark of this meet,
+    // where the three would stand equal whole, stands as
+    // this meet's own posture and not as the condition of
+    // either equality.
     let meet = midrange_meet();
     let midrange = meet_midrange(&meet).expect("the midrange read");
     let margins = meet_margins(&meet).expect("the margins read");
