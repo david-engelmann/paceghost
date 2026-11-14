@@ -56,8 +56,9 @@
 //! fields of three and five, the mean margins standing at
 //! 116.666667 and 134 against 95 and 155, under S-1 at the
 //! fields of four and three, the midhinges becoming 145 and
-//! 187.5, and under S-5 from the first mark of each meet, and
-//! it passes under S-4 by design. Pin 8 fails under S-4, its
+//! 187.5, and under S-6 as under S-1, under S-5 from the
+//! first mark of each meet, and it passes under S-4 by
+//! design. Pin 8 fails under S-4, its
 //! designed catcher, the loosened scan naming the fifth mark
 //! at 75 where the pin states the second, under S-1 at its
 //! second, third, fourth, and fifth marks on value, the
