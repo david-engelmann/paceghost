@@ -672,6 +672,35 @@ mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, midh
 midhinge counts, marks walked 16, marks with another standing 15, days 3, closest midhinge margin 90 at 400 seconds on the first day
 ```
 
+### midrange
+
+The midrange command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, and the midrange standing held after it by the field behind its holder, the mean of the nearest standing and the farthest standing of that field.
+
+```text
+$ paceghost midrange examples/meet.json
+meet midrange, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, midrange standing 1350, midrange margin 90
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, midrange standing 1305, midrange margin 105
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, midrange standing 1275, midrange margin 169.285714
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, midrange standing 1152.857143, midrange margin 212.857143
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, midrange standing 1051.948052, midrange margin 111.948052
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, midrange standing 1069.090909, midrange margin 129.090909
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, midrange standing 1069.090909, midrange margin 229.090909
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, midrange standing 1069.090909, midrange margin 229.090909
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, midrange standing 990, midrange margin 315
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, midrange standing 1146, midrange margin 471
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, midrange standing 1026, midrange margin 351
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, midrange standing 954, midrange margin 279
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, midrange standing 954, midrange margin 394
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, midrange standing 810, midrange margin 250
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, midrange standing 735, midrange margin 175
+midrange counts, marks walked 16, marks with another standing 15, days 3, closest midrange margin 90 at 400 seconds on the first day
+```
+
 ## Status
 
 Seeded in October 2026. Setup has landed, and Rounds 1 to 23 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
