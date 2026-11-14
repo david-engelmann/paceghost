@@ -154,8 +154,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 24 standing built and in review, so the count
     // stood at one, the slice 24 status line, until the
     // Round 23 closure landed slice 24 and the count
+    // returned to zero. Adjusted again with the
+    // Round 24 slice, as the named mechanical consequence
+    // of slice 25 standing built and in review, so the count
+    // stood at one, the slice 25 status line, until the
+    // Round 24 closure landed slice 25 and the count
     // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -709,6 +714,67 @@ fn test_the_command_surface_stands_at_twenty_five_with_midhinge_last() {
     // five commands of the earlier rounds standing in
     // their order with midhinge twenty fifth and midrange
     // appended last of twenty six.
+    let text = read("rust/src/cli.rs");
+    let lines: Vec<&str> = text.lines().collect();
+    let start = lines
+        .iter()
+        .position(|line| *line == "const COMMANDS: [&str; 26] = [")
+        .expect("the command table stands");
+    let names: Vec<&str> = lines[start + 1..]
+        .iter()
+        .take_while(|line| **line != "];")
+        .map(|line| line.trim().trim_end_matches(',').trim_matches('"'))
+        .collect();
+    let expected: Vec<&str> = vec![
+        "show",
+        "ghost",
+        "race",
+        "season",
+        "board",
+        "fieldday",
+        "ladder",
+        "rematch",
+        "meet",
+        "table",
+        "reign",
+        "days",
+        "forks",
+        "marks",
+        "standings",
+        "traces",
+        "margins",
+        "spread",
+        "middle",
+        "tails",
+        "mean",
+        "median",
+        "quartiles",
+        "range",
+        "midhinge",
+        "midrange",
+    ];
+    assert_eq!(names, expected);
+}
+#[test]
+fn test_contract_carries_the_round_twenty_four_obligations() {
+    let text = read("CONTRACT.md");
+    assert!(text.contains("## Round 24 obligations, full form"));
+    assert!(text.contains("### PG-49 full form, the midrange reading's inputs"));
+    assert!(text.contains("### PG-50 full form, the midrange reading over a meet"));
+}
+
+#[test]
+fn test_readme_reports_the_round_twenty_four_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-49 and PG-50 stand in full form in CONTRACT.md under the Round 24 obligations.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 25 is built and in review. It carries the midrange reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the midrange standing held after it by the field behind its holder, the mean of the nearest standing and the farthest standing of that field, and the midrange margin by which the record stands ahead of that standing, and the midrange command, with the golden midrange readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the midrange standing after each mark, and the seeded generated fixture family extended to the midrange reading, and the README midrange section.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 23 of 100"));
+}
+
+#[test]
+fn test_the_command_surface_stands_at_twenty_six_with_midrange_last() {
     let text = read("rust/src/cli.rs");
     let lines: Vec<&str> = text.lines().collect();
     let start = lines
