@@ -631,12 +631,18 @@ fn test_the_command_surface_keeps_the_twenty_four_commands_in_order_with_midhing
     // now asserts the form the landing leaves, the twenty
     // four commands of the earlier rounds standing in
     // their order with range twenty fourth and midhinge
-    // appended last of twenty five.
+    // appended last of twenty five. Restated again in
+    // place at the Round 24 build commit as the same
+    // forced restatement, the midrange landing falsifying
+    // the twenty five name form, the pin asserting the
+    // twenty five commands of the earlier rounds standing
+    // in their order with midhinge twenty fifth and
+    // midrange appended last of twenty six.
     let text = read("rust/src/cli.rs");
     let lines: Vec<&str> = text.lines().collect();
     let start = lines
         .iter()
-        .position(|line| *line == "const COMMANDS: [&str; 25] = [")
+        .position(|line| *line == "const COMMANDS: [&str; 26] = [")
         .expect("the command table stands");
     let names: Vec<&str> = lines[start + 1..]
         .iter()
@@ -669,6 +675,7 @@ fn test_the_command_surface_keeps_the_twenty_four_commands_in_order_with_midhing
         "quartiles",
         "range",
         "midhinge",
+        "midrange",
     ];
     assert_eq!(names, expected);
 }
@@ -693,11 +700,19 @@ fn test_readme_reports_the_round_twenty_three_status() {
 
 #[test]
 fn test_the_command_surface_stands_at_twenty_five_with_midhinge_last() {
+    // Restated in place at the Round 24 build commit as a
+    // forced restatement, the pin's Round 23 assertion of
+    // a surface of twenty five with midhinge last standing
+    // falsified by the midrange landing itself. The pin
+    // now asserts the form the landing leaves, the twenty
+    // five commands of the earlier rounds standing in
+    // their order with midhinge twenty fifth and midrange
+    // appended last of twenty six.
     let text = read("rust/src/cli.rs");
     let lines: Vec<&str> = text.lines().collect();
     let start = lines
         .iter()
-        .position(|line| *line == "const COMMANDS: [&str; 25] = [")
+        .position(|line| *line == "const COMMANDS: [&str; 26] = [")
         .expect("the command table stands");
     let names: Vec<&str> = lines[start + 1..]
         .iter()
@@ -730,6 +745,7 @@ fn test_the_command_surface_stands_at_twenty_five_with_midhinge_last() {
         "quartiles",
         "range",
         "midhinge",
+        "midrange",
     ];
     assert_eq!(names, expected);
 }
