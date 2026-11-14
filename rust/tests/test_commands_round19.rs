@@ -106,7 +106,7 @@ fn test_the_median_command_stands_in_the_command_surface() {
     assert_eq!(outcome.code, 2);
     assert_eq!(
         outcome.stderr.last().map(String::as_str),
-        Some("paceghost: error: argument command: invalid choice: 'bogus' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range')")
+        Some("paceghost: error: argument command: invalid choice: 'bogus' (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge')")
     );
     let outcome = cli(&["--help"]);
     assert_eq!(outcome.code, 0);
@@ -144,7 +144,7 @@ fn test_the_cli_median_command_at_the_wrong_argument_counts_and_against_a_closed
         outcome.stderr,
         vec![
             "usage: paceghost [-h]",
-            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range}",
+            "                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge}",
             "                 ...",
             "paceghost: error: unrecognized arguments: b.json",
         ]

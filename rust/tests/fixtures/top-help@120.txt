@@ -1,13 +1,13 @@
 0
 %%%STDOUT%%%
 usage: paceghost [-h]
-                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range}
+                 {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge}
                  ...
 
 Race a recorded run against the ghost of your best run.
 
 positional arguments:
-  {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range}
+  {show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge}
     show                print one recorded run
     ghost               print the standing ghost
     race                race a live run against a ghost
@@ -32,6 +32,7 @@ positional arguments:
     median              print the meet median for three or more field days
     quartiles           print the meet quartiles for three or more field days
     range               print the meet range for three or more field days
+    midhinge            print the meet midhinge for three or more field days
 
 options:
   -h, --help            show this help message and exit
