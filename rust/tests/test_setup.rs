@@ -159,8 +159,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 25 standing built and in review, so the count
     // stood at one, the slice 25 status line, until the
     // Round 24 closure landed slice 25 and the count
+    // returned to zero. Adjusted again with the
+    // Round 25 slice, as the named mechanical consequence
+    // of slice 26 standing built and in review, so the count
+    // stood at one, the slice 26 status line, until the
+    // Round 25 closure landed slice 26 and the count
     // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -842,3 +847,65 @@ fn test_the_command_surface_stands_at_twenty_six_with_midrange_last() {
     assert_eq!(names, expected);
 }
 
+#[test]
+fn test_contract_carries_the_round_twenty_five_obligations() {
+    let text = read("CONTRACT.md");
+    assert!(text.contains("## Round 25 obligations, full form"));
+    assert!(text.contains("### PG-51 full form, the width reading's inputs"));
+    assert!(text.contains("### PG-52 full form, the width reading over a meet"));
+}
+
+#[test]
+fn test_readme_reports_the_round_twenty_five_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-51 and PG-52 stand in full form in CONTRACT.md under the Round 25 obligations.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 26 is built and in review. It carries the width reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, and the field width held after it by the field behind its holder, the farthest standing less the nearest standing of that field, and the width command, with the golden width readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the field width after each mark, and the seeded generated fixture family extended to the width reading, and the README width section.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 24 of 100"));
+}
+
+#[test]
+fn test_the_command_surface_stands_at_twenty_seven_with_width_last() {
+    let text = read("rust/src/cli.rs");
+    let lines: Vec<&str> = text.lines().collect();
+    let start = lines
+        .iter()
+        .position(|line| *line == "const COMMANDS: [&str; 27] = [")
+        .expect("the command table stands");
+    let names: Vec<&str> = lines[start + 1..]
+        .iter()
+        .take_while(|line| **line != "];")
+        .map(|line| line.trim().trim_end_matches(',').trim_matches('"'))
+        .collect();
+    let expected: Vec<&str> = vec![
+        "show",
+        "ghost",
+        "race",
+        "season",
+        "board",
+        "fieldday",
+        "ladder",
+        "rematch",
+        "meet",
+        "table",
+        "reign",
+        "days",
+        "forks",
+        "marks",
+        "standings",
+        "traces",
+        "margins",
+        "spread",
+        "middle",
+        "tails",
+        "mean",
+        "median",
+        "quartiles",
+        "range",
+        "midhinge",
+        "midrange",
+        "width",
+    ];
+    assert_eq!(names, expected);
+}
