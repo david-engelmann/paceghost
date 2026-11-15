@@ -164,8 +164,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 26 standing built and in review, so the count
     // stood at one, the slice 26 status line, until the
     // Round 25 closure landed slice 26 and the count
+    // returned to zero. Adjusted again with the
+    // Round 26 slice, as the named mechanical consequence
+    // of slice 27 standing built and in review, so the count
+    // stood at one, the slice 27 status line, until the
+    // Round 26 closure landed slice 27 and the count
     // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -908,4 +913,24 @@ fn test_the_command_surface_stands_at_twenty_seven_with_width_last() {
         "width",
     ];
     assert_eq!(names, expected);
+}
+
+#[test]
+fn test_contract_carries_the_round_twenty_six_obligations() {
+    let text = read("CONTRACT.md");
+    assert!(text.contains("## Round 26 obligations, full form"));
+    assert!(text.contains("### PG-53 full form, the separating meet and the width reading over it"));
+    assert!(text.contains(
+        "### PG-54 full form, the coincidence of the partners over the generated family"
+    ));
+}
+
+#[test]
+fn test_readme_reports_the_round_twenty_six_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-53 and PG-54 stand in full form in CONTRACT.md under the Round 26 obligations.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 27 is built and in review. It carries the separating meet of PG-53, a hand built meet whose third mark holds the five figure field that separates the width reading's two partners, the range standing at the field width at every mark of the meet and the difference of the tails standing below it at the third, and the coincidence pin of PG-54 over the generated fixture family, with no reading and no command added.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 25 of 100"));
 }

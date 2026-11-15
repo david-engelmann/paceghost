@@ -110,6 +110,32 @@
 //! field of its fixture counting two figures or fewer, and
 //! under S-4 by design, its narrowest width, 0 at the
 //! second mark, standing unique.
+//!
+//! Pin 17, the separating meet pin, asserts the width
+//! reading over the separating meet of PG-53 line by line,
+//! the meet whose third mark holds five figures with the
+//! two lowest equal and the two highest equal, where the
+//! range stands at the field width and the difference of
+//! the tails stands below it at two thirds of it. The pin
+//! passes under S-2 whole, the range agreeing with the
+//! width at every mark of the meet, and fails under S-3
+//! at the third mark alone, and it passes under S-4, the
+//! meet's one field width of zero standing unique, and
+//! fails under S-1, S-5, and S-6. Pin 18, the separation
+//! relation pin, asserts the relations of PG-53 over the
+//! same meet across the width, range, tails, and
+//! quartiles readings read together, the range at the
+//! field width at every figured mark, the difference of
+//! the tails at the field width at the first and second
+//! marks and below it by fifty at the third, and the
+//! quartile standings at the third mark standing at one
+//! hundred and fifty and three hundred, so a compensating
+//! movement of the two quartile standings by one amount,
+//! which leaves their difference and every other reading
+//! of the meet unmoved, falls at this pin where pin 17,
+//! reading the width alone, cannot see it, and its split
+//! under the six mutations stands as pin 17's split
+//! stands.
 
 use paceghost::fieldday::{DayRun, FieldDay};
 use paceghost::meet::{
@@ -362,6 +388,35 @@ fn width_meet() -> Meet {
                 run("d", 250, &[(100, 12)]),
                 run("e", 200, &[(200, 38)]),
                 run("f", 150, &[(300, 66)])
+            ),
+        ),
+    ])
+}
+
+fn separating_meet() -> Meet {
+    load_meet(&[
+        day(
+            1000,
+            "a",
+            &format!(
+                "[{}, {}, {}]",
+                run("a", 500, &[(100, 10)]),
+                run("b", 400, &[(100, 15)]),
+                run("c", 300, &[(200, 36)])
+            ),
+        ),
+        quiet_day(1000, "a", "a"),
+        day(
+            1000,
+            "a",
+            &format!(
+                "[{}, {}, {}, {}, {}, {}]",
+                run("a", 500, &[]),
+                run("b", 400, &[(100, 15)]),
+                run("c", 300, &[(100, 15)]),
+                run("d", 250, &[(100, 20)]),
+                run("e", 200, &[(100, 30)]),
+                run("f", 150, &[(100, 30)])
             ),
         ),
     ])
@@ -1251,4 +1306,66 @@ fn test_the_width_is_the_exact_difference_of_extremes_that_render_alike() {
             "width counts, marks walked 3, marks with another standing 2, days 3, narrowest field width 0 at 4194305 seconds on the first day",
         ]
     );
+}
+
+#[test]
+fn test_the_width_reading_over_the_separating_meet_line_by_line() {
+    let meet = separating_meet();
+    let expected: Vec<String> = [
+        "meet width, 3 days",
+        "day, the first day, marks 2",
+        "mark 1, at 100 seconds on the first day, a at a projection of 100, field width 0",
+        "mark 2, at 200 seconds on the first day, a at a projection of 100, field width 30",
+        "day, the second day, marks 0",
+        "day, the third day, marks 1",
+        "mark 3, at 100 seconds on the third day, a at a projection of 100, field width 150",
+        "width counts, marks walked 3, marks with another standing 3, days 3, narrowest field width 0 at 100 seconds on the first day",
+    ]
+    .iter()
+    .map(|line| line.to_string())
+    .collect();
+    assert_eq!(meet_width(&meet), Ok(expected));
+}
+
+#[test]
+fn test_the_separation_relation_over_the_separating_meet() {
+    let meet = separating_meet();
+    let width = meet_width(&meet).expect("the width reading stands");
+    let range = meet_range(&meet).expect("the range reading stands");
+    let tails = meet_tails(&meet).expect("the tails reading stands");
+    let quartiles = meet_quartiles(&meet).expect("the quartiles reading stands");
+    let width_marks = mark_lines(&width);
+    let range_marks = mark_lines(&range);
+    let tails_marks = mark_lines(&tails);
+    let quartiles_marks = mark_lines(&quartiles);
+    assert_eq!(width_marks.len(), 3);
+    assert_eq!(range_marks.len(), 3);
+    assert_eq!(tails_marks.len(), 3);
+    assert_eq!(quartiles_marks.len(), 3);
+    for (place, (((width_line, range_line), tails_line), quartiles_line)) in width_marks
+        .iter()
+        .zip(range_marks.iter())
+        .zip(tails_marks.iter())
+        .zip(quartiles_marks.iter())
+        .enumerate()
+    {
+        let width_figure = width_of(width_line).expect("a field width stands");
+        let range_figure = range_of(range_line).expect("an interquartile range stands");
+        assert_eq!(range_figure, width_figure, "mark {}", place + 1);
+        let difference = tails_difference_of(tails_line).expect("the tail standings stand");
+        if place < 2 {
+            assert_eq!(difference, width_figure, "mark {}", place + 1);
+        } else {
+            assert!(difference < width_figure, "mark {}", place + 1);
+            assert!(
+                (width_figure - difference - 50.0).abs() < 0.001,
+                "mark {}",
+                place + 1
+            );
+            let (lower_quartile, upper_quartile) =
+                quartile_standings_of(quartiles_line).expect("the quartile standings stand");
+            assert!((lower_quartile - 150.0).abs() < 0.001, "mark {}", place + 1);
+            assert!((upper_quartile - 300.0).abs() < 0.001, "mark {}", place + 1);
+        }
+    }
 }
