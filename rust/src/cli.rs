@@ -54,6 +54,8 @@
 //! The midrange command prints the meet midrange for a meet, the
 //! same walk read mark by mark with the midrange standing behind
 //! each mark.
+//! The width command prints the meet width for a meet, the same
+//! walk read mark by mark with the field width behind each mark.
 //! Nothing here touches the network.
 //!
 //! The dispatch is a pure function of the argument list and a file
@@ -77,7 +79,7 @@ use crate::ladder::{ladder_report, load_ladder_text, Ladder};
 use crate::meet::{
     load_meet_text, meet_days, meet_forks, meet_margins, meet_marks, meet_mean, meet_median,
     meet_middle, meet_midhinge, meet_midrange, meet_quartiles, meet_range, meet_reign, meet_report,
-    meet_spread, meet_standings, meet_table, meet_tails, meet_traces, Meet,
+    meet_spread, meet_standings, meet_table, meet_tails, meet_traces, meet_width, Meet,
 };
 use crate::pynum::format_seconds;
 use crate::pytext::PText;
@@ -102,7 +104,7 @@ impl CliOutcome {
     }
 }
 
-const COMMANDS: [&str; 26] = [
+const COMMANDS: [&str; 27] = [
     "show",
     "ghost",
     "race",
@@ -129,9 +131,10 @@ const COMMANDS: [&str; 26] = [
     "range",
     "midhinge",
     "midrange",
+    "width",
 ];
 
-const COMMAND_HELPS: [(&str, &str); 26] = [
+const COMMAND_HELPS: [(&str, &str); 27] = [
     ("show", "print one recorded run"),
     ("ghost", "print the standing ghost"),
     ("race", "race a live run against a ghost"),
@@ -191,10 +194,11 @@ const COMMAND_HELPS: [(&str, &str); 26] = [
         "midrange",
         "print the meet midrange for three or more field days",
     ),
+    ("width", "print the meet width for three or more field days"),
 ];
 
 const CHOICES_HEADER: &str =
-    "{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge,midrange}";
+    "{show,ghost,race,season,board,fieldday,ladder,rematch,meet,table,reign,days,forks,marks,standings,traces,margins,spread,middle,tails,mean,median,quartiles,range,midhinge,midrange,width}";
 
 /// The static shape of one subcommand.
 struct Spec {
@@ -330,6 +334,11 @@ fn spec_for(command: &str) -> Spec {
             positionals: &["file"],
             variadic: false,
         },
+        "width" => Spec {
+            name: "width",
+            positionals: &["file"],
+            variadic: false,
+        },
         _ => Spec {
             name: "ladder",
             positionals: &["file"],
@@ -449,6 +458,7 @@ fn sub_parser_info(spec: &Spec) -> ParserInfo {
             "range" => "paceghost range",
             "midhinge" => "paceghost midhinge",
             "midrange" => "paceghost midrange",
+            "width" => "paceghost width",
             _ => "paceghost ladder",
         },
         description: None,
@@ -1216,7 +1226,7 @@ pub fn dispatch_with_columns(
                 out,
                 &main_usage,
                 format!(
-                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge', 'midrange')",
+                    "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge', 'midrange', 'width')",
                     py_repr(token)
                 ),
             );
@@ -1236,7 +1246,7 @@ pub fn dispatch_with_columns(
                     out,
                     &main_usage,
                     format!(
-                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge', 'midrange')",
+                        "paceghost: error: argument command: invalid choice: {} (choose from 'show', 'ghost', 'race', 'season', 'board', 'fieldday', 'ladder', 'rematch', 'meet', 'table', 'reign', 'days', 'forks', 'marks', 'standings', 'traces', 'margins', 'spread', 'middle', 'tails', 'mean', 'median', 'quartiles', 'range', 'midhinge', 'midrange', 'width')",
                         py_repr(token)
                     ),
                 );
@@ -1419,6 +1429,7 @@ fn run_command(
         "range" => command_range(&positionals[0], read_file, out),
         "midhinge" => command_midhinge(&positionals[0], read_file, out),
         "midrange" => command_midrange(&positionals[0], read_file, out),
+        "width" => command_width(&positionals[0], read_file, out),
         _ => command_ladder(&positionals[0], read_file, out),
     }
 }
@@ -1933,6 +1944,18 @@ fn command_midrange(
         Some(meet) => meet,
     };
     let lines = meet_midrange(&meet).expect("a loaded meet satisfies the midrange preconditions");
+    out.stdout.extend(lines);
+}
+
+fn command_width(file: &PText, read_file: &dyn Fn(&[u8]) -> Option<String>, out: &mut CliOutcome) {
+    let meet = match load_meet_or_print_defects(file, read_file, out) {
+        None => {
+            out.code = 1;
+            return;
+        }
+        Some(meet) => meet,
+    };
+    let lines = meet_width(&meet).expect("a loaded meet satisfies the width preconditions");
     out.stdout.extend(lines);
 }
 

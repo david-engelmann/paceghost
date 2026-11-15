@@ -393,7 +393,15 @@ struct MarkRecord {
 /// no competitor other than the holder held a standing
 /// after the mark, so the midrange reading reads the
 /// same pass an eighteenth way and no walk stands for
-/// it either.
+/// it either. The field widths record, after each
+/// mark, the field width after that mark, the farthest
+/// standing less the nearest standing of the field
+/// behind the holder, one optional entry per mark in
+/// walk order beside the midrange standings, an entry
+/// standing empty where no competitor other than the
+/// holder held a standing after the mark, so the width
+/// reading reads the same pass a nineteenth way and no
+/// walk stands for it either.
 struct MeetWalk {
     lines: Vec<String>,
     labels: Vec<PText>,
@@ -414,6 +422,7 @@ struct MeetWalk {
     range: Vec<Option<BigRational>>,
     midhinge: Vec<Option<BigRational>>,
     midrange: Vec<Option<BigRational>>,
+    width: Vec<Option<BigRational>>,
     day_standings: Vec<Vec<Option<BigRational>>>,
     day_close_lines: Vec<String>,
 }
@@ -497,9 +506,11 @@ fn select_extreme(
 /// from it, and the midhinge selection takes the mean
 /// of its two sub-field medians from it, and the
 /// midrange selection takes the mean of its lowest
+/// figure and its highest figure from it, and the
+/// width selection takes the difference of its lowest
 /// figure and its highest figure from it, so the field
-/// the eight readings state stands in one body and
-/// the eight cannot be edited apart. The
+/// the nine readings state stands in one body and
+/// the nine cannot be edited apart. The
 /// helper guards no invariant and carries no expect
 /// string, because it reads no competitor out of the
 /// vector; the emptiness of the field is each caller's
@@ -857,6 +868,35 @@ fn select_midrange(standing: &[Option<BigRational>], holder: usize) -> Option<Bi
     Some((lowest + highest) / BigRational::from(BigInt::from(2)))
 }
 
+/// The field width after a mark, over the walk's vectors.
+///
+/// The field width is the farthest standing less the
+/// nearest standing of the field behind the holder, the
+/// nearest standing being the lowest figure of that
+/// field and the farthest standing being the highest
+/// figure of that field, so where one competitor stands
+/// behind the holder the field width is zero, the
+/// nearest standing and the farthest standing both
+/// standing at that competitor's figure, where two
+/// stand behind the holder the field width is the
+/// higher of their two figures less the lower, and
+/// where three or more stand behind the holder the
+/// field width is the difference of the lowest figure
+/// and the highest figure alone, no other figure of the
+/// field entering it. A field width is a statistic of
+/// the figures of the field and is held by no
+/// competitor, so the selection names no holder for the
+/// field width and applies no tie discipline. No
+/// competitor other than the holder holding a standing
+/// after the mark leaves the field width empty.
+fn select_width(standing: &[Option<BigRational>], holder: usize) -> Option<BigRational> {
+    let figures = field_figures(standing, holder);
+    if figures.is_empty() {
+        return None;
+    }
+    Some(figures[figures.len() - 1].clone() - figures[0].clone())
+}
+
 /// Walk the record progression of one loaded meet once.
 ///
 /// The walk reads the days as one field of competitors, a runner
@@ -991,6 +1031,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
     let mut range: Vec<Option<BigRational>> = Vec::new();
     let mut midhinge: Vec<Option<BigRational>> = Vec::new();
     let mut midrange: Vec<Option<BigRational>> = Vec::new();
+    let mut width: Vec<Option<BigRational>> = Vec::new();
     let mut day_standings: Vec<Vec<Option<BigRational>>> = Vec::new();
     let mut day_close_lines: Vec<String> = Vec::new();
     let mut previous: Option<(usize, BigRational)> = None;
@@ -1086,6 +1127,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         range.push(select_range(&standing, new_holder));
         midhinge.push(select_midhinge(&standing, new_holder));
         midrange.push(select_midrange(&standing, new_holder));
+        width.push(select_width(&standing, new_holder));
         previous = Some((new_holder, record.clone()));
         if emitted != Some((new_holder, record.clone())) {
             lines.push(format!(
@@ -1160,6 +1202,7 @@ fn meet_walk(meet: &Meet) -> Result<MeetWalk, String> {
         range,
         midhinge,
         midrange,
+        width,
         day_standings,
         day_close_lines,
     })
@@ -2679,6 +2722,96 @@ pub fn meet_midrange(meet: &Meet) -> Result<Vec<String>, String> {
         )),
         None => lines.push(format!(
             "midrange counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
+            walk.marks_walked,
+            with_another,
+            meet.days.len()
+        )),
+    }
+    Ok(lines)
+}
+
+/// Return the meet width lines for one loaded meet.
+///
+/// The width reading reads the one walk a nineteenth
+/// way. One section stands for each day of the meet in
+/// meet order, every day holding a section, and inside
+/// a section one line stands for each mark of the walk
+/// standing in that day, in walk order, naming the
+/// place of the mark in the whole walk, the holder
+/// after the mark and the record figure after it, in
+/// the mark form of the marks reading as far as the
+/// record figure, and then the field width after the
+/// mark, the farthest standing less the nearest
+/// standing of the field behind the holder, or the
+/// words and no other standing where no competitor
+/// other than the holder holds a standing after the
+/// mark. A field width is a statistic of the figures
+/// of the field and is held by no competitor, so no
+/// mark line names a holder for the field width. Each
+/// field width is computed on exact values before any
+/// rendering, so it is never negative, and it stands
+/// at zero exactly where every figure of the field
+/// stands at one figure. The reading closes by
+/// counting the marks the walk walked, the marks with
+/// another standing, and the days, and naming the
+/// narrowest field width and the earliest mark
+/// standing at it, the narrowest width taken over the
+/// marks and never over the competitors, or by stating
+/// that no other standing stood at any mark where none
+/// did. No competitor is ranked or compared against
+/// another beyond the holder each mark line names.
+pub fn meet_width(meet: &Meet) -> Result<Vec<String>, String> {
+    let walk = meet_walk(meet)?;
+    let mut sections: Vec<Vec<(usize, &MarkRecord)>> = vec![Vec::new(); meet.days.len()];
+    for (index, record) in walk.marks_detail.iter().enumerate() {
+        sections[record.day_index].push((index + 1, record));
+    }
+    let mut lines = vec![format!("meet width, {} days", meet.days.len())];
+    let mut with_another = 0usize;
+    let mut narrowest: Option<(BigRational, &MarkRecord)> = None;
+    for (day_index, section) in sections.iter().enumerate() {
+        lines.push(format!(
+            "day, the {} day, marks {}",
+            ORDINALS[day_index],
+            section.len()
+        ));
+        for (place, record) in section {
+            let head = format!(
+                "mark {}, at {} seconds on the {} day, {} at a projection of {}",
+                place,
+                format_seconds_fraction(&record.mark),
+                ORDINALS[record.day_index],
+                walk.labels[record.holder],
+                format_usage(&record.record)
+            );
+            match &walk.width[place - 1] {
+                Some(figure) => {
+                    with_another += 1;
+                    let nearer = match &narrowest {
+                        None => true,
+                        Some((smallest, _)) => *figure < *smallest,
+                    };
+                    if nearer {
+                        narrowest = Some((figure.clone(), *record));
+                    }
+                    lines.push(format!("{}, field width {}", head, format_usage(figure)));
+                }
+                None => lines.push(format!("{}, and no other standing", head)),
+            }
+        }
+    }
+    match narrowest {
+        Some((figure, record)) => lines.push(format!(
+            "width counts, marks walked {}, marks with another standing {}, days {}, narrowest field width {} at {} seconds on the {} day",
+            walk.marks_walked,
+            with_another,
+            meet.days.len(),
+            format_usage(&figure),
+            format_seconds_fraction(&record.mark),
+            ORDINALS[record.day_index]
+        )),
+        None => lines.push(format!(
+            "width counts, marks walked {}, marks with another standing {}, days {}, and, no other standing at any mark",
             walk.marks_walked,
             with_another,
             meet.days.len()
