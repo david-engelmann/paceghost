@@ -1,6 +1,6 @@
 //! The paceghost command line surface.
 //!
-//! Twenty five commands read recorded runs from local files and
+//! Twenty seven commands read recorded runs from local files and
 //! print reports. The show command prints one run or its
 //! defects, the
 //! ghost command prints the standing ghost for a task, and the race
