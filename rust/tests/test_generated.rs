@@ -32,7 +32,7 @@
 use paceghost::meet::{
     load_meet_text, meet_days, meet_margins, meet_marks, meet_mean, meet_median, meet_middle,
     meet_midhinge, meet_midrange, meet_quartiles, meet_range, meet_reign, meet_report, meet_spread,
-    meet_standings, meet_table, meet_tails, meet_traces,
+    meet_standings, meet_table, meet_tails, meet_traces, meet_width,
 };
 use paceghost::pynum::Num;
 use paceghost::runs::load_run_text;
@@ -4529,4 +4529,459 @@ fn test_generated_meets_close_under_the_midrange_reading() {
     assert_eq!(family_midhinge_equal, 34);
     assert_eq!(family_midhinge_above, 675);
     assert_eq!(family_zero, 0);
+}
+
+/// The figures of one width mark line, the record figure
+/// and, where another standing stands, the field width
+/// figure as printed.
+fn width_mark_parts(line: &str) -> (String, Option<String>) {
+    let start = line
+        .find("at a projection of ")
+        .expect("a mark line names its record figure");
+    let figure_start = start + "at a projection of ".len();
+    let figure_end = line[figure_start..]
+        .find(',')
+        .map(|offset| figure_start + offset)
+        .expect("a record figure ends at a comma");
+    let record = line[figure_start..figure_end].to_string();
+    if line.ends_with(", and no other standing") {
+        return (record, None);
+    }
+    let width_start = line
+        .find(", field width ")
+        .expect("a figured mark line names its field width")
+        + ", field width ".len();
+    (record, Some(line[width_start..].to_string()))
+}
+
+/// The elapsed figure and ordinal phrase a width mark
+/// line names, read the way the margins helper reads
+/// them.
+fn width_mark_position(line: &str) -> (String, String) {
+    margins_mark_position(line)
+}
+
+/// Whether every figure of one ordered field stands at
+/// one figure, the zero condition of PG-52 in its field
+/// form.
+fn width_zero_condition_holds(field: &[f64]) -> bool {
+    field.iter().all(|figure| *figure == field[0])
+}
+
+// The width pin of the generated family, added with
+// Round 25 beside the reading closings above. On the
+// built tree it fails under S-1, S-2, S-3, S-5, and S-6
+// on its closing relations, and it fails under S-4 as
+// well, at seeds 1, 3, 4, and 7, each seed's narrowest
+// field width of 0 standing tied, seed 1 at its third
+// and fourth marks, seed 3 at its second, third, and
+// fourth, seed 4 at its second and third, and seed 7 at
+// its second and third, so the loosened scan renames
+// its narrowest seat at those seeds, a posture parting
+// from its midrange analogue stated in the open, the
+// parting standing as the width's own figure, zero at
+// every field of one figure.
+#[test]
+fn test_generated_meets_close_under_the_width_reading() {
+    let mut family_figured = 0usize;
+    let mut family_range_below = 0usize;
+    let mut family_range_equal = 0usize;
+    let mut family_range_above = 0usize;
+    let mut family_tails_below = 0usize;
+    let mut family_tails_equal = 0usize;
+    let mut family_tails_above = 0usize;
+    let mut family_zero = 0usize;
+    let mut closes_at_two = 0usize;
+    let mut closes_at_four = 0usize;
+    let mut closes_at_five = 0usize;
+    let mut closes_at_six = 0usize;
+    let mut closes_at_seven = 0usize;
+    let mut closes_at_nine = 0usize;
+    let mut closes_total = 0usize;
+    for index in 0..8u64 {
+        let seed = MEET_SEED + index;
+        let mut gen = Gen::new(seed);
+        let text = meet_text(&mut gen);
+        let (meet, defects) = load_meet_text(&text);
+        assert_eq!(defects, Vec::<String>::new(), "seed {}", seed);
+        let meet = meet.expect("the generated meet loads");
+
+        let marks = meet_marks(&meet).expect("the marks read");
+        let margins = meet_margins(&meet).expect("the margins read");
+        let spread = meet_spread(&meet).expect("the spread read");
+        let range = meet_range(&meet).expect("the range read");
+        let tails = meet_tails(&meet).expect("the tails read");
+        let width = meet_width(&meet).expect("the width read");
+        let standings = meet_standings(&meet).expect("the standings read");
+
+        let reading_marks: Vec<&String> = marks
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let margins_marks: Vec<&String> = margins
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let spread_marks: Vec<&String> = spread
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let range_marks: Vec<&String> = range
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let tails_marks: Vec<&String> = tails
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let width_marks: Vec<&String> = width
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        assert_eq!(width_marks.len(), reading_marks.len(), "seed {}", seed);
+        assert_eq!(width_marks.len(), margins_marks.len(), "seed {}", seed);
+        assert_eq!(width_marks.len(), spread_marks.len(), "seed {}", seed);
+        assert_eq!(width_marks.len(), range_marks.len(), "seed {}", seed);
+        assert_eq!(width_marks.len(), tails_marks.len(), "seed {}", seed);
+
+        // The closing relations of PG-52 line by line,
+        // the field width as the exact spread of PG-32
+        // less the exact margin of PG-30, the bound chain
+        // of PG-52, the interquartile range and the
+        // difference of the tails never above the field
+        // width and the field width never above the
+        // spread, the zero relation in its field form,
+        // and the no fixed order relations against the
+        // interquartile range and the difference of the
+        // tails counted in both directions.
+        let mut with_another = 0usize;
+        for (((((width_line, mark_line), margin_line), spread_line), range_line), tails_line) in
+            width_marks
+                .iter()
+                .zip(reading_marks.iter())
+                .zip(margins_marks.iter())
+                .zip(spread_marks.iter())
+                .zip(range_marks.iter())
+                .zip(tails_marks.iter())
+        {
+            assert!(
+                width_line.starts_with(&margins_record_prefix(mark_line)),
+                "seed {}",
+                seed
+            );
+            let (record, width_part) = width_mark_parts(width_line);
+            assert_eq!(record, marks_record_figure(mark_line), "seed {}", seed);
+            let (_margin_record, margin_part) = margins_mark_parts(margin_line);
+            let (_spread_record, _field, farthest) = spread_mark_parts(spread_line);
+            let (_range_record, range_part) = range_mark_parts(range_line);
+            let (_tails_record, tails_part) = tails_mark_parts(tails_line);
+            if let Some(width_figure) = width_part {
+                with_another += 1;
+                family_figured += 1;
+                let width_value: f64 = width_figure.parse().expect("a width figure parses");
+                let (nearest_figure, _nearest_label, margin_figure) =
+                    margin_part.expect("the margins line states a nearest standing");
+                let margin_value: f64 = margin_figure.parse().expect("a margin parses");
+                let (farthest_figure, _farthest_label, spread_figure) =
+                    farthest.expect("the spread line states a farthest standing");
+                let spread_value: f64 = spread_figure.parse().expect("a spread figure parses");
+                assert!(
+                    (width_value - (spread_value - margin_value)).abs() <= 0.000002,
+                    "seed {}",
+                    seed
+                );
+                assert!(width_value >= 0.0, "seed {}", seed);
+                let range_figure = range_part.expect("the range line states its range");
+                let range_value: f64 = range_figure.parse().expect("a range figure parses");
+                assert!(range_value <= width_value + 0.000002, "seed {}", seed);
+                assert!(width_value <= spread_value + 0.000002, "seed {}", seed);
+                let (lower_tail_figure, _lower_margin, upper_tail_figure, _upper_margin) =
+                    tails_part.expect("the tails line states its tails");
+                let lower_tail_value: f64 = lower_tail_figure
+                    .parse()
+                    .expect("a lower tail figure parses");
+                let upper_tail_value: f64 = upper_tail_figure
+                    .parse()
+                    .expect("an upper tail figure parses");
+                let tails_difference = upper_tail_value - lower_tail_value;
+                assert!(tails_difference <= width_value + 0.000002, "seed {}", seed);
+                assert_eq!(
+                    width_figure == "0",
+                    nearest_figure == farthest_figure,
+                    "seed {}",
+                    seed
+                );
+                if width_figure == "0" {
+                    family_zero += 1;
+                }
+                if width_value > range_value + 0.000002 {
+                    family_range_above += 1;
+                } else if width_value + 0.000002 < range_value {
+                    family_range_below += 1;
+                } else {
+                    family_range_equal += 1;
+                }
+                if width_value > tails_difference + 0.000002 {
+                    family_tails_above += 1;
+                } else if width_value + 0.000002 < tails_difference {
+                    family_tails_below += 1;
+                } else {
+                    family_tails_equal += 1;
+                }
+            } else {
+                assert!(margin_part.is_none(), "seed {}", seed);
+                assert!(farthest.is_none(), "seed {}", seed);
+                assert!(range_part.is_none(), "seed {}", seed);
+                assert!(tails_part.is_none(), "seed {}", seed);
+            }
+        }
+
+        // The counts arithmetic of PG-52, and the
+        // closing naming the earliest mark at the
+        // narrowest field width, the named mark standing
+        // as the first mark at the smallest width, every
+        // seed's narrowest field width standing at zero
+        // in the family as the design record counts it,
+        // the narrowest standing tied at seeds 1, 3, 4,
+        // and 7, so no uniqueness stands asserted here.
+        let counts = width.last().expect("the width closes");
+        let walked = count_after(counts, "marks walked ");
+        assert_eq!(walked, width_marks.len(), "seed {}", seed);
+        let stated_with = count_after(counts, "marks with another standing ");
+        assert_eq!(stated_with, with_another, "seed {}", seed);
+        let stated_days = count_after(counts, "days ");
+        let no_other = width_marks
+            .iter()
+            .filter(|line| line.ends_with(", and no other standing"))
+            .count();
+        assert_eq!(with_another + no_other, walked, "seed {}", seed);
+        if with_another > 0 {
+            let narrowest_part = counts
+                .split("narrowest field width ")
+                .nth(1)
+                .expect("the counts line names its narrowest width");
+            let (narrowest_figure, narrowest_rest) = narrowest_part
+                .split_once(" at ")
+                .expect("the narrowest width names its mark");
+            let (narrowest_elapsed, narrowest_ordinal) = narrowest_rest
+                .split_once(" seconds on the ")
+                .expect("the narrowest width names its seconds");
+            let narrowest_ordinal = narrowest_ordinal
+                .strip_suffix(" day")
+                .expect("the narrowest width names its day");
+            let narrowest_stated: f64 = narrowest_figure.parse().expect("a width parses");
+            assert_eq!(narrowest_stated, 0.0, "seed {}", seed);
+            let smallest = width_marks
+                .iter()
+                .filter_map(|line| width_mark_parts(line).1)
+                .map(|figure| figure.parse::<f64>().expect("a width figure parses"))
+                .fold(f64::INFINITY, f64::min);
+            assert!(
+                (narrowest_stated - smallest).abs() <= 0.000002,
+                "seed {}",
+                seed
+            );
+            let first = width_marks
+                .iter()
+                .find(|line| {
+                    width_mark_parts(line)
+                        .1
+                        .map(|figure| {
+                            (figure.parse::<f64>().expect("a width figure parses") - smallest).abs()
+                                <= 0.000002
+                        })
+                        .unwrap_or(false)
+                })
+                .expect("a mark line states the narrowest width");
+            assert_eq!(
+                width_mark_position(first),
+                (narrowest_elapsed.to_string(), narrowest_ordinal.to_string()),
+                "seed {}",
+                seed
+            );
+            let named = width_mark_parts(first)
+                .1
+                .expect("the named mark is figured");
+            assert_eq!(named, narrowest_figure, "seed {}", seed);
+        } else {
+            assert!(
+                counts.ends_with(", and, no other standing at any mark"),
+                "seed {}",
+                seed
+            );
+        }
+
+        // The day close relation of PG-52, computed from
+        // the standings sections, the field width taken
+        // over the figures of the competitors other than
+        // the closing holder as the highest of them less
+        // the lowest, with the zero condition checked in
+        // both directions at every close from the closing
+        // field itself, the closes counted out at their
+        // field counts, and the field width standing at
+        // each partner identically at the closes of count
+        // two and above each at every other close.
+        let mut standing_sections: Vec<Vec<String>> = Vec::new();
+        for line in &standings {
+            if line.starts_with("day, the ") {
+                standing_sections.push(Vec::new());
+            }
+            if let Some(section) = standing_sections.last_mut() {
+                section.push(line.clone());
+            }
+        }
+        let mut width_sections: Vec<Vec<&String>> = Vec::new();
+        for line in &width {
+            if line.starts_with("day, the ") {
+                width_sections.push(Vec::new());
+            }
+            if let Some(section) = width_sections.last_mut() {
+                section.push(line);
+            }
+        }
+        let mut range_sections: Vec<Vec<&String>> = Vec::new();
+        for line in &range {
+            if line.starts_with("day, the ") {
+                range_sections.push(Vec::new());
+            }
+            if let Some(section) = range_sections.last_mut() {
+                section.push(line);
+            }
+        }
+        let mut tails_sections: Vec<Vec<&String>> = Vec::new();
+        for line in &tails {
+            if line.starts_with("day, the ") {
+                tails_sections.push(Vec::new());
+            }
+            if let Some(section) = tails_sections.last_mut() {
+                section.push(line);
+            }
+        }
+        assert_eq!(
+            standing_sections.len(),
+            width_sections.len(),
+            "seed {}",
+            seed
+        );
+        assert_eq!(stated_days, standing_sections.len(), "seed {}", seed);
+        for ((section, width_section), (range_section, tails_section)) in standing_sections
+            .iter()
+            .zip(width_sections.iter())
+            .zip(range_sections.iter().zip(tails_sections.iter()))
+        {
+            let day_marks: Vec<&&String> = width_section
+                .iter()
+                .filter(|line| line.starts_with("mark "))
+                .collect();
+            if day_marks.is_empty() {
+                continue;
+            }
+            let closing = section
+                .iter()
+                .find(|line| line.starts_with("close of the "))
+                .expect("a standings section closes");
+            let holder = closing
+                .split("record held by ")
+                .nth(1)
+                .and_then(|rest| rest.split(" at a projection of ").next())
+                .expect("a closing line names its holder");
+            let mut others: Vec<f64> = section
+                .iter()
+                .filter(|line| line.starts_with("competitor "))
+                .filter(|line| !line.starts_with(&format!("competitor {},", holder)))
+                .filter_map(|line| {
+                    line.strip_prefix("competitor ")
+                        .and_then(|rest| rest.split_once(", standing projection "))
+                        .and_then(|(_, rest)| {
+                            rest.strip_suffix(" at the close")
+                                .and_then(|figure| figure.parse::<f64>().ok())
+                        })
+                })
+                .collect();
+            let last = day_marks.last().expect("the day holds a mark");
+            let (_last_record, last_width) = width_mark_parts(last);
+            match (others.is_empty(), last_width) {
+                (true, None) => {}
+                (false, Some(width_figure)) => {
+                    others.sort_by(|a, b| a.partial_cmp(b).expect("figures order"));
+                    let expected = others[others.len() - 1] - others[0];
+                    let width_value: f64 = width_figure.parse().expect("a width figure parses");
+                    assert!((width_value - expected).abs() <= 0.000002, "seed {}", seed);
+                    assert_eq!(
+                        width_value == 0.0,
+                        width_zero_condition_holds(&others),
+                        "seed {}",
+                        seed
+                    );
+                    closes_total += 1;
+                    match others.len() {
+                        2 => closes_at_two += 1,
+                        4 => closes_at_four += 1,
+                        5 => closes_at_five += 1,
+                        6 => closes_at_six += 1,
+                        7 => closes_at_seven += 1,
+                        9 => closes_at_nine += 1,
+                        _ => {}
+                    }
+                    let range_last = range_section
+                        .iter()
+                        .rfind(|line| line.starts_with("mark "))
+                        .expect("the day holds a range mark");
+                    let (_range_record, range_figure) = range_mark_parts(range_last);
+                    let range_value: f64 = range_figure
+                        .expect("the close states its range")
+                        .parse()
+                        .expect("a range figure parses");
+                    let tails_last = tails_section
+                        .iter()
+                        .rfind(|line| line.starts_with("mark "))
+                        .expect("the day holds a tails mark");
+                    let (_tails_record, tails_part) = tails_mark_parts(tails_last);
+                    let (lower_tail_figure, _lm, upper_tail_figure, _um) =
+                        tails_part.expect("the close states its tails");
+                    let tails_difference: f64 = upper_tail_figure
+                        .parse::<f64>()
+                        .expect("an upper tail figure parses")
+                        - lower_tail_figure
+                            .parse::<f64>()
+                            .expect("a lower tail figure parses");
+                    if others.len() == 2 {
+                        assert!(
+                            (width_value - range_value).abs() <= 0.000002,
+                            "seed {}",
+                            seed
+                        );
+                        assert!(
+                            (width_value - tails_difference).abs() <= 0.000002,
+                            "seed {}",
+                            seed
+                        );
+                    } else {
+                        assert!(width_value > range_value + 0.000002, "seed {}", seed);
+                        assert!(width_value > tails_difference + 0.000002, "seed {}", seed);
+                    }
+                }
+                _ => panic!("the day close relation fails, seed {}", seed),
+            }
+        }
+    }
+    assert_eq!(family_figured, 876);
+    assert_eq!(family_range_below, 0);
+    assert_eq!(family_range_equal, 34);
+    assert_eq!(family_range_above, 842);
+    assert_eq!(family_tails_below, 0);
+    assert_eq!(family_tails_equal, 34);
+    assert_eq!(family_tails_above, 842);
+    assert_eq!(family_zero, 13);
+    assert_eq!(closes_total, 67);
+    assert_eq!(closes_at_two, 2);
+    assert_eq!(closes_at_four, 6);
+    assert_eq!(closes_at_five, 18);
+    assert_eq!(closes_at_six, 20);
+    assert_eq!(closes_at_seven, 14);
+    assert_eq!(closes_at_nine, 7);
+    assert_eq!(
+        closes_at_five + closes_at_six + closes_at_seven + closes_at_nine,
+        59
+    );
 }
