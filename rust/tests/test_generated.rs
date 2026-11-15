@@ -4988,14 +4988,24 @@ fn test_generated_meets_close_under_the_width_reading() {
 
 // The coincidence pin of the generated family, added
 // with Round 26 beside the width pin above. It reads
-// the width, range, and tails readings together over
-// the whole family and counts the marks where each of
-// the width's two partners stands at the field width,
-// asserting the coincidence PG-54 states, the two
-// counts standing equal at thirty four and no mark of
-// the family standing as a separation, the range at
-// the field width with the difference of the tails
-// below it. At every figured mark it asserts the
+// the width, range, tails, and spread readings
+// together over the whole family and counts the marks
+// where each of the width's two partners stands at
+// the field width, asserting the coincidence PG-54
+// states, the two counts standing equal at thirty
+// four and no mark of the family standing as a
+// separation, the range at the field width with the
+// difference of the tails below it. It counts the
+// partings beside them, the marks where the partners
+// part from each other with neither standing at the
+// field width, standing at seven hundred and fifty
+// six, and at every coincident mark it asserts the
+// field behind the holder holds one figure or two,
+// the count read from the spread line's record part,
+// whose stated field counts the holder standing with
+// the field behind it, so the field of the
+// obligation stands one below the count the line
+// states. At every figured mark it asserts the
 // standing relation in the direction the ground of
 // PG-54 proves, that where the difference of the tails
 // stands at the field width the range stands at the
@@ -5006,6 +5016,7 @@ fn test_generated_meets_close_under_the_coincidence_of_the_partners() {
     let mut family_range_at_width = 0usize;
     let mut family_tails_at_width = 0usize;
     let mut family_separations = 0usize;
+    let mut family_partings = 0usize;
     for index in 0..8u64 {
         let seed = MEET_SEED + index;
         let mut gen = Gen::new(seed);
@@ -5017,6 +5028,7 @@ fn test_generated_meets_close_under_the_coincidence_of_the_partners() {
         let range = meet_range(&meet).expect("the range read");
         let tails = meet_tails(&meet).expect("the tails read");
         let width = meet_width(&meet).expect("the width read");
+        let spread = meet_spread(&meet).expect("the spread read");
         let range_marks: Vec<&String> = range
             .iter()
             .filter(|line| line.starts_with("mark "))
@@ -5029,12 +5041,18 @@ fn test_generated_meets_close_under_the_coincidence_of_the_partners() {
             .iter()
             .filter(|line| line.starts_with("mark "))
             .collect();
+        let spread_marks: Vec<&String> = spread
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
         assert_eq!(width_marks.len(), range_marks.len(), "seed {}", seed);
         assert_eq!(width_marks.len(), tails_marks.len(), "seed {}", seed);
-        for ((width_line, range_line), tails_line) in width_marks
+        assert_eq!(width_marks.len(), spread_marks.len(), "seed {}", seed);
+        for (((width_line, range_line), tails_line), spread_line) in width_marks
             .iter()
             .zip(range_marks.iter())
             .zip(tails_marks.iter())
+            .zip(spread_marks.iter())
         {
             let (_record, width_part) = width_mark_parts(width_line);
             if let Some(width_figure) = width_part {
@@ -5065,6 +5083,15 @@ fn test_generated_meets_close_under_the_coincidence_of_the_partners() {
                 if range_at_width && difference < width_value - 0.000002 {
                     family_separations += 1;
                 }
+                if !range_at_width && !tails_at_width && (range_value - difference).abs() > 0.000002
+                {
+                    family_partings += 1;
+                }
+                if range_at_width || tails_at_width {
+                    let (_spread_record, stated_field, _farthest) = spread_mark_parts(spread_line);
+                    let field_behind = stated_field - 1;
+                    assert!(field_behind == 1 || field_behind == 2, "seed {}", seed);
+                }
             }
         }
     }
@@ -5072,4 +5099,5 @@ fn test_generated_meets_close_under_the_coincidence_of_the_partners() {
     assert_eq!(family_range_at_width, 34);
     assert_eq!(family_tails_at_width, 34);
     assert_eq!(family_separations, 0);
+    assert_eq!(family_partings, 756);
 }

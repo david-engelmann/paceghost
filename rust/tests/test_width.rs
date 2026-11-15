@@ -123,12 +123,19 @@
 //! meet's one field width of zero standing unique, and
 //! fails under S-1, S-5, and S-6. Pin 18, the separation
 //! relation pin, asserts the relations of PG-53 over the
-//! same meet across the width, range, and tails readings
-//! read together, the range at the field width at every
-//! figured mark, the difference of the tails at the field
-//! width at the first and second marks and below it by
-//! fifty at the third, and its split stands as pin 17's
-//! split stands.
+//! same meet across the width, range, tails, and
+//! quartiles readings read together, the range at the
+//! field width at every figured mark, the difference of
+//! the tails at the field width at the first and second
+//! marks and below it by fifty at the third, and the
+//! quartile standings at the third mark standing at one
+//! hundred and fifty and three hundred, so a compensating
+//! movement of the two quartile standings by one amount,
+//! which leaves their difference and every other reading
+//! of the meet unmoved, falls at this pin where pin 17,
+//! reading the width alone, cannot see it, and its split
+//! under the six mutations stands as pin 17's split
+//! stands.
 
 use paceghost::fieldday::{DayRun, FieldDay};
 use paceghost::meet::{
@@ -1326,16 +1333,20 @@ fn test_the_separation_relation_over_the_separating_meet() {
     let width = meet_width(&meet).expect("the width reading stands");
     let range = meet_range(&meet).expect("the range reading stands");
     let tails = meet_tails(&meet).expect("the tails reading stands");
+    let quartiles = meet_quartiles(&meet).expect("the quartiles reading stands");
     let width_marks = mark_lines(&width);
     let range_marks = mark_lines(&range);
     let tails_marks = mark_lines(&tails);
+    let quartiles_marks = mark_lines(&quartiles);
     assert_eq!(width_marks.len(), 3);
     assert_eq!(range_marks.len(), 3);
     assert_eq!(tails_marks.len(), 3);
-    for (place, ((width_line, range_line), tails_line)) in width_marks
+    assert_eq!(quartiles_marks.len(), 3);
+    for (place, (((width_line, range_line), tails_line), quartiles_line)) in width_marks
         .iter()
         .zip(range_marks.iter())
         .zip(tails_marks.iter())
+        .zip(quartiles_marks.iter())
         .enumerate()
     {
         let width_figure = width_of(width_line).expect("a field width stands");
@@ -1351,6 +1362,10 @@ fn test_the_separation_relation_over_the_separating_meet() {
                 "mark {}",
                 place + 1
             );
+            let (lower_quartile, upper_quartile) =
+                quartile_standings_of(quartiles_line).expect("the quartile standings stand");
+            assert!((lower_quartile - 150.0).abs() < 0.001, "mark {}", place + 1);
+            assert!((upper_quartile - 300.0).abs() < 0.001, "mark {}", place + 1);
         }
     }
 }
