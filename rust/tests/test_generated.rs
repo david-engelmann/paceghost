@@ -4985,3 +4985,91 @@ fn test_generated_meets_close_under_the_width_reading() {
         59
     );
 }
+
+// The coincidence pin of the generated family, added
+// with Round 26 beside the width pin above. It reads
+// the width, range, and tails readings together over
+// the whole family and counts the marks where each of
+// the width's two partners stands at the field width,
+// asserting the coincidence PG-54 states, the two
+// counts standing equal at thirty four and no mark of
+// the family standing as a separation, the range at
+// the field width with the difference of the tails
+// below it. At every figured mark it asserts the
+// standing relation in the direction the ground of
+// PG-54 proves, that where the difference of the tails
+// stands at the field width the range stands at the
+// field width there.
+#[test]
+fn test_generated_meets_close_under_the_coincidence_of_the_partners() {
+    let mut family_figured = 0usize;
+    let mut family_range_at_width = 0usize;
+    let mut family_tails_at_width = 0usize;
+    let mut family_separations = 0usize;
+    for index in 0..8u64 {
+        let seed = MEET_SEED + index;
+        let mut gen = Gen::new(seed);
+        let text = meet_text(&mut gen);
+        let (meet, defects) = load_meet_text(&text);
+        assert_eq!(defects, Vec::<String>::new(), "seed {}", seed);
+        let meet = meet.expect("the generated meet loads");
+
+        let range = meet_range(&meet).expect("the range read");
+        let tails = meet_tails(&meet).expect("the tails read");
+        let width = meet_width(&meet).expect("the width read");
+        let range_marks: Vec<&String> = range
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let tails_marks: Vec<&String> = tails
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        let width_marks: Vec<&String> = width
+            .iter()
+            .filter(|line| line.starts_with("mark "))
+            .collect();
+        assert_eq!(width_marks.len(), range_marks.len(), "seed {}", seed);
+        assert_eq!(width_marks.len(), tails_marks.len(), "seed {}", seed);
+        for ((width_line, range_line), tails_line) in width_marks
+            .iter()
+            .zip(range_marks.iter())
+            .zip(tails_marks.iter())
+        {
+            let (_record, width_part) = width_mark_parts(width_line);
+            if let Some(width_figure) = width_part {
+                family_figured += 1;
+                let width_value: f64 = width_figure.parse().expect("a width figure parses");
+                let (_range_record, range_part) = range_mark_parts(range_line);
+                let range_figure = range_part.expect("the range line states its range");
+                let range_value: f64 = range_figure.parse().expect("a range figure parses");
+                let (_tails_record, tails_part) = tails_mark_parts(tails_line);
+                let (lower_tail_figure, _lower_margin, upper_tail_figure, _upper_margin) =
+                    tails_part.expect("the tails line states its tails");
+                let lower_tail_value: f64 =
+                    lower_tail_figure.parse().expect("a tail figure parses");
+                let upper_tail_value: f64 =
+                    upper_tail_figure.parse().expect("a tail figure parses");
+                let difference = upper_tail_value - lower_tail_value;
+                let range_at_width = (range_value - width_value).abs() <= 0.000002;
+                let tails_at_width = (difference - width_value).abs() <= 0.000002;
+                if tails_at_width {
+                    assert!(range_at_width, "seed {}", seed);
+                }
+                if range_at_width {
+                    family_range_at_width += 1;
+                }
+                if tails_at_width {
+                    family_tails_at_width += 1;
+                }
+                if range_at_width && difference < width_value - 0.000002 {
+                    family_separations += 1;
+                }
+            }
+        }
+    }
+    assert_eq!(family_figured, 876);
+    assert_eq!(family_range_at_width, 34);
+    assert_eq!(family_tails_at_width, 34);
+    assert_eq!(family_separations, 0);
+}
