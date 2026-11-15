@@ -701,6 +701,35 @@ mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, midr
 midrange counts, marks walked 16, marks with another standing 15, days 3, closest midrange margin 90 at 400 seconds on the first day
 ```
 
+### width
+
+The width command prints the meet read mark by mark, naming the holder after each mark, the record figure after it, and the field width held after it by the field behind its holder, the farthest standing less the nearest standing of that field.
+
+```text
+$ paceghost width examples/meet.json
+meet width, 3 days
+day, the first day, marks 8
+mark 1, at 300 seconds on the first day, operator at a projection of 1260, and no other standing
+mark 2, at 400 seconds on the first day, operator at a projection of 1260, field width 0
+mark 3, at 600 seconds on the first day, dawn fork at a projection of 1200, field width 90
+mark 4, at 700 seconds on the first day, operator at a projection of 1105.714286, field width 150
+mark 5, at 900 seconds on the first day, night fork at a projection of 940, field width 94.285714
+mark 6, at 1100 seconds on the first day, night fork at a projection of 940, field width 107.532468
+mark 7, at 1200 seconds on the first day, night fork at a projection of 940, field width 141.818182
+mark 8, at 1500 seconds on the first day, night fork at a projection of 840, field width 141.818182
+day, the second day, marks 5
+mark 9, at 300 seconds on the second day, night fork at a projection of 840, field width 141.818182
+mark 10, at 400 seconds on the second day, dawn fork at a projection of 675, field width 300
+mark 11, at 500 seconds on the second day, dawn fork at a projection of 675, field width 12
+mark 12, at 800 seconds on the second day, dawn fork at a projection of 675, field width 252
+mark 13, at 1000 seconds on the second day, dawn fork at a projection of 675, field width 108
+day, the third day, marks 3
+mark 14, at 450 seconds on the third day, dawn fork at a projection of 560, field width 108
+mark 15, at 500 seconds on the third day, dawn fork at a projection of 560, field width 180
+mark 16, at 600 seconds on the third day, dawn fork at a projection of 560, field width 30
+width counts, marks walked 16, marks with another standing 15, days 3, narrowest field width 0 at 400 seconds on the first day
+```
+
 ## Status
 
 Seeded in October 2026. Setup has landed, and Rounds 1 to 24 have closed, with all slices merged on main. Part of the Spectacle line in the 39 repo storefront perfection programme.
