@@ -948,6 +948,23 @@ fn test_contract_carries_the_round_twenty_seven_obligations() {
         "### PG-55 full form, the execution record of the width file's unexecuted mutations"
     ));
     assert!(text.contains("### PG-56 full form, the hunt record of the width neighbourhood"));
+
+    assert!(text.contains(
+        "Under S-1 the suite stands at nine hundred and thirty nine passed and twenty failed"
+    ));
+    assert!(text.contains(
+        "Under S-5 the suite stands at nine hundred and forty passed and nineteen failed"
+    ));
+    assert!(text.contains("Under S-6 the suite stands at eight hundred and eleven passed and one hundred and forty eight failed"));
+    assert!(text.contains(
+        "Under S-4 the suite stands at nine hundred and fifty five passed and four failed"
+    ));
+    assert!(text.contains("The header's stated splits for the separating meet pin and the separation relation pin, falling under S-1, S-5, and S-6 and passing under S-4, stand confirmed by execution whole"));
+    assert!(text.contains("W-1 takes the field width as the second farthest standing less the nearest standing in the width selection alone, the mirror of the seat the Round 26 red team probed with the farthest less the second lowest, and falls at sixteen pins, its set parting from that edit's set at three names each way"));
+    assert!(text.contains("W-2 takes the lower of the two middle figures at an even part in the quartiles selection's own copy of the median construction, the range and midhinge copies standing untouched, and falls at eighteen pins"));
+    assert!(text.contains("W-3 makes the tails parts disjoint in the tails selection alone, the upper part opening at the part count at the odd counts of three or more with the shipped form standing at counts one and two and at every even count, and falls at twenty one failures standing at nineteen distinct pin names, the separation relation pin among them at its third mark and the separating meet pin passing, the width standing untouched by the edit"));
+    assert!(text.contains("W-4 makes the range parts disjoint in the range selection's own copy of the part construction under the same guard as W-3, and falls at twelve pins, the separation relation pin passing by the separating meet's own shape, the upper part standing at three hundred twice under both constructions at its third mark, and the generated range pin and the range family's pins over odd counted fields carrying the catch"));
+    assert!(text.contains("W-5 loosens the narrowest scan in the range reading alone to name a later mark at an equal range, and falls at four pins, the range tie pin, the constructed range golden pin, the constructed range command pin, and the generated range pin"));
 }
 
 #[test]
