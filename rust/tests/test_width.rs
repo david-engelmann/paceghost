@@ -121,7 +121,12 @@
 //! width at every mark of the meet, and fails under S-3
 //! at the third mark alone, and it passes under S-4, the
 //! meet's one field width of zero standing unique, and
-//! fails under S-1, S-5, and S-6. Pin 18, the separation
+//! fails under S-1, S-5, and S-6. Its split under S-1,
+//! S-4, S-5, and S-6 stands executed whole at Round 27
+//! under PG-55, the four edits standing run against it
+//! at the design desk, and the split stands charged to
+//! every later build's warm-up in the form PG-55 states.
+//! Pin 18, the separation
 //! relation pin, asserts the relations of PG-53 over the
 //! same meet across the width, range, tails, and
 //! quartiles readings read together, the range at the
@@ -135,7 +140,11 @@
 //! of the meet unmoved, falls at this pin where pin 17,
 //! reading the width alone, cannot see it, and its split
 //! under the six mutations stands as pin 17's split
-//! stands.
+//! stands. Its split under the same four edits stands
+//! executed whole at Round 27, and it stands as pin 17's
+//! split stands now on execution and not on the family's
+//! account alone, the split standing charged to every
+//! later build's warm-up in the form PG-55 states.
 
 use paceghost::fieldday::{DayRun, FieldDay};
 use paceghost::meet::{

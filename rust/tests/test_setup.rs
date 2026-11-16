@@ -169,8 +169,13 @@ fn test_readme_reports_the_round_four_status() {
     // of slice 27 standing built and in review, so the count
     // stood at one, the slice 27 status line, until the
     // Round 26 closure landed slice 27 and the count
+    // returned to zero. Adjusted again with the
+    // Round 27 slice, as the named mechanical consequence
+    // of slice 28 standing built and in review, so the count
+    // stood at one, the slice 28 status line, until the
+    // Round 27 closure landed slice 28 and the count
     // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -931,6 +936,43 @@ fn test_readme_reports_the_round_twenty_six_status() {
     let standing = "- Contract, PG-53 and PG-54 met. They stand in full form in CONTRACT.md under the Round 26 obligations, and Round 26, the separation round, closed on the merged slice 27 after three reviews, with the spec review approving with findings at two Observations, and the standards review approving with findings at two Minors and four Observations, with both Minors standing cured in the slice by the repair commit bbb5310a, and the red team approving with no findings on its completion lane's report, its first seating standing incomplete on the write fault and discharged by execution, and with CodeRabbit returning three inline comments on the slice, two standing valid and cured in the repair, the qualifier half of the standards review's first Minor and the quartile standings of its second, and one standing not valid, the exact comparison comment, dismissed on the family's standing print grain tolerance standing at one hundred and thirty one lines of the base's generated file alone, and with the separation standing executed whole, under S-2 the failing set standing at ten with pins 17 and 18 passing, and under S-3 at exactly those ten plus pins 17 and 18, the sets parting at the separating meet's pins and nowhere else, and with the impossibility standing proved at the desk and swept by execution, one thousand five hundred and fourteen meets and three thousand and twenty eight figured marks at no counterexample, the claim's antecedent standing exercised at eight hundred and fifty three marks, and with the two cures standing proven in both directions, pin 16 failing at eight hundred and forty two partings counted against seven hundred and fifty six under disturbances at the tails seat and at the range seat where the unrepaired pin passed whole, and pin 18 failing at its lower quartile assertion under the compensating movement where the unrepaired pin passed, and with the build's fresh extraction re-run standing discharged under the bounded fault limb, the form gate on the identical tree and the hosted gate standing as its verdicts of record, and the repair's own fresh extraction gate standing executed whole at 959 and 0, and with the design note's section 0 base tree string standing for the errata queue, the base commit's tree standing at 7842fa27, and with the three records items of the design note's second section standing carried forward named with no cure charged, the Round 24 design note's fourth section carrying the false distribution pair as written, one at seven and fifty eight at five and more against the counted fourteen at seven and fifty nine at five and more, its contract places standing cured inside Round 24 by FIX-PG-20, and the Round 23 design note's fifth section carrying its compression as written, and the Round 22 design record's manifest figure of 73 standing against the counted 71 as a records reconciliation, and with FIX-PG-21 standing free and unspent through the round.";
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 27 has landed. It carries the separating meet of PG-53, a hand built meet whose third mark holds the five figure field that separates the width reading's two partners, the range standing at the field width at every mark of the meet and the difference of the tails standing below it at the third, and the coincidence pin of PG-54 over the generated fixture family, with no reading and no command added.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 26 of 100"));
+}
+
+#[test]
+fn test_contract_carries_the_round_twenty_seven_obligations() {
+    let text = read("CONTRACT.md");
+    assert!(text.contains("## Round 27 obligations, full form"));
+    assert!(text.contains(
+        "### PG-55 full form, the execution record of the width file's unexecuted mutations"
+    ));
+    assert!(text.contains("### PG-56 full form, the hunt record of the width neighbourhood"));
+
+    assert!(text.contains(
+        "Under S-1 the suite stands at nine hundred and thirty nine passed and twenty failed"
+    ));
+    assert!(text.contains(
+        "Under S-5 the suite stands at nine hundred and forty passed and nineteen failed"
+    ));
+    assert!(text.contains("Under S-6 the suite stands at eight hundred and eleven passed and one hundred and forty eight failed"));
+    assert!(text.contains(
+        "Under S-4 the suite stands at nine hundred and fifty five passed and four failed"
+    ));
+    assert!(text.contains("The header's stated splits for the separating meet pin and the separation relation pin, falling under S-1, S-5, and S-6 and passing under S-4, stand confirmed by execution whole"));
+    assert!(text.contains("W-1 takes the field width as the second farthest standing less the nearest standing in the width selection alone, the mirror of the seat the Round 26 red team probed with the farthest less the second lowest, and falls at sixteen pins, its set parting from that edit's set at three names each way"));
+    assert!(text.contains("W-2 takes the lower of the two middle figures at an even part in the quartiles selection's own copy of the median construction, the range and midhinge copies standing untouched, and falls at eighteen pins"));
+    assert!(text.contains("W-3 makes the tails parts disjoint in the tails selection alone, the upper part opening at the part count at the odd counts of three or more with the shipped form standing at counts one and two and at every even count, and falls at twenty one failures standing at nineteen distinct pin names, the separation relation pin among them at its third mark and the separating meet pin passing, the width standing untouched by the edit"));
+    assert!(text.contains("W-4 makes the range parts disjoint in the range selection's own copy of the part construction under the same guard as W-3, and falls at twelve pins, the separation relation pin passing by the separating meet's own shape, the upper part standing at three hundred twice under both constructions at its third mark, and the generated range pin and the range family's pins over odd counted fields carrying the catch"));
+    assert!(text.contains("W-5 loosens the narrowest scan in the range reading alone to name a later mark at an equal range, and falls at four pins, the range tie pin, the constructed range golden pin, the constructed range command pin, and the generated range pin"));
+}
+
+#[test]
+fn test_readme_reports_the_round_twenty_seven_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-55 and PG-56 met. They stand in full form in CONTRACT.md under the Round 27 obligations, and Round 27 is the width execution record round.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 28 built and in review. It carries the execution record of PG-55, the four mutations of the Round 25 family standing executed against the width file's pins with the header's stated splits for the separating meet pin and the separation relation pin confirmed whole and no parting standing, and the hunt record of PG-56 over the width reading's neighbourhood, five fresh edits falling and none passing whole, with no reading and no command added.";
     assert!(lines.iter().any(|found| found == slice_line));
     assert!(read("README.md").contains("Closed perfection rounds, 26 of 100"));
 }
