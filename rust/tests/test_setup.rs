@@ -635,6 +635,7 @@ fn subsection_span(lines: &[String], subheading: &str) -> Vec<String> {
     lines[start..end].to_vec()
 }
 
+// Restated under PG-57, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_two_obligations() {
     let text = read("CONTRACT.md");
@@ -747,6 +748,7 @@ fn test_the_command_surface_keeps_the_twenty_four_commands_in_order_with_midhing
     assert_eq!(names, expected);
 }
 
+// Restated under PG-57, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_three_obligations() {
     let text = read("CONTRACT.md");
@@ -839,6 +841,7 @@ fn test_the_command_surface_stands_at_twenty_five_with_midhinge_last() {
     ];
     assert_eq!(names, expected);
 }
+// Restated under PG-57, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_four_obligations() {
     let text = read("CONTRACT.md");
@@ -926,6 +929,7 @@ fn test_the_command_surface_stands_at_twenty_six_with_midrange_last() {
     assert_eq!(names, expected);
 }
 
+// Restated under PG-57, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_five_obligations() {
     let text = read("CONTRACT.md");
@@ -1005,6 +1009,7 @@ fn test_the_command_surface_stands_at_twenty_seven_with_width_last() {
     assert_eq!(names, expected);
 }
 
+// Restated under PG-57, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_six_obligations() {
     let text = read("CONTRACT.md");
