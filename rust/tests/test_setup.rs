@@ -32,7 +32,7 @@ fn test_agents_carries_the_canonical_marker() {
 
 #[test]
 fn test_readme_states_the_closed_round_count() {
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -180,7 +180,7 @@ fn test_readme_reports_the_round_four_status() {
     // stood at one, the slice 29 status line, until the
     // Round 28 closure landed slice 29 and the count
     // returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 1);
+    assert_eq!(read("README.md").matches("built and in review").count(), 0);
 }
 
 #[test]
@@ -190,7 +190,7 @@ fn test_readme_reports_the_round_five_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 6 has landed. It carries the rematch loader that names every malformed field in a rematch file, the rematch report that reads two field days as one record progression and closes by naming where the record changed hands between the days, and the rematch command, with two synthetic example rematches and their golden reports under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -200,7 +200,7 @@ fn test_readme_reports_the_round_six_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 7 has landed. It carries the meet loader that names every malformed field in a meet file, the meet report that reads three or more field days as one record progression and names the closing holder of each day and the day the standing record was set, and the meet command, with a synthetic example meet and its golden report under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -210,7 +210,7 @@ fn test_readme_reports_the_round_seven_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 8 has landed. It carries the meet table that reads a meet competitor by competitor over the one record progression of the meet report, naming the lowest standing projection of each competitor and the day and mark at which it was set, the count of marks each competitor held the record after, and their standing projection at the close, and the table command, with the golden meet table of the standing example meet under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -220,7 +220,7 @@ fn test_readme_reports_the_round_eight_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 9 has landed. It carries the reign reading that reads a meet spell by spell over the one record progression of the meet report, naming each maximal run of consecutive marks one competitor held the record after with the marks it spans and its length, and the count of marks and spells and the longest spell at the close, and the reign command, with the golden reign reading of the standing example meet under examples.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -230,7 +230,7 @@ fn test_readme_reports_the_round_nine_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 10 has landed. It carries the days reading that reads a meet day by day over the one record progression of the meet report, naming the marks and handovers of each day and the record that stood at its close, and the days command, with the golden days reading of the standing example meet under examples, and the README brought to the fleet README standard, its lede, install, quickstart, and usage sections standing with captured output.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -240,7 +240,7 @@ fn test_readme_reports_the_round_ten_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 11 has landed. It carries the forks reading that reads a meet competitor by competitor over the one record progression of the meet report, naming every standing each competitor set and the record spells it held and the figures of its close, and the forks command, with the golden forks reading of the standing example meet under examples, and the label fencing closure of the meet readings under FIX-PG-11, and the README opening paragraph repaired of its lede restatement.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -250,7 +250,7 @@ fn test_readme_reports_the_round_eleven_status() {
     assert!(lines.iter().any(|found| found == stated));
     let slice_line = "- Slice 12 has landed. It carries the marks reading that reads a meet mark by mark over the one record progression of the meet report, naming the place of each mark in the whole meet and the competitor who held the record after it and the standing the mark took against the state that stood before it, and the marks command, with the golden marks readings of the standing example meet and of a constructed meet under examples, and the label fencing closure of the field day family and the run readings under FIX-PG-12.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -260,7 +260,7 @@ fn test_readme_reports_the_round_twelve_status() {
     assert!(lines.iter().any(|found| found == stated));
     let slice_line = "- Slice 13 has landed. It carries the standings reading that reads a meet at the close of each day over the one record progression of the meet report, naming every competitor's standing at every day's close and closing each section with the closing line of the meet report for that day, and the standings command, with the golden standings readings of the standing example meet and of a constructed meet under examples, and the file carried fencing closure of the loaders and the summary under FIX-PG-14, and the input forms named at version 1 with the guarded closed stream pin under FIX-PG-13, and the seeded generated fixture family pinned by the closing relations the contract states.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -270,7 +270,7 @@ fn test_readme_reports_the_round_thirteen_status() {
     assert!(lines.iter().any(|found| found == stated));
     let slice_line = "- Slice 14 has landed. It carries the traces reading that reads a meet competitor by competitor at the close of each day over the one record progression of the meet report, naming every competitor's standing at the close of each day in one section of its own and the closes at which it held a standing, and the traces command, with the golden traces readings of the standing example meet and of a constructed meet under examples, and the summary guard order pins completed under FIX-PG-15, and the seeded generated fixture family extended to the traces reading.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -288,7 +288,7 @@ fn test_readme_reports_the_round_fourteen_status() {
     assert!(lines.iter().any(|found| found == stated));
     let slice_line = "- Slice 15 has landed. It carries the margins reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the nearest standing held after it by a competitor other than its holder, and the margin by which the record stands ahead of that nearest standing, and the margins command, with the golden margins readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the nearest standing after each mark, and the seeded generated fixture family extended to the margins reading.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -306,7 +306,7 @@ fn test_readme_reports_the_round_fifteen_status() {
     assert!(lines.iter().any(|found| found == stated));
     let slice_line = "- Slice 16 has landed. It carries the spread reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the count of competitors holding a standing after it, the farthest standing held after it by a competitor other than its holder, and the spread by which that farthest standing stands behind the record, and the spread command, with the golden spread readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the farthest standing and the field after each mark, and the seeded generated fixture family extended to the spread reading.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -324,7 +324,7 @@ fn test_readme_reports_the_round_sixteen_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 17 has landed. It carries the middle reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the middle standing held after it by a competitor other than its holder, and the middle margin by which the record stands ahead of that middle standing, and the middle command, with the golden middle readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the middle standing after each mark, and the seeded generated fixture family extended to the middle reading.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -342,7 +342,7 @@ fn test_readme_reports_the_round_seventeen_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 18 has landed. It carries the tails reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the lower tail standing and the upper tail standing held after it by the field behind its holder, and the lower tail margin and the upper tail margin by which the record stands ahead of each tail standing, and the tails command, with the golden tails readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the lower tail standing and the upper tail standing after each mark, and the seeded generated fixture family extended to the tails reading.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -360,7 +360,7 @@ fn test_readme_reports_the_round_eighteen_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 19 has landed. It carries the mean reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the mean standing held after it by the field behind its holder, and the mean margin by which the record stands ahead of the mean standing, and the mean command, with the golden mean readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the mean standing after each mark, and the seeded generated fixture family extended to the mean reading.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -378,7 +378,7 @@ fn test_readme_reports_the_round_nineteen_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 20 has landed. It carries the median reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the median standing held after it by the field behind its holder, and the median margin by which the record stands ahead of the median standing, and the median command, with the golden median readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the median standing after each mark, and the seeded generated fixture family extended to the median reading.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -493,7 +493,7 @@ fn test_readme_reports_the_round_twenty_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 21 has landed. It carries the quartiles reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the lower quartile standing and the upper quartile standing held after it by the field behind its holder, and the lower quartile margin and the upper quartile margin by which the record stands ahead of each, and the quartiles command, with the golden quartiles readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the lower quartile standing and the upper quartile standing after each mark, and the seeded generated fixture family extended to the quartiles reading, and the record prefix repair across the five standing generated pins, and the README Usage sections for the marks, standings, traces, and margins readings and the standing form guard over the Usage block.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -591,7 +591,7 @@ fn test_readme_reports_the_round_twenty_one_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 22 has landed. It carries the range reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, and the interquartile range held after it by the field behind its holder, the upper quartile standing less the lower quartile standing of that field, and the range command, with the golden range readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the interquartile range after each mark, and the seeded generated fixture family extended to the range reading, and the README range section, and the README badge set.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -679,7 +679,7 @@ fn test_readme_reports_the_round_twenty_two_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 23 has landed. It carries the execution record of the one unexecuted mutation of the Round 21 family and of the census of the opening tree in both shapes, and the probe recompositions of PG-46 over the three probes of the Round 19 record that stood unexecuted as recorded, with no new reading and no new command.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -780,7 +780,7 @@ fn test_readme_reports_the_round_twenty_three_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 24 has landed. It carries the midhinge reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the midhinge standing held after it by the field behind its holder, the mean of the lower quartile standing and the upper quartile standing of that field, and the midhinge margin by which the record stands ahead of that standing, and the midhinge command, with the golden midhinge readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the midhinge standing after each mark, and the seeded generated fixture family extended to the midhinge reading, and the README midhinge section.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -873,7 +873,7 @@ fn test_readme_reports_the_round_twenty_four_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 25 has landed. It carries the midrange reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, the midrange standing held after it by the field behind its holder, the mean of the nearest standing and the farthest standing of that field, and the midrange margin by which the record stands ahead of that standing, and the midrange command, with the golden midrange readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the midrange standing after each mark, and the seeded generated fixture family extended to the midrange reading, and the README midrange section.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -961,7 +961,7 @@ fn test_readme_reports_the_round_twenty_five_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 26 has landed. It carries the width reading that reads a meet mark by mark over the one record progression of the meet report, naming the holder after each mark, the record figure after it, and the field width held after it by the field behind its holder, the farthest standing less the nearest standing of that field, and the width command, with the golden width readings of the standing example meet and of a constructed meet under examples, and the multi day walk extended in its own pass to record the field width after each mark, and the seeded generated fixture family extended to the width reading, and the README width section.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -1043,7 +1043,7 @@ fn test_readme_reports_the_round_twenty_six_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 27 has landed. It carries the separating meet of PG-53, a hand built meet whose third mark holds the five figure field that separates the width reading's two partners, the range standing at the field width at every mark of the meet and the difference of the tails standing below it at the third, and the coincidence pin of PG-54 over the generated fixture family, with no reading and no command added.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -1080,7 +1080,7 @@ fn test_readme_reports_the_round_twenty_seven_status() {
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 28 has landed. It carries the execution record of PG-55, the four mutations of the Round 25 family standing executed against the width file's pins with the header's stated splits for the separating meet pin and the separation relation pin confirmed whole and no parting standing, and the hunt record of PG-56 over the width reading's neighbourhood, five fresh edits falling and none passing whole, with no reading and no command added.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
 
 #[test]
@@ -1110,9 +1110,9 @@ fn test_contract_carries_the_round_twenty_eight_obligations() {
 #[test]
 fn test_readme_reports_the_round_twenty_eight_status() {
     let lines = readme_lines();
-    let standing = "- Contract, PG-57 met and PG-58 not yet met. They stand in full form in CONTRACT.md under the Round 28 obligations, PG-57 standing as the whole obligation assertion cure over the contract pins of Rounds 22 through 26 and PG-58 as the hunt record of the field selections beside it, its execution standing charged to the warm up of the build and carried unexecuted in part under the write fault, the round standing open under the rule of PG-58 while that execution stands unexecuted.";
+    let standing = "- Contract, PG-57 and PG-58 met. They stand in full form in CONTRACT.md under the Round 28 obligations, PG-57 standing as the whole obligation assertion cure over the contract pins of Rounds 22 through 26 and PG-58 as the hunt record of the field selections beside it, the hunt standing executed whole and no edit passing whole anywhere. The slice standing as pull request 61 merged at f6154458 with main's tree standing verified equal to the repaired slice tree ca0445e8 and the census standing at 963. The spec review approving with findings at one Observation, standing against the design record and none charged to the slice, that PG-58's opening sentence in the design note's fourth section states the hunt's four edits in executed form while its own later sentences stand them computed and carried, the item riding the errata queue. The standards review approving with findings at one Minor and one Observation, the Minor standing charged on the five restated pins carrying no local justification comment naming PG-57 where their alterations land, and standing cured in the slice by the repair commit d5ea2dd9 adding the one comment at each of the five seats in the file's own double slash form naming PG-57 and that the block asserts the standing subsection text whole, the cure standing proven in both directions, and the Observation standing against no text in the slice, the heading count block repeating at six seats in the standing family form and priced forward only. CodeRabbit returning one inline comment on the slice, standing valid as the standards review's Minor at its seat and cured in the same repair. The red team approving with findings at two Observations and nothing charged to the slice, the first standing against the standing record, that the Round 27 contract pin asserts PG-55 and PG-56 by named sentences only with nine sentences of PG-55 and six of PG-56 standing under no literal, priced forward for a later round, and the second naming the helper subsection_span as the cure's one shared component, priced in the open and guarded by its own count assertion. The hunt standing executed whole as first executions, X-1 at the design desk at nine hundred and fifty passed and eleven failed, X-2 at nine hundred and thirty eight passed and twenty three failed, X-3 at nine hundred and forty two passed and nineteen failed at eighteen distinct pins, and X-4 at nine hundred and forty six passed and fifteen failed, every failure an assertion failure and every set standing inside its computed expectation on the single channel ground its edit moves one figure alone. The cure's tightness standing verified by the red team's computation, the twelve span literals standing equal to the spans computed from the head contract under the pins' own semantics, the ten cuts standing re-derived in both directions over every contract reading pin, passing whole at the base and falling on the form at the pin of their own round alone, and the shared span break attempts falling at every seat whose span they move and at no other. The form family standing carried at this closure on the write fault at the attempts the closure report records, the form gate, the ten cuts, the directions d1, d2, r1, rad1, and f57, the candidate legs A and B, and the fresh extraction gate standing unexecuted here as they stood at the build and the red team, their computed sets standing confirmed pin by pin at the red team's desk over every pin that reads the contract text, and the hosted gate on the closure head standing as the verdict of record in their place. The three records items of the Round 26 note's second section standing carried forward named with no cure charged, the Round 24 design note's fourth section carrying the false distribution pair as written, one at seven and fifty eight at five and more against the counted fourteen at seven and fifty nine at five and more, its contract places standing cured inside Round 24 by FIX-PG-20, and the Round 23 design note's fifth section carrying its day close compression as written, and the Round 22 design record's manifest figure of 73 standing against the counted 71 as a records reconciliation. The Round 26 design note's section 0 base tree string standing for the errata queue, 0b9e4eea against the true base tree 7842fa27. The Round 27 design record's items standing carried the same way, its note's fifth section naming a round seven count pin and a Round 27 in flight heading the base's setup file does not carry, and its design report's section figure of 7,635 standing against the contract side figure of 7,651. And FIX-PG-21 standing free and unspent through the round.";
     assert!(lines.iter().any(|found| found == standing));
-    let slice_line = "- Slice 29 built and in review. It carries the whole obligation assertion cure of PG-57, the contract pins of Rounds 22 through 26 standing restated to assert the whole text of their two obligations each, and the hunt record of PG-58 over the field selections standing part executed and part carried under the write fault, with no reading and no command added.";
+    let slice_line = "- Slice 29 has landed. It carries the whole obligation assertion cure of PG-57, the contract pins of Rounds 22 through 26 standing restated to assert the whole text of their two obligations each, and the hunt record of PG-58 over the field selections standing part executed and part carried under the write fault, with no reading and no command added.";
     assert!(lines.iter().any(|found| found == slice_line));
-    assert!(read("README.md").contains("Closed perfection rounds, 27 of 100"));
+    assert!(read("README.md").contains("Closed perfection rounds, 28 of 100"));
 }
