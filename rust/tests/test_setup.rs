@@ -185,7 +185,12 @@ fn test_readme_reports_the_round_four_status() {
     // in review, so the count stood at one, the slice 30
     // status line, until the Round 29 closure landed slice 30
     // and the count returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // Adjusted again with the Round 30 slice, as the named
+    // mechanical consequence of slice 31 standing built and
+    // in review, so the count stood at one, the slice 31
+    // status line, until the Round 30 closure landed slice 31
+    // and the count returned to zero.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -640,7 +645,27 @@ fn subsection_span(lines: &[String], subheading: &str) -> Vec<String> {
     lines[start..end].to_vec()
 }
 
-// Restated under PG-57, the block below asserts the standing subsection text whole.
+fn section_subheadings(lines: &[String], section: &str) -> Vec<String> {
+    let starts: Vec<usize> = lines
+        .iter()
+        .enumerate()
+        .filter(|(_, line)| line.as_str() == section)
+        .map(|(index, _)| index)
+        .collect();
+    assert_eq!(starts.len(), 1, "the section heading stands exactly once");
+    let start = starts[0];
+    let mut end = start + 1;
+    while end < lines.len() && !lines[end].starts_with("## ") {
+        end += 1;
+    }
+    lines[start + 1..end]
+        .iter()
+        .filter(|line| line.starts_with("### "))
+        .cloned()
+        .collect()
+}
+
+// Restated under PG-61, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_two_obligations() {
     let text = read("CONTRACT.md");
@@ -674,6 +699,18 @@ fn test_contract_carries_the_round_twenty_two_obligations() {
     assert_eq!(
         subsection_span(&lines, "### PG-46 full form, the probe recompositions and their executions").join("\n"),
         "### PG-46 full form, the probe recompositions and their executions\n\nPG-46. The three probes of the Round 19 red team record that stand unexecuted as recorded, the probes named D, F, and G, stand recomposed in this round under the loader discipline the run loader of the repo enforces, the discipline that a read whose field usage stands below the previous read of its run is refused and a read whose elapsed_seconds stands not greater than the previous read of its run is refused, the refusals the phrases read field usage is less than the previous read and read field elapsed_seconds is not greater than the previous read name. A recomposition holds the probe's discrimination whole and moves only what the discipline forces, the reads of each fixture designed as reads first and fields second, the read usages of a run never decreasing and the elapsed of a run's reads strictly rising. Each recomposed fixture stands printed whole in the round's design note, with the bound the validated transcription derives for it, figure by figure against the bound the record carried for the fixture as first composed, every figure that moves named with its reason, and the execution runs each recomposed fixture through the real median command of the built tree and sets the printed lines against the derived bound line by line. The probes named A, B, C, and E stand as controls, already executed and passing exactly as bound, and are not recomposed. The recompositions are review instruments and land as records of the round, not as pins of the suite and not as examples, and no figure, form, or behaviour of any reading moves under this obligation. Test, the round's records, the executions standing in them.\n"
+    );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 22 obligations, full form"),
+        [
+            "### PG-45 full form, the execution record of the carried mutations and shapes",
+            "### PG-46 full form, the probe recompositions and their executions",
+            "### The Round 22 command line surface",
+            "### The generated fixture family under the execution record",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
     );
 }
 
@@ -753,7 +790,7 @@ fn test_the_command_surface_keeps_the_twenty_four_commands_in_order_with_midhing
     assert_eq!(names, expected);
 }
 
-// Restated under PG-57, the block below asserts the standing subsection text whole.
+// Restated under PG-61, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_three_obligations() {
     let text = read("CONTRACT.md");
@@ -775,6 +812,18 @@ fn test_contract_carries_the_round_twenty_three_obligations() {
     assert_eq!(
         subsection_span(&lines, "### PG-48 full form, the midhinge reading over a meet").join("\n"),
         "### PG-48 full form, the midhinge reading over a meet\n\nThe meet_midhinge function in the paceghost.meet module takes a loaded meet and returns the midhinge lines on the error channel FIX-PG-10 states, and the reading is a pure function of the meet. The standing projection of a competitor at a mark, the holder after a mark, the record after a mark, the lower quartile standing after a mark, the upper quartile standing after a mark, and the midhinge standing after a mark are the standings PG-47 states, read off the one walk PG-47 names. Test, rust/tests/test_midhinge.rs.\n\nThe first line of the reading names the meet, in the form meet midhinge, and the count of days and the word days, the first line form of the marks reading. One section then stands for each day of the meet, in meet order, and every day of the meet holds a section, a day in which no mark of the walk stands holding a section with no mark line in it. A section opens with one line reading day, and the ordinal phrase of the day as the meet report states it, in the form the and the ordinal word of the day and day, and, marks and the count of marks of the walk standing in that day, the day opening of the marks reading byte for byte. One mark line then stands for each mark of the walk standing in that day, in walk order, reading mark and the place of the mark in the whole walk, and, at and the elapsed figure of the mark and seconds on the and the ordinal phrase of the day of the mark and day, and the label of the holder after the mark and at a projection of and the record figure after the mark, in the mark form of the marks reading as far as the record figure, and then, where another competitor holds a standing after the mark, the line continues with midhinge standing and the midhinge standing figure and, midhinge margin and the midhinge margin figure. Where no competitor other than the holder holds a standing after the mark, the line ends with the words and no other standing. The reading closes with one counts line. Where some mark held another standing, the counts line reads midhinge counts, and marks walked and the count of marks of the walk and, marks with another standing and the count of marks at which another competitor held a standing and, days and the count of days and, closest midhinge margin and the smallest midhinge margin among the marks of the walk and at and the elapsed figure of the earliest mark standing at that margin and seconds on the and the ordinal phrase of the day of that mark and day. Where no mark held another standing, the counts line ends with the words and, no other standing at any mark in place of the closest margin clause, and that form also covers the meet in which no read projects, whose counts line states marks walked zero. No other line stands in the reading. Every elapsed figure renders with format_seconds_fraction, and every projection and every midhinge figure and midhinge margin renders with format_usage, so every figure renders under a discipline an earlier section states. No competitor is ranked, ordered, or compared against another anywhere in the reading beyond the holder each mark line names, and no mark line names a holder for a midhinge standing, because a midhinge standing is a mean of two statistics of the field and no competitor holds it, and no line of the reading names a winner or says that a competitor or a figure did well or badly, because a figure names only what the walk computed, and the comparison the reading makes beyond its mark lines is the one closest midhinge margin its closing line names, taken over the marks themselves and never over the competitors, in the discipline PG-18 states for its longest spell.\n\nThe closing relations bind the reading to the standing meet readings over the same meet, and each is stated so it can fail. The sections equal the days of the meet, the count the days read line of the meet report states, and the marks of the sections sum to the marks walked of the marks reading over the same meet, because every mark of the walk stands in exactly one day. Line by line, the holder and the record figure of each mark line are the holder after the mark and the record figure after the mark the marks reading states for the mark at that place. At the last mark of each day holding marks, the midhinge standing figure is the mean of the quartile standings of the standings the standings reading's section for that day states for competitors other than the holder its closing line names, the quartiles taken in the order and at the count PG-41 states and the midhinge standing as their mean, and the midhinge margin is that figure less the record figure of that closing line, the closing line being the closing line the meet report prints for that day, which the standings section carries byte for byte. The marks with another standing of the counts line and the marks whose lines end in no other standing sum to the marks walked. The midhinge standing of every mark line is the exact mean of its lower quartile standing figure and its upper quartile standing figure, computed on exact values, and the midhinge margin of every mark line is the exact mean of its lower quartile margin and its upper quartile margin, and no midhinge margin is negative. The margin of PG-30 at a mark is never more than the lower quartile margin of PG-42 at that mark, the lower quartile margin is never more than the midhinge margin at that mark, the midhinge margin is never more than the upper quartile margin at that mark, and the upper quartile margin is never more than the spread of PG-32 at that mark, the midhinge margin equal to the lower quartile margin exactly where the interquartile range of PG-44 at that mark stands at zero, and the midhinge margin equal to the upper quartile margin exactly where the range stands at zero there, because the midhinge margin is the lower quartile margin plus one half of the range at every mark. The closest midhinge margin of the counts line is the smallest midhinge margin among the mark lines, it stands at the earliest mark standing at that margin, and the mark line at the day and the elapsed figure the counts line names states that margin. The midhinge margin stands in no fixed order against the median margin at a mark, a field whose upper figures stand far carrying its midhinge above its median and a field whose lower figures stand far carrying its midhinge below it, and the two directions of the relation stand witnessed in the round's pins and in the generated family and nowhere claimed as an order. The midhinge margin stands in no fixed order against the mean margin at a mark either, on the same form, and the two directions of that relation stand witnessed the same way, the midhinge standing at the mean margin identically wherever the field counts four figures and standing at the median margin identically wherever the field counts one figure or two, the two statistics the midhinge coincides with whole at those counts and separates from at every other count. One further relation stands as a pin rather than a closing. The midhinge margin stands at zero exactly at the marks where every figure standing at a middle place of the lowest (m + 1) div 2 figures of the field and every figure standing at a middle place of the highest (m + 1) div 2 figures stand at the record figure, and at no other mark, because the midhinge margin is the mean of the two quartile margins the line's field carries, each standing at or above zero, and their mean stands at zero exactly where both do. The reading walks the marks of the progression in plain order and holds no recursion of its own beyond the walk it shares. Test, rust/tests/test_midhinge.rs, and the golden midhinge readings held in rust/tests/test_examples_round22.rs.\n\nThe example stands in the examples directory. The meet file at examples/meet.json, the example meet of Round 6, does not move, and the midhinge reading is taken over that meet as it stands. The golden reading at examples/meet-midhinge-golden.txt is produced by the real midhinge command over the meet file. The midhinge reading of the example meet closes at marks walked 16, marks with another standing 15, and days 3, with closest midhinge margin 90 at 400 seconds on the first day, the second mark, the only mark standing at that margin, and the last mark of each day agrees with the standings golden's closes, the first day closing with night fork at 840 and a midhinge of 1069.090909 over the closing field {998.181818, 1140}, the second with dawn fork at 675 and a midhinge of 954 over {900, 1008}, and the third with dawn fork at 560 and a midhinge of 735 over {720, 750}, counted by hand from the meet file through the walk, every figured mark of the shipped meet standing at one or two behind its holder, so each mark's midhinge is its median and its mean whole, the separations from both standing in the round's hand built pins and in the generated family in this golden's place. The constructed meet of Round 11, at examples/constructed-meet.json, does not move, and its golden reading stands beside its marks golden at examples/constructed-meet-midhinge-golden.txt, produced by the real midhinge command over the constructed meet file, closing at marks walked 7, marks with another standing 7, and days 3, with closest midhinge margin 50 at 100 seconds on the second day, the third mark, the earliest of the two marks standing at that margin, the constructed field standing at one behind its holder at every mark, so its midhinge is its one figure whole at every mark, counted by hand from the constructed meet file through the walk. Test, rust/tests/test_examples_round22.rs.\n"
+    );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 23 obligations, full form"),
+        [
+            "### PG-47 full form, the midhinge reading's inputs",
+            "### PG-48 full form, the midhinge reading over a meet",
+            "### The Round 23 command line surface",
+            "### The generated fixture family extended to the midhinge reading",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
     );
 }
 
@@ -846,7 +895,7 @@ fn test_the_command_surface_stands_at_twenty_five_with_midhinge_last() {
     ];
     assert_eq!(names, expected);
 }
-// Restated under PG-57, the block below asserts the standing subsection text whole.
+// Restated under PG-61, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_four_obligations() {
     let text = read("CONTRACT.md");
@@ -868,6 +917,18 @@ fn test_contract_carries_the_round_twenty_four_obligations() {
     assert_eq!(
         subsection_span(&lines, "### PG-50 full form, the midrange reading over a meet").join("\n"),
         "### PG-50 full form, the midrange reading over a meet\n\nThe meet_midrange function in the paceghost.meet module takes a loaded meet and returns the midrange lines on the error channel FIX-PG-10 states, and the reading is a pure function of the meet. The standing projection of a competitor at a mark, the holder after a mark, the record after a mark, the nearest standing after a mark, the farthest standing after a mark, and the midrange standing after a mark are the standings PG-49 states, read off the one walk PG-49 names. Test, rust/tests/test_midrange.rs.\n\nThe first line of the reading names the meet, in the form meet midrange, and the count of days and the word days, the first line form of the marks reading. One section then stands for each day of the meet, in meet order, and every day of the meet holds a section, a day in which no mark of the walk stands holding a section with no mark line in it. A section opens with one line reading day, and the ordinal phrase of the day as the meet report states it, in the form the and the ordinal word of the day and day, and, marks and the count of marks of the walk standing in that day, the day opening of the marks reading byte for byte. One mark line then stands for each mark of the walk standing in that day, in walk order, reading mark and the place of the mark in the whole walk, and, at and the elapsed figure of the mark and seconds on the and the ordinal phrase of the day of the mark and day, and the label of the holder after the mark and at a projection of and the record figure after the mark, in the mark form of the marks reading as far as the record figure, and then, where another competitor holds a standing after the mark, the line continues with midrange standing and the midrange standing figure and, midrange margin and the midrange margin figure. Where no competitor other than the holder holds a standing after the mark, the line ends with the words and no other standing. The reading closes with one counts line. Where some mark held another standing, the counts line reads midrange counts, and marks walked and the count of marks of the walk and, marks with another standing and the count of marks at which another competitor held a standing and, days and the count of days and, closest midrange margin and the smallest midrange margin among the marks of the walk and at and the elapsed figure of the earliest mark standing at that margin and seconds on the and the ordinal phrase of the day of that mark and day. Where no mark held another standing, the counts line ends with the words and, no other standing at any mark in place of the closest margin clause, and that form also covers the meet in which no read projects, whose counts line states marks walked zero. No other line stands in the reading. Every elapsed figure renders with format_seconds_fraction, and every projection and every midrange figure and midrange margin renders with format_usage, so every figure renders under a discipline an earlier section states. No competitor is ranked, ordered, or compared against another anywhere in the reading beyond the holder each mark line names, and no mark line names a holder for a midrange standing, because a midrange standing is a mean of two standings of the field and no competitor holds it, and no line of the reading names a winner or says that a competitor or a figure did well or badly, because a figure names only what the walk computed, and the comparison the reading makes beyond its mark lines is the one closest midrange margin its closing line names, taken over the marks themselves and never over the competitors, in the discipline PG-18 states for its longest spell.\n\nThe closing relations bind the reading to the standing meet readings over the same meet, and each is stated so it can fail. The sections equal the days of the meet, the count the days read line of the meet report states, and the marks of the sections sum to the marks walked of the marks reading over the same meet, because every mark of the walk stands in exactly one day. Line by line, the holder and the record figure of each mark line are the holder after the mark and the record figure after the mark the marks reading states for the mark at that place. At the last mark of each day holding marks, the midrange standing figure is the mean of the nearest standing and the farthest standing of the standings the standings reading's section for that day states for competitors other than the holder its closing line names, the extremes taken as PG-29 and PG-31 state them and the midrange standing as their mean, and the midrange margin is that figure less the record figure of that closing line, the closing line being the closing line the meet report prints for that day, which the standings section carries byte for byte. The marks with another standing of the counts line and the marks whose lines end in no other standing sum to the marks walked. The midrange standing of every mark line is the exact mean of its nearest standing figure and its farthest standing figure, computed on exact values, and the midrange margin of every mark line is the exact mean of the margin of PG-30 and the spread of PG-32 at that mark, and no midrange margin is negative. The margin of PG-30 at a mark is never more than the midrange margin at that mark, and the midrange margin is never more than the spread of PG-32 at that mark, the midrange margin equal to the margin exactly where the spread equals the margin there, every figure of the field standing at one figure, and the midrange margin equal to the spread exactly where the spread equals the margin there, the two equalities standing or falling together at every mark, because the midrange margin is the mean of the margin and the spread at every mark. The closest midrange margin of the counts line is the smallest midrange margin among the mark lines, it stands at the earliest mark standing at that margin, and the mark line at the day and the elapsed figure the counts line names states that margin. The midrange margin stands in no fixed order against the median margin at a mark, a field whose upper figures stand far carrying its midrange above its median and a field whose lower figures stand far carrying its midrange below it, and the two directions of the relation stand witnessed in the round's pins and in the generated family and nowhere claimed as an order. The midrange margin stands in no fixed order against the mean margin at a mark either, and in no fixed order against the midhinge margin, on the same form, and the two directions of each relation stand witnessed the same way, the midrange standing at the median margin and at the mean margin and at the midhinge margin identically wherever the field counts one figure or two, the three statistics the midrange coincides with whole at those counts and can stand apart from at every count from three upward. One further relation stands as a pin rather than a closing. The midrange margin stands at zero exactly at the marks where every figure of the field stands at the record figure, and at no other mark, because the midrange margin is the mean of the margin of PG-30 and the spread of PG-32 at that mark, each standing at or above zero, and their mean stands at zero exactly where both do. The reading walks the marks of the progression in plain order and holds no recursion of its own beyond the walk it shares. Test, rust/tests/test_midrange.rs, and the golden midrange readings held in rust/tests/test_examples_round23.rs.\n\nThe example stands in the examples directory. The meet file at examples/meet.json, the example meet of Round 6, does not move, and the midrange reading is taken over that meet as it stands. The golden reading at examples/meet-midrange-golden.txt is produced by the real midrange command over the meet file. The midrange reading of the example meet closes at marks walked 16, marks with another standing 15, and days 3, with closest midrange margin 90 at 400 seconds on the first day, the second mark, the only mark standing at that margin, and the last mark of each day agrees with the standings golden's closes, the first day closing with night fork at 840 and a midrange of 1069.090909 over the closing field {998.181818, 1140}, the second with dawn fork at 675 and a midrange of 954 over {900, 1008}, and the third with dawn fork at 560 and a midrange of 735 over {720, 750}, counted by hand from the meet file through the walk, every figured mark of the shipped meet standing at one or two behind its holder, so each mark's midrange is its median and its mean and its midhinge whole, the separations from each standing in the round's hand built pins and in the generated family in this golden's place. The constructed meet of Round 11, at examples/constructed-meet.json, does not move, and its golden reading stands beside its marks golden at examples/constructed-meet-midrange-golden.txt, produced by the real midrange command over the constructed meet file, closing at marks walked 7, marks with another standing 7, and days 3, with closest midrange margin 50 at 100 seconds on the second day, the third mark, the earliest of the two marks standing at that margin, the constructed field standing at one behind its holder at every mark, so its midrange is its one figure whole at every mark, counted by hand from the constructed meet file through the walk. Test, rust/tests/test_examples_round23.rs.\n"
+    );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 24 obligations, full form"),
+        [
+            "### PG-49 full form, the midrange reading's inputs",
+            "### PG-50 full form, the midrange reading over a meet",
+            "### The Round 24 command line surface",
+            "### The generated fixture family extended to the midrange reading",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
     );
 }
 
@@ -934,7 +995,7 @@ fn test_the_command_surface_stands_at_twenty_six_with_midrange_last() {
     assert_eq!(names, expected);
 }
 
-// Restated under PG-57, the block below asserts the standing subsection text whole.
+// Restated under PG-61, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_five_obligations() {
     let text = read("CONTRACT.md");
@@ -956,6 +1017,18 @@ fn test_contract_carries_the_round_twenty_five_obligations() {
     assert_eq!(
         subsection_span(&lines, "### PG-52 full form, the width reading over a meet").join("\n"),
         "### PG-52 full form, the width reading over a meet\n\nThe meet_width function in the paceghost.meet module takes a loaded meet and returns the width lines on the error channel FIX-PG-10 states, and the reading is a pure function of the meet. The standing projection of a competitor at a mark, the holder after a mark, the record after a mark, the nearest standing after a mark, the farthest standing after a mark, and the field width after a mark are the standings PG-51 states, read off the one walk PG-51 names. Test, rust/tests/test_width.rs.\n\nThe first line of the reading names the meet, in the form meet width, and the count of days and the word days, the first line form of the marks reading. One section then stands for each day of the meet, in meet order, and every day of the meet holds a section, a day in which no mark of the walk stands holding a section with no mark line in it. A section opens with one line reading day, and the ordinal phrase of the day as the meet report states it, in the form the and the ordinal word of the day and day, and, marks and the count of marks of the walk standing in that day, the day opening of the marks reading byte for byte. One mark line then stands for each mark of the walk standing in that day, in walk order, reading mark and the place of the mark in the whole walk, and, at and the elapsed figure of the mark and seconds on the and the ordinal phrase of the day of the mark and day, and the label of the holder after the mark and at a projection of and the record figure after the mark, in the mark form of the marks reading as far as the record figure, and then, where another competitor holds a standing after the mark, the line continues with field width and the field width figure. Where no competitor other than the holder holds a standing after the mark, the line ends with the words and no other standing. The reading closes with one counts line. Where some mark held another standing, the counts line reads width counts, and marks walked and the count of marks of the walk and, marks with another standing and the count of marks at which another competitor held a standing and, days and the count of days and, narrowest field width and the smallest field width among the marks of the walk and at and the elapsed figure of the earliest mark standing at that width and seconds on the and the ordinal phrase of the day of that mark and day. Where no mark held another standing, the counts line ends with the words and, no other standing at any mark in place of the narrowest width clause, and that form also covers the meet in which no read projects, whose counts line states marks walked zero. No other line stands in the reading. Every elapsed figure renders with format_seconds_fraction, and every projection and every field width figure renders with format_usage, so every figure renders under a discipline an earlier section states. No competitor is ranked, ordered, or compared against another anywhere in the reading beyond the holder each mark line names, and no mark line names a holder for a field width, because a field width is a difference of two standings of the field and no competitor holds it, and no line of the reading names a winner or says that a competitor or a figure did well or badly, because a figure names only what the walk computed, and the comparison the reading makes beyond its mark lines is the one narrowest field width its closing line names, taken over the marks themselves and never over the competitors, in the discipline PG-18 states for its longest spell.\n\nThe closing relations bind the reading to the standing meet readings over the same meet, and each is stated so it can fail. The sections equal the days of the meet, the count the days read line of the meet report states, and the marks of the sections sum to the marks walked of the marks reading over the same meet, because every mark of the walk stands in exactly one day. Line by line, the holder and the record figure of each mark line are the holder after the mark and the record figure after the mark the marks reading states for the mark at that place. At the last mark of each day holding marks, the field width figure is the farthest standing less the nearest standing of the standings the standings reading's section for that day states for competitors other than the holder its closing line names, the extremes taken as PG-29 and PG-31 state them and the field width standing as their difference, the closing line being the closing line the meet report prints for that day, which the standings section carries byte for byte. The marks with another standing of the counts line and the marks whose lines end in no other standing sum to the marks walked. The field width of every mark line is the exact spread of PG-32 at that mark less the margin of PG-30 at that mark, computed on exact values, and no field width is negative. The interquartile range of PG-44 at a mark is never more than the field width at that mark, and the field width is never more than the spread of PG-32 at that mark, the field width equal to the interquartile range exactly where the lower quartile standing stands at the nearest standing and the upper quartile standing stands at the farthest standing there, and the field width equal to the spread exactly where the margin of PG-30 stands at zero there, the nearest standing standing at the record figure, because the field width is the farthest standing less the nearest standing at every mark and each quartile standing stands at or between the two. The difference of the tails of PG-36 at a mark is never more than the field width at that mark either, each tail standing at or between the nearest standing and the farthest standing there. The narrowest field width of the counts line is the smallest field width among the mark lines, it stands at the earliest mark standing at that width, and the mark line at the day and the elapsed figure the counts line names states that width. One further relation stands as a pin rather than a closing. The field width stands at zero exactly at the marks where every figure of the field stands at one figure, and at no other mark, because the field width is the farthest standing less the nearest standing at that mark, each figure of the field standing at or between the two, and the two stand at one figure exactly where every figure of the field does. The reading walks the marks of the progression in plain order and holds no recursion of its own beyond the walk it shares. Test, rust/tests/test_width.rs, and the golden width readings held in rust/tests/test_examples_round24.rs.\n\nThe example stands in the examples directory. The meet file at examples/meet.json, the example meet of Round 6, does not move, and the width reading is taken over that meet as it stands. The golden reading at examples/meet-width-golden.txt is produced by the real width command over the meet file. The width reading of the example meet closes at marks walked 16, marks with another standing 15, and days 3, with narrowest field width 0 at 400 seconds on the first day, the second mark, the only mark standing at that width, and the last mark of each day agrees with the standings golden's closes, the first day closing with night fork at 840 and a field width of 141.818182 over the closing field {998.181818, 1140}, the second with dawn fork at 675 and a field width of 108 over {900, 1008}, and the third with dawn fork at 560 and a field width of 30 over {720, 750}, counted by hand from the meet file through the walk, every figured mark of the shipped meet standing at one or two behind its holder, so each mark's field width is its interquartile range whole and its difference of the tails whole, the separations from each standing in the round's hand built pins and in the generated family in this golden's place. The constructed meet of Round 11, at examples/constructed-meet.json, does not move, and its golden reading stands beside its marks golden at examples/constructed-meet-width-golden.txt, produced by the real width command over the constructed meet file, closing at marks walked 7, marks with another standing 7, and days 3, with narrowest field width 0 at 100 seconds on the first day, the first mark, the earliest of the seven marks standing at that width, the constructed field standing at one behind its holder at every mark, so its field width is zero at every mark, counted by hand from the constructed meet file through the walk. Test, rust/tests/test_examples_round24.rs.\n"
+    );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 25 obligations, full form"),
+        [
+            "### PG-51 full form, the width reading's inputs",
+            "### PG-52 full form, the width reading over a meet",
+            "### The Round 25 command line surface",
+            "### The generated fixture family extended to the width reading",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
     );
 }
 
@@ -1014,7 +1087,7 @@ fn test_the_command_surface_stands_at_twenty_seven_with_width_last() {
     assert_eq!(names, expected);
 }
 
-// Restated under PG-57, the block below asserts the standing subsection text whole.
+// Restated under PG-61, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_six_obligations() {
     let text = read("CONTRACT.md");
@@ -1039,6 +1112,18 @@ fn test_contract_carries_the_round_twenty_six_obligations() {
         subsection_span(&lines, "### PG-54 full form, the coincidence of the partners over the generated family").join("\n"),
         "### PG-54 full form, the coincidence of the partners over the generated family\n\nPG-54. Over the generated fixture family of the generated pins, eight hundred and seventy six figured marks standing counted over the family's eight meets, the range stands at the field width at thirty four marks and the difference of the tails stands at the field width at the same thirty four marks, every one of them a mark whose field holds one figure or two, where the three figures coincide by construction. No figured mark of the family separates the partners, no mark standing counted where the range stands at the field width and the difference of the tails stands below it, and the range and the difference of the tails part from each other at seven hundred and fifty six of the eight hundred and seventy six marks without either standing at the field width. The coincidence the family counts is the family's instance of the standing relation this round states in the open, that where the difference of the tails stands at the field width at any figured mark of any meet the range stands at the field width there, since a mean of figures standing at or below a bound stands at that bound only where every figure of the mean stands at it, so a difference of the tails at the field width forces every figure of the lower tail part to the nearest standing and every figure of the upper tail part to the farthest standing, and the quartile of each part, the median of that part, stands at the same extreme. The mirror separation, a mark whose difference of the tails stands at the field width while its range stands below it, is not a fixture a later round can build, and this obligation records its impossibility so the search for it does not reopen. Test, test_generated.rs, the coincidence pin of the generated family.\n"
     );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 26 obligations, full form"),
+        [
+            "### PG-53 full form, the separating meet and the width reading over it",
+            "### PG-54 full form, the coincidence of the partners over the generated family",
+            "### The Round 26 command line surface",
+            "### The generated fixture family under the separation record",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
+    );
 }
 
 #[test]
@@ -1051,7 +1136,7 @@ fn test_readme_reports_the_round_twenty_six_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 29 of 100"));
 }
 
-// Restated under PG-59, the block below asserts the standing subsection text whole.
+// Restated under PG-61, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_seven_obligations() {
     let text = read("CONTRACT.md");
@@ -1093,6 +1178,18 @@ fn test_contract_carries_the_round_twenty_seven_obligations() {
         subsection_span(&lines, "### PG-56 full form, the hunt record of the width neighbourhood").join("\n"),
         "### PG-56 full form, the hunt record of the width neighbourhood\n\nPG-56. The round carries a hunt record over the seats of the width reading's neighbourhood that the standing record has not executed, five edits of the shipped code, each executed whole on the opening tree at its standing census in its own fresh target directory at the round's design desk under the discipline PG-55 states, the failing sets read from assertion failures alone. W-1 takes the field width as the second farthest standing less the nearest standing in the width selection alone, the mirror of the seat the Round 26 red team probed with the farthest less the second lowest, and falls at sixteen pins, its set parting from that edit's set at three names each way. W-2 takes the lower of the two middle figures at an even part in the quartiles selection's own copy of the median construction, the range and midhinge copies standing untouched, and falls at eighteen pins. W-3 makes the tails parts disjoint in the tails selection alone, the upper part opening at the part count at the odd counts of three or more with the shipped form standing at counts one and two and at every even count, and falls at twenty one failures standing at nineteen distinct pin names, the separation relation pin among them at its third mark and the separating meet pin passing, the width standing untouched by the edit. W-4 makes the range parts disjoint in the range selection's own copy of the part construction under the same guard as W-3, and falls at twelve pins, the separation relation pin passing by the separating meet's own shape, the upper part standing at three hundred twice under both constructions at its third mark, and the generated range pin and the range family's pins over odd counted fields carrying the catch. W-5 loosens the narrowest scan in the range reading alone to name a later mark at an equal range, and falls at four pins, the range tie pin, the constructed range golden pin, the constructed range command pin, and the generated range pin. The first constructions of W-3 and W-4 stand void on this record and are not discrimination reads, each emptying its upper part at a field of one figure and crashing the walk it ran in, their runs standing as crash totals beside this record and never inside any set, and the guarded constructions of this obligation stand executed in their place. No edit this round executed passes the whole suite on the opening tree, and no discrimination gap stands in the width reading's neighbourhood at the seats this record names. No figure, form, or behaviour of any reading moves under this obligation. Test, the round's records, the executions standing in them.\n"
     );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 27 obligations, full form"),
+        [
+            "### PG-55 full form, the execution record of the width file's unexecuted mutations",
+            "### PG-56 full form, the hunt record of the width neighbourhood",
+            "### The Round 27 command line surface",
+            "### The generated fixture family under the execution record",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
+    );
 }
 
 #[test]
@@ -1105,6 +1202,7 @@ fn test_readme_reports_the_round_twenty_seven_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 29 of 100"));
 }
 
+// Restated under PG-61, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_eight_obligations() {
     let text = read("CONTRACT.md");
@@ -1127,6 +1225,18 @@ fn test_contract_carries_the_round_twenty_eight_obligations() {
         subsection_span(&lines, "### PG-58 full form, the hunt record of the field selections").join("\n"),
         "### PG-58 full form, the hunt record of the field selections\n\nPG-58. The round carries a hunt record over the seats of the field selections that the standing record has not executed, four edits of the shipped code, each executed whole on the opening tree at its standing census in its own fresh target directory at the round's design desk under the discipline PG-55 states, the failing sets read from assertion failures alone. X-1, the midhinge selection's own copy of the median construction taking the lower middle figure at an even part, stands executed at the design desk at 950 passed and 11 failed, its failing set standing in the round's design record name for name, the midhinge reading's own pins and the separation pins that name the midhinge among them. X-2, the median selection taking the lower of its two middle figures alone at an even field count, X-3, the middle selection taking the upper middle figure at an even field count, and X-4, the quartiles parts taking the floor count at the odd field counts of three or more, stand computed in the design record at their seats and carried unexecuted under the write fault, one run of X-2 standing void in that record as a window straddle with no set read off it, and their execution stands charged to the warm up of the build as first executions in the order the design record states, any of the three passing whole at its execution reopening the round's design before the slice is seated. This paragraph stands restated to the executed form, the four edits and their sets standing in it whole, if the build's warm up runs the family whole before the contract commit is assembled, the swap standing named in the build's report, and the round stands open under the rule of this obligation while that execution stands unexecuted. No figure, form, or behaviour of any reading moves under this obligation. Test, the round's records, the executions standing in them.\n"
     );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 28 obligations, full form"),
+        [
+            "### PG-57 full form, the whole obligation assertion cure",
+            "### PG-58 full form, the hunt record of the field selections",
+            "### The Round 28 command line surface",
+            "### The generated fixture family under the assertion cure",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
+    );
 }
 
 #[test]
@@ -1139,6 +1249,7 @@ fn test_readme_reports_the_round_twenty_eight_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 29 of 100"));
 }
 
+// Restated under PG-61, the block below asserts the standing subsection text whole.
 #[test]
 fn test_contract_carries_the_round_twenty_nine_obligations() {
     let text = read("CONTRACT.md");
@@ -1161,6 +1272,18 @@ fn test_contract_carries_the_round_twenty_nine_obligations() {
         subsection_span(&lines, "### PG-60 full form, the cut record of the Round 27 cohort").join("\n"),
         "### PG-60 full form, the cut record of the Round 27 cohort\n\nPG-60. The round carries a cut record over the two obligations of Round 27, eight cuts of the contract text, each computed seat by seat in this round's design record over every pin that reads the contract, in its own fresh target directory at its execution under the discipline PG-55 states, the failing sets read from assertion failures alone. In the base direction, on the tree the round opens from, a cut of the second sentence of PG-55 and a cut of the second sentence of PG-56 each pass the whole suite, no pin holding a literal inside either sentence and each sentence standing exactly once in the contract, a cut of the Under S-1 sentence of PG-55 and a cut of the W-2 sentence of PG-56 each fall at the contract pin of Round 27 alone on the fragment the cut removes whole, a duplication of the record paragraph of PG-55 inside its own subsection passes whole, a planting of the whole subsection of PG-56 a second time at the end of the Round 27 section passes whole, and a sentence moved from the body of PG-55 into the body of PG-56 passes whole in both its forms, the moved sentence standing under no literal in the first and carrying the Under S-1 fragment in the second, the containment pin reading the whole contract text and standing blind to the fragment's seat. In the form direction, on the tree the slice assembles, every one of those eight cuts falls at the contract pin of Round 27 alone, the relocation falling at both of its span assertions under the one pin, a cut of one sentence of the preamble paragraph of the Round 27 section passes whole outside the cure's radius, and a cut of the assertion sentence of PG-59 falls at the obligations pin of Round 29 alone. The eight cuts and their directions stand computed in the design record and carried unexecuted under the write fault, and their execution stands charged to the warm up of the build as first executions in the order the design record states beside the form family Round 28 carried, any base cut falling anywhere but its computed seat, any of the eight passing whole on the form, or the preamble cut falling anywhere reopening the round's design before the slice is seated, and the round stands open under the rule of this obligation while that execution stands unexecuted. This paragraph stands restated to the executed form, the eight cuts and their sets standing in it whole, if the build's warm up runs the family whole before the contract commit is assembled, the swap standing named in the build's report. No figure, form, or behaviour of any reading moves under this obligation. Test, the round's records, the executions standing in them.\n"
     );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 29 obligations, full form"),
+        [
+            "### PG-59 full form, the whole obligation assertion cure over the contract pin of Round 27",
+            "### PG-60 full form, the cut record of the Round 27 cohort",
+            "### The Round 29 command line surface",
+            "### The generated fixture family under the cut record",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
+    );
 }
 
 #[test]
@@ -1169,6 +1292,64 @@ fn test_readme_reports_the_round_twenty_nine_status() {
     let standing = "- Contract, PG-59 met and PG-60 not yet met, the two standing in full form in CONTRACT.md under the Round 29 obligations, PG-59 standing as the whole obligation assertion cure over the contract pin of Round 27 and PG-60 as the cut record of the Round 27 cohort beside it, its cuts standing carried unexecuted under the write fault, the round standing closed under the rule of PG-60 while that execution stands unexecuted. The slice standing as pull request 63 merged at 7a37a2c1 with main's tree standing verified equal to the repaired slice tree d9464174 and the census standing at 965. The spec review approving with findings at one Minor and two Observations, the Minor standing charged to the slice as the wording of the Round 28 hunt ledger carried over Round 29's own family in the standing and slice texts, and standing cured in the slice by the repair commit 4a9a7da3 restating the clause to carried unexecuted at exactly the four seats, two in this file and two in the setup file, the third seat in each file standing as the Round 28 line of PG-58, true of that round and not moved, and the two Observations standing against the design record and the build record with nothing further charged to the slice. The standards review approving with findings at one Minor, two Observations, and one further Minor, the Minor standing charged to the slice as the same wording at its seats and cured in the same repair, the two Observations standing against the design record, its fifth section carrying a false clause over the family it narrates and its seventh section phrasing the construction in five commits where the slice stands in three, and the further Minor standing against the build record, its eighth section's stage tree figures standing nowhere on the remote where the commits' own trees stand read in their place, every blob level claim of the build standing verified whole. The red team approving with findings at one Minor and two Observations, the Minor standing as the same wording at its seats and cured in the same repair, the first Observation standing charged to the slice at no action, that a subsection planted in the Round 27 section outside the two spans passes the restated pin whole, priced in the open, and the second Observation standing against the build record. CodeRabbit returning one inline comment on the slice, standing valid as the same Minor at its seat and cured in the same repair. The cure's tightness standing verified at the red team's desk, the two span literals standing byte-equal to the spans computed from the head contract at 3,479 characters for PG-55 and 2,681 for PG-56, the eight cuts standing re-derived in both directions name for name, and the candidate legs standing read on their whole evaluable surface. The warm up family standing at this closure with one leg executed and the rest carried, the Round 28 form gate standing executed on expectation at the closure's third seating, the whole suite on the Round 28 form tree at 963 passed and 0 failed with the format check and clippy each at exit 0 and no fault signature in its log, and the Round 29 trees standing extracted whole and verified at that seating after ten extraction runs across the closure's three seatings, the base tree and the form tree each at 232 of 232 files matching its remote listing blob for blob, the base tree's last four files standing landed by direct write after their writes refused across twenty one passes of the extractor, the remaining legs standing carried on the write fault, the rate limit stops the closure report records, and the runtime's kills of the hunt's processes mid compile on the contended box, the form gate of Round 29 and its base gate, the ten cuts of Round 28, the directions and the relocation and rad1 and f57 of that round, the eight cuts and directions of Round 29 on its base tree and the ten legs on its form tree including rad1 and f59, and the candidate legs A and B of both rounds standing unexecuted here as they stood at the build and the red team, their computed sets standing confirmed at the red team's desk, and the hosted gate on the closure head standing as the verdict of record in their place. The records items standing carried forward named with no cure charged, the Round 24 design note's fourth section carrying the false distribution pair as written, one at seven and fifty eight at five and more against the counted fourteen at seven and fifty nine at five and more, its contract places standing cured inside Round 24 by FIX-PG-20, the Round 23 design note's fifth section carrying its day close compression as written, and the Round 22 design record's manifest figure of 73 standing against the counted 71 as a records reconciliation. The Round 26 design note's section 0 base tree string standing for the errata queue, 0b9e4eea against the true base tree 7842fa27. The Round 27 design record's items standing carried the same way, its note's fifth section namings and its design report's section figure of 7,635 standing against the contract side figure of 7,651. The Round 28 design note's fourth section carrying its PG-58 opening sentence as written. The Round 28 red team's literal counts standing corrected on the record at eight for PG-55 and twelve for PG-56, the extraction standing at five content literals in each body, ten in the two bodies beside the three heading assertions, its sentence counts and its finding standing confirmed whole. And FIX-PG-21 standing free and unspent through the round.";
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 30 has landed. It carries the whole obligation assertion cure of PG-59, the contract pin of Round 27 standing restated to assert the whole text of its two obligations, and the cut record of PG-60 over the Round 27 cohort standing carried unexecuted under the write fault, with no reading and no command added.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 29 of 100"));
+}
+
+#[test]
+fn test_contract_carries_the_round_thirty_obligations() {
+    let text = read("CONTRACT.md");
+    for label in ["PG-61", "PG-62"] {
+        assert!(text.contains(label), "the contract carries {}", label);
+    }
+    let lines: Vec<&str> = text.lines().collect();
+    for heading in [
+        "## Round 30 obligations, full form",
+        "### PG-61 full form, the section census cure over the obligations pins of Rounds 22 through 29",
+        "### PG-62 full form, the plant record of the guarded sections",
+    ] {
+        assert!(
+            lines.contains(&heading),
+            "the contract carries the heading {}",
+            heading
+        );
+    }
+    let lines: Vec<String> = text.lines().map(|line| line.to_string()).collect();
+    assert_eq!(
+        lines
+            .iter()
+            .filter(|line| line.as_str() == "## Round 30 obligations, full form")
+            .count(),
+        1
+    );
+    assert_eq!(
+        subsection_span(&lines, "### PG-61 full form, the section census cure over the obligations pins of Rounds 22 through 29").join("\n"),
+        "### PG-61 full form, the section census cure over the obligations pins of Rounds 22 through 29\n\nPG-61. The obligations pins of Rounds 22 through 29 in rust/tests/test_setup.rs stand restated so that each asserts, beside every assertion it already carries, the census of its round's section of this contract. Each restated pin gains an assertion that the subheadings standing under its round's section heading, down to the next section heading, stand equal in their order to that section's standing census and nothing else, the subheading of each of its round's two obligations, the subheading of its round's command line surface, and the subheading of its round's generated fixture family, the census standing collected by the helper section_subheadings in the species of subsection_span, the helper asserting as it goes that the section heading stands exactly once among the lines of this contract. The obligations pin of Round 30 stands born carrying the same assertion for its own section beside its whole text assertions over PG-61 and PG-62. A subsection planted anywhere inside a guarded section fails at that section's pin on its census, a subsection removed from a guarded section or renamed inside it fails at the same pin, and a subsection moved from one guarded section into another fails at the pins of both sections, and no seat outside the guarded sections moves any census, a planting in a section of Rounds 1 through 21 passing every pin whole as it stands at this round's base. The preamble paragraph of each guarded section and the texts of its command line surface and generated fixture family subsections stand outside the censuses this obligation asserts, as they stood outside the spans of PG-57 and PG-59, their texts standing asserted by no part of this obligation, and the whole text question over those paragraphs stands priced in this round's design record with its trigger unmet. The enumeration that prices this cure stands in this round's design record, taken over the whole contract at the round's base, and it finds the guarded sections standing at the eight sections of Rounds 22 through 29 with the ninth standing in this section itself, each carrying exactly the four subheadings its census names in their standing order. This round's design record carries the computed directions of the cure against the whole suite in both directions, the cure's own executions standing charged to the warm up of the build as first executions under the stopping rule PG-62 states. No figure, form, or behaviour of any reading moves under this obligation, and no text of this contract moves under it, the restated pins passing over the contract as it stands and failing only where a guarded section's census stands moved. Test, rust/tests/test_setup.rs, the obligations pins of Rounds 22 through 30 as restated and born.\n"
+    );
+    assert_eq!(
+        subsection_span(&lines, "### PG-62 full form, the plant record of the guarded sections").join("\n"),
+        "### PG-62 full form, the plant record of the guarded sections\n\nPG-62. The round carries a plant record over the sections the census of PG-61 guards, twenty eight legs of the contract text, each computed seat by seat in this round's design record over every pin that reads the contract, in its own fresh target directory at its execution under the discipline PG-55 states, the failing sets read from assertion failures alone. In the base direction, on the tree the round opens from, a subsection planted at the end of each of the eight sections of Rounds 22 through 29 passes the whole suite, no pin asserting the census of any section and each plant standing outside every span its section's pin asserts. In the form direction, on the tree the slice assembles, every one of those plants falls at its own section's obligations pin alone on the census, and a ninth plant at the end of the Round 30 section falls at the obligations pin of Round 30 alone. A subsection planted before the first obligation of the Round 29 section, a subsection planted between its second obligation and its command line surface, and a subsection planted inside the span of PG-60 each fall at the Round 29 pin alone, the third at its span equality and its census together under the one pin. The generated fixture family subsection of Round 29 standing removed whole falls at the Round 29 pin alone, the command line surface subheading of Round 28 standing renamed falls at the Round 28 pin alone, the generated fixture family subsection of Round 28 standing moved into the Round 29 section falls at the pins of Rounds 28 and 29 together, and the generated fixture family subsection of Round 29 standing promoted to a section heading falls at the Round 29 pin alone. A subsection planted at the end of the Round 21 section and a subsection planted at the end of the Round 12 section each pass the whole suite on the form, those sections standing outside the census cohort, and a cut of one sentence of the command line surface paragraph of Round 29 passes whole on the form and on the base both, the census asserting the section's shape and not its paragraphs' texts, that boundary standing priced in the design record as the boundary this round leaves. A cut of one sentence of PG-60 stands as the family's control, falling at the Round 29 pin alone on its span equality with its census unmoved. The twenty eight legs and their directions stand computed in the design record and carried unexecuted under the write fault, and their execution stands charged to the warm up of the build as first executions in the order the design record states beside the carried families of Rounds 28 and 29, any plant falling anywhere but its computed seat, any plant inside the census cohort passing whole on the form, the surface cut falling anywhere, or the control cut falling anywhere but the Round 29 pin reopening the round's design before the slice is seated, and the round stands open under the rule of this obligation while that execution stands unexecuted. This paragraph stands restated to the executed form, the legs and their sets standing in it whole, if the build's warm up runs the family whole before the contract commit is assembled, the swap standing named in the build's report. No figure, form, or behaviour of any reading moves under this obligation. Test, the round's records, the executions standing in them.\n"
+    );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 30 obligations, full form"),
+        [
+            "### PG-61 full form, the section census cure over the obligations pins of Rounds 22 through 29",
+            "### PG-62 full form, the plant record of the guarded sections",
+            "### The Round 30 command line surface",
+            "### The generated fixture family under the section census",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
+    );
+}
+
+#[test]
+fn test_readme_reports_the_round_thirty_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-61 met and PG-62 not yet met, the two standing in full form in CONTRACT.md under the Round 30 obligations, PG-61 standing met by the restated obligations pins of Rounds 22 through 29 and the born obligations pin of Round 30 and PG-62 standing not yet met, its plant record standing carried unexecuted under the write fault with the stopping rule of PG-62 standing open.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 31 built and in review, carrying the section census cure over the obligations pins of Rounds 22 through 29, each pin asserting the standing census of its round's section beside every assertion it already carried, and the plant record of the guarded sections standing carried under the write fault, with no reading and no command added.";
     assert!(lines.iter().any(|found| found == slice_line));
     assert!(read("README.md").contains("Closed perfection rounds, 29 of 100"));
 }
