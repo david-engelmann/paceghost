@@ -670,7 +670,42 @@ fn section_subheadings(lines: &[String], section: &str) -> Vec<String> {
         .collect()
 }
 
-// Restated under PG-61, the block below asserts the standing subsection text whole.
+fn section_span(lines: &[String], section: &str, subheading: &str) -> Vec<String> {
+    let starts: Vec<usize> = lines
+        .iter()
+        .enumerate()
+        .filter(|(_, line)| line.as_str() == section)
+        .map(|(index, _)| index)
+        .collect();
+    assert_eq!(starts.len(), 1, "the section heading stands exactly once");
+    let start = starts[0];
+    let mut end = start + 1;
+    while end < lines.len() && !lines[end].starts_with("## ") {
+        end += 1;
+    }
+    let subs: Vec<usize> = lines[start..end]
+        .iter()
+        .enumerate()
+        .filter(|(_, line)| line.as_str() == subheading)
+        .map(|(index, _)| start + index)
+        .collect();
+    assert_eq!(
+        subs.len(),
+        1,
+        "the subheading stands exactly once in its section"
+    );
+    let sub = subs[0];
+    let mut span_end = sub + 1;
+    while span_end < end
+        && !lines[span_end].starts_with("## ")
+        && !lines[span_end].starts_with("### ")
+    {
+        span_end += 1;
+    }
+    lines[sub..span_end].to_vec()
+}
+
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_twenty_two_obligations() {
     let text = read("CONTRACT.md");
@@ -716,6 +751,18 @@ fn test_contract_carries_the_round_twenty_two_obligations() {
         .iter()
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
+    );
+    assert_eq!(
+        subsection_span(&lines, "## Round 22 obligations, full form").join("\n"),
+        "## Round 22 obligations, full form\n\nThis section states the Round 22 obligations in full form. PG-45 and PG-46 add no reading to the readings the earlier sections state. PG-45 carries an execution record taken on the tree the round opens from, executing the one mutation of the Round 21 family that no lane has executed and the census of the opening tree in both shapes, and PG-46 recomposes the three probes of the Round 19 record that stand unexecuted as recorded and executes them through the median command. The record of this round is a record of executions over recordings, as every report in this repo is, and paceghost schedules no work here or anywhere. Watching a real window while it runs remains future work, and nothing in this slice does it.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 22 obligations, full form", "### The Round 22 command line surface").join("\n"),
+        "### The Round 22 command line surface\n\nNo command is added in this round. The surface stands at the twenty four commands the Round 21 section names, with range last, and the surface pins of the earlier rounds keep their behaviour, and the one surface fact this round adds stands guarded by the status pin of section 5, that the surface stands unchanged by the round.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 22 obligations, full form", "### The generated fixture family under the execution record").join("\n"),
+        "### The generated fixture family under the execution record\n\nThe generated meets carry the execution of PG-45 over the same family, the generated pins of the six consumers of field_figures, the middle, tails, mean, median, quartiles, and range readings, standing read under the one shared edit of that obligation, each against the standings close its paragraph states, and the generated pins of the traces, margins, and spread readings standing read as the negative side, no consumer of the shared helper standing among them. No generated paragraph of an earlier round changes.\n"
     );
 }
 
@@ -795,7 +842,7 @@ fn test_the_command_surface_keeps_the_twenty_four_commands_in_order_with_midhing
     assert_eq!(names, expected);
 }
 
-// Restated under PG-61, the block below asserts the standing subsection text whole.
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_twenty_three_obligations() {
     let text = read("CONTRACT.md");
@@ -829,6 +876,18 @@ fn test_contract_carries_the_round_twenty_three_obligations() {
         .iter()
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
+    );
+    assert_eq!(
+        subsection_span(&lines, "## Round 23 obligations, full form").join("\n"),
+        "## Round 23 obligations, full form\n\nThis section states the Round 23 obligations in full form. PG-47 and PG-48 read a meet mark by mark with the field behind each mark, where PG-13 read the same meet as one chronological progression of record lines, PG-15 read it competitor by competitor, PG-17 read it as the spells of its record, PG-19 read it day by day, PG-21 read it competitor by competitor over its standing events, PG-23 read it mark by mark, PG-25 read it by day at the close of each day, PG-27 read it competitor by competitor at the close of each day, PG-29 read it mark by mark with the field behind each mark, PG-31 read it mark by mark with the field behind each mark, PG-33 read it mark by mark with the field behind each mark, PG-35 read it mark by mark with the field behind each mark, PG-37 read it mark by mark with the field behind each mark, PG-39 read it mark by mark with the field behind each mark, PG-41 read it mark by mark with the field behind each mark, and PG-43 read it mark by mark with the field behind each mark. The midhinge reading states, for each mark of the walk, the midhinge standing held after it by the field behind its holder, the mean of the lower quartile standing and the upper quartile standing of that field, a figure no standing meet reading states. The midhinge reading is a reading of recordings, as every report in this repo is, and paceghost schedules no work here or anywhere. Watching a real window while it runs remains future work, and nothing in this slice does it.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 23 obligations, full form", "### The Round 23 command line surface").join("\n"),
+        "### The Round 23 command line surface\n\nThe command line surface gains one command beside show, ghost, race, season, board, fieldday, ladder, rematch, meet, table, reign, days, forks, marks, standings, traces, margins, spread, middle, tails, mean, median, quartiles, and range. The midhinge command takes one file argument, named file, holding one meet, and prints the midhinge reading of PG-48. The command loads the file whole through the meet loader before it prints anything, and no line of the reading is ever printed for a malformed meet, because the loader returns no meet for a file carrying any defect. When the file is malformed the command prints exactly what the meet command prints for that file, the heading invalid meet and then one line for each defect in the form defect and the defect phrase, because the file is a meet file and the defects are the meet loader's own, and a sound file exits with status zero and a malformed file exits with status one. The twenty four commands of the earlier rounds keep their behaviour. Every printed report is deterministic, so the same inputs always print the same bytes. Test, rust/tests/test_commands_round22.rs.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 23 obligations, full form", "### The generated fixture family extended to the midhinge reading").join("\n"),
+        "### The generated fixture family extended to the midhinge reading\n\nThe generated meets carry the midhinge reading of PG-48 over the same meet, and the closing relations of PG-48 hold there in full, the sections equal to the days of the meet, the marks of the sections summing to the marks walked of the marks reading, the marks with another standing and the marks whose lines end in no other standing summing to the marks walked, the midhinge standing of every mark line equal to the exact mean of that line's lower quartile standing figure and upper quartile standing figure, the midhinge margin of every mark line equal to the exact mean of its two quartile margins and never negative, the margin of PG-30 never more than the lower quartile margin at the same mark, the lower quartile margin never more than the midhinge margin, the midhinge margin never more than the upper quartile margin, and the upper quartile margin never more than the spread of PG-32 at that mark, the closest midhinge margin standing at the earliest mark stating it, the midhinge margin standing in no fixed order against the median margin and in no fixed order against the mean margin, the two directions of each relation checked where the generated shapes produce them, which the generated meets do in every seed, the reading's day closes standing at the midhinge of the standings the standings reading states at each close, the day closes standing at counts of five and more in every seed, so the day close relation separates the midhinge from the median and, at every close whose count stands apart from four, from the mean in process where the written goldens cannot separate it from either at all, and the midhinge margin standing at zero exactly at the marks where every figure standing at a middle place of the lowest (m + 1) div 2 figures of the field and every figure standing at a middle place of the highest (m + 1) div 2 figures stand at the record figure. One meet pin over the whole generated family carries the midhinge reading. Test, rust/tests/test_generated.rs.\n"
     );
 }
 
@@ -900,7 +959,7 @@ fn test_the_command_surface_stands_at_twenty_five_with_midhinge_last() {
     ];
     assert_eq!(names, expected);
 }
-// Restated under PG-61, the block below asserts the standing subsection text whole.
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_twenty_four_obligations() {
     let text = read("CONTRACT.md");
@@ -934,6 +993,18 @@ fn test_contract_carries_the_round_twenty_four_obligations() {
         .iter()
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
+    );
+    assert_eq!(
+        subsection_span(&lines, "## Round 24 obligations, full form").join("\n"),
+        "## Round 24 obligations, full form\n\nThis section states the Round 24 obligations in full form. PG-49 and PG-50 read a meet mark by mark with the field behind each mark, where PG-13 read the same meet as one chronological progression of record lines, PG-15 read it competitor by competitor, PG-17 read it as the spells of its record, PG-19 read it day by day, PG-21 read it competitor by competitor over its standing events, PG-23 read it mark by mark, PG-25 read it by day at the close of each day, PG-27 read it competitor by competitor at the close of each day, PG-29 read it mark by mark with the field behind each mark, PG-31 read it mark by mark with the field behind each mark, PG-33 read it mark by mark with the field behind each mark, PG-35 read it mark by mark with the field behind each mark, PG-37 read it mark by mark with the field behind each mark, PG-39 read it mark by mark with the field behind each mark, PG-41 read it mark by mark with the field behind each mark, PG-43 read it mark by mark with the field behind each mark, and PG-47 read it mark by mark with the field behind each mark. The midrange reading states, for each mark of the walk, the midrange standing held after it by the field behind its holder, the mean of the nearest standing and the farthest standing of that field, a figure no standing meet reading states. The midrange reading is a reading of recordings, as every report in this repo is, and paceghost schedules no work here or anywhere. Watching a real window while it runs remains future work, and nothing in this slice does it.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 24 obligations, full form", "### The Round 24 command line surface").join("\n"),
+        "### The Round 24 command line surface\n\nThe command line surface gains one command beside show, ghost, race, season, board, fieldday, ladder, rematch, meet, table, reign, days, forks, marks, standings, traces, margins, spread, middle, tails, mean, median, quartiles, range, and midhinge. The midrange command takes one file argument, named file, holding one meet, and prints the midrange reading of PG-50. The command loads the file whole through the meet loader before it prints anything, and no line of the reading is ever printed for a malformed meet, because the loader returns no meet for a file carrying any defect. When the file is malformed the command prints exactly what the meet command prints for that file, the heading invalid meet and then one line for each defect in the form defect and the defect phrase, because the file is a meet file and the defects are the meet loader's own, and a sound file exits with status zero and a malformed file exits with status one. The twenty five commands of the earlier rounds keep their behaviour. Every printed report is deterministic, so the same inputs always print the same bytes. Test, rust/tests/test_commands_round23.rs.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 24 obligations, full form", "### The generated fixture family extended to the midrange reading").join("\n"),
+        "### The generated fixture family extended to the midrange reading\n\nThe generated meets carry the midrange reading of PG-50 over the same meet, and the closing relations of PG-50 hold there in full, the sections equal to the days of the meet, the marks of the sections summing to the marks walked of the marks reading, the marks with another standing and the marks whose lines end in no other standing summing to the marks walked, the midrange standing of every mark line equal to the exact mean of that line's nearest standing figure and farthest standing figure, the midrange margin of every mark line equal to the exact mean of its margin of PG-30 and its spread of PG-32 and never negative, the margin of PG-30 never more than the midrange margin at the same mark, and the midrange margin never more than the spread of PG-32 at that mark, the closest midrange margin standing at the earliest mark stating it, the midrange margin standing in no fixed order against the median margin and in no fixed order against the mean margin and in no fixed order against the midhinge margin, the two directions of each relation checked where the generated shapes produce them, which the generated meets do in every seed, the reading's day closes standing at the midrange of the standings the standings reading states at each close, the day closes counted out as two closes at a count of two, the first closes of seeds 1 and 4, six closes at a count of four, the first closes of seeds 0, 2, 3, 5, and 7 and the second close of seed 4, fourteen closes at a count of seven, the first close of seed 6, five later closes of seed 1 at its fifth to ninth days, and eight later closes of seed 3 at its second to ninth days, eighteen closes at a count of five, twenty closes at a count of six, and seven closes at a count of nine, and fifty nine closes at counts of five and more, the fourteen closes at a count of seven counted inside the fifty nine, so the day close relation separates the midrange from the median at every close whose count stands apart from two and from the mean and from the midhinge at every close whose count stands apart from two as well, the midrange standing at each of the three identically at the two closes of count two, in process where the written goldens cannot separate it from any of them at all, and the midrange margin standing at zero exactly at the marks where every figure of the field stands at the record figure, no figured mark of the family standing so. One meet pin over the whole generated family carries the midrange reading. Test, rust/tests/test_generated.rs.\n"
     );
 }
 
@@ -1000,7 +1071,7 @@ fn test_the_command_surface_stands_at_twenty_six_with_midrange_last() {
     assert_eq!(names, expected);
 }
 
-// Restated under PG-61, the block below asserts the standing subsection text whole.
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_twenty_five_obligations() {
     let text = read("CONTRACT.md");
@@ -1034,6 +1105,18 @@ fn test_contract_carries_the_round_twenty_five_obligations() {
         .iter()
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
+    );
+    assert_eq!(
+        subsection_span(&lines, "## Round 25 obligations, full form").join("\n"),
+        "## Round 25 obligations, full form\n\nThis section states the Round 25 obligations in full form. PG-51 and PG-52 read a meet mark by mark with the field behind each mark, where PG-13 read the same meet as one chronological progression of record lines, PG-15 read it competitor by competitor, PG-17 read it as the spells of its record, PG-19 read it day by day, PG-21 read it competitor by competitor over its standing events, PG-23 read it mark by mark, PG-25 read it by day at the close of each day, PG-27 read it competitor by competitor at the close of each day, PG-29 read it mark by mark with the field behind each mark, PG-31 read it mark by mark with the field behind each mark, PG-33 read it mark by mark with the field behind each mark, PG-35 read it mark by mark with the field behind each mark, PG-37 read it mark by mark with the field behind each mark, PG-39 read it mark by mark with the field behind each mark, PG-41 read it mark by mark with the field behind each mark, PG-43 read it mark by mark with the field behind each mark, PG-47 read it mark by mark with the field behind each mark, and PG-49 read it mark by mark with the field behind each mark. The width reading states, for each mark of the walk, the field width held after it by the field behind its holder, the farthest standing less the nearest standing of that field, a figure no standing meet reading states. The width reading is a reading of recordings, as every report in this repo is, and paceghost schedules no work here or anywhere. Watching a real window while it runs remains future work, and nothing in this slice does it.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 25 obligations, full form", "### The Round 25 command line surface").join("\n"),
+        "### The Round 25 command line surface\n\nThe command line surface gains one command beside show, ghost, race, season, board, fieldday, ladder, rematch, meet, table, reign, days, forks, marks, standings, traces, margins, spread, middle, tails, mean, median, quartiles, range, midhinge, and midrange. The width command takes one file argument, named file, holding one meet, and prints the width reading of PG-52. The command loads the file whole through the meet loader before it prints anything, and no line of the reading is ever printed for a malformed meet, because the loader returns no meet for a file carrying any defect. When the file is malformed the command prints exactly what the meet command prints for that file, the heading invalid meet and then one line for each defect in the form defect and the defect phrase, because the file is a meet file and the defects are the meet loader's own, and a sound file exits with status zero and a malformed file exits with status one. The twenty six commands of the earlier rounds keep their behaviour. Every printed report is deterministic, so the same inputs always print the same bytes. Test, rust/tests/test_commands_round24.rs.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 25 obligations, full form", "### The generated fixture family extended to the width reading").join("\n"),
+        "### The generated fixture family extended to the width reading\n\nThe generated meets carry the width reading of PG-52 over the same meet, and the closing relations of PG-52 hold there in full, the sections equal to the days of the meet, the marks of the sections summing to the marks walked of the marks reading, the marks with another standing and the marks whose lines end in no other standing summing to the marks walked, the field width of every mark line equal to the exact spread of PG-32 at that mark less the margin of PG-30 at that mark and never negative, the interquartile range of PG-44 never more than the field width at the same mark, and the field width never more than the spread of PG-32 at that mark, the difference of the tails of PG-36 never more than the field width at that mark either, the narrowest field width standing at the earliest mark stating it, the reading's day closes standing at the field width of the standings the standings reading states at each close, the day closes counted out as two closes at a count of two, the first closes of seeds 1 and 4, six closes at a count of four, the first closes of seeds 0, 2, 3, 5, and 7 and the second close of seed 4, eighteen closes at a count of five, twenty closes at a count of six, fourteen closes at a count of seven, and seven closes at a count of nine, fifty nine closes at counts of five and more, so the day close relation separates the field width from the interquartile range and from the difference of the tails at every close whose count stands apart from two, the field width standing at each of the two identically at the two closes of count two, in process where the written goldens cannot separate it from either at all, and the field width standing at zero exactly at the marks where every figure of the field stands at one figure, the thirteen marks of the family whose fields count one figure standing so and no other figured mark of the family standing so. One meet pin over the whole generated family carries the width reading. Test, rust/tests/test_generated.rs.\n"
     );
 }
 
@@ -1092,7 +1175,7 @@ fn test_the_command_surface_stands_at_twenty_seven_with_width_last() {
     assert_eq!(names, expected);
 }
 
-// Restated under PG-61, the block below asserts the standing subsection text whole.
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_twenty_six_obligations() {
     let text = read("CONTRACT.md");
@@ -1129,6 +1212,18 @@ fn test_contract_carries_the_round_twenty_six_obligations() {
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
     );
+    assert_eq!(
+        subsection_span(&lines, "## Round 26 obligations, full form").join("\n"),
+        "## Round 26 obligations, full form\n\nThis section states the Round 26 obligations in full form. PG-53 and PG-54 add no reading to the readings the earlier sections state. PG-53 composes one hand built meet whose field at its third mark stands in the first shape that separates the two partners of the width reading, the range and the difference of the tails, and PG-54 states the coincidence of those partners over the generated fixture family and the ground that makes the separation one directional. The record of this round is a record of executions over recordings, as every report in this repo is, and paceghost schedules no work here or anywhere. Watching a real window while it runs remains future work, and nothing in this slice does it.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 26 obligations, full form", "### The Round 26 command line surface").join("\n"),
+        "### The Round 26 command line surface\n\nNo command is added in this round. The surface stands at the twenty seven commands the Round 25 section names, with width last, and the surface pins of the earlier rounds keep their behaviour, and the one surface fact this round adds stands guarded by the status pin of section 5, that the surface stands unchanged by the round.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 26 obligations, full form", "### The generated fixture family under the separation record").join("\n"),
+        "### The generated fixture family under the separation record\n\nThe generated meets carry the coincidence execution of PG-54 over the same family, the generated pins of the width, range, and tails readings standing read together by the one coincidence pin the obligation names, its counted marks standing stated in PG-54's own text. The generated pins of the earlier rounds keep their standings, and no generated paragraph of an earlier round changes.\n"
+    );
 }
 
 #[test]
@@ -1141,7 +1236,7 @@ fn test_readme_reports_the_round_twenty_six_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 31 of 100"));
 }
 
-// Restated under PG-61, the block below asserts the standing subsection text whole.
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_twenty_seven_obligations() {
     let text = read("CONTRACT.md");
@@ -1195,6 +1290,18 @@ fn test_contract_carries_the_round_twenty_seven_obligations() {
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
     );
+    assert_eq!(
+        subsection_span(&lines, "## Round 27 obligations, full form").join("\n"),
+        "## Round 27 obligations, full form\n\nThis section states the Round 27 obligations in full form. PG-55 and PG-56 add no reading to the readings the earlier sections state. PG-55 executes the four mutations of the Round 25 family that no lane has executed against the pins Round 26 added to the width file, and PG-56 records a hunt over the seats of the width reading's neighbourhood that the standing record has not executed. The record of this round is a record of executions over recordings, as every report in this repo is, and paceghost schedules no work here or anywhere. Watching a real window while it runs remains future work, and nothing in this slice does it.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 27 obligations, full form", "### The Round 27 command line surface").join("\n"),
+        "### The Round 27 command line surface\n\nNo command is added in this round. The surface stands at the twenty seven commands the Round 25 section names, with width last, and the surface pins of the earlier rounds keep their behaviour, and the one surface fact this round adds stands guarded by the status pin of section 5, that the surface stands unchanged by the round.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 27 obligations, full form", "### The generated fixture family under the execution record").join("\n"),
+        "### The generated fixture family under the execution record\n\nThe generated meets carry the executions of PG-55 and PG-56 over the same family, the generated pins of the width, range, tails, quartiles, and coincidence readings standing read under the edits those obligations name, each against the standings its paragraph states, and the generated pins of the earlier rounds keep their standings, and no generated paragraph of an earlier round changes.\n"
+    );
 }
 
 #[test]
@@ -1207,7 +1314,7 @@ fn test_readme_reports_the_round_twenty_seven_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 31 of 100"));
 }
 
-// Restated under PG-61, the block below asserts the standing subsection text whole.
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_twenty_eight_obligations() {
     let text = read("CONTRACT.md");
@@ -1242,6 +1349,18 @@ fn test_contract_carries_the_round_twenty_eight_obligations() {
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
     );
+    assert_eq!(
+        subsection_span(&lines, "## Round 28 obligations, full form").join("\n"),
+        "## Round 28 obligations, full form\n\nThis section states the Round 28 obligations in full form. PG-57 and PG-58 add no reading to the readings the earlier sections state. PG-57 restates the contract pins of the five rounds from Round 22 through Round 26 so that each asserts the whole text of its two obligations inside their own subsections, and PG-58 records a hunt over the seats of the field selections that the standing record has not executed. The record of this round is a record of executions over recordings, as every report in this repo is, and paceghost schedules no work here or anywhere. Watching a real window while it runs remains future work, and nothing in this slice does it.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 28 obligations, full form", "### The Round 28 command line surface").join("\n"),
+        "### The Round 28 command line surface\n\nNo command is added in this round. The surface stands at the twenty seven commands the Round 25 section names, with width last, and the surface pins of the earlier rounds keep their behaviour, and the one surface fact this round adds stands guarded by the status pin of section 5, that the surface stands unchanged by the round.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 28 obligations, full form", "### The generated fixture family under the assertion cure").join("\n"),
+        "### The generated fixture family under the assertion cure\n\nThe generated meets carry the executions of PG-58 over the same family, the generated pins of the field readings standing read under the edits that obligation names, each against the standings its paragraph states, and the generated pins of the earlier rounds keep their standings, and no generated paragraph of an earlier round changes.\n"
+    );
 }
 
 #[test]
@@ -1254,7 +1373,7 @@ fn test_readme_reports_the_round_twenty_eight_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 31 of 100"));
 }
 
-// Restated under PG-61, the block below asserts the standing subsection text whole.
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_twenty_nine_obligations() {
     let text = read("CONTRACT.md");
@@ -1289,6 +1408,18 @@ fn test_contract_carries_the_round_twenty_nine_obligations() {
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
     );
+    assert_eq!(
+        subsection_span(&lines, "## Round 29 obligations, full form").join("\n"),
+        "## Round 29 obligations, full form\n\nThis section states the Round 29 obligations in full form. PG-59 carries the whole obligation assertion cure over the contract pin of Round 27, and PG-60 carries the cut record of the Round 27 cohort. The slice that discharges them stands described in the round's design record.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 29 obligations, full form", "### The Round 29 command line surface").join("\n"),
+        "### The Round 29 command line surface\n\nThe Round 29 slice adds no command. The command line surface stands as the Round 28 section states it, at twenty seven commands with width last in the surface order the usage text and the command surface pins assert, and the binary's name and the forms at version 1 stand as they stood.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 29 obligations, full form", "### The generated fixture family under the cut record").join("\n"),
+        "### The generated fixture family under the cut record\n\nThe Round 29 slice adds no generated fixture. The generated fixture family stands as the Round 28 section states it, the seeded meet family and its readings' extensions standing as they stood, and the fixture counts of every reading stand as the Round 28 section states them.\n"
+    );
 }
 
 #[test]
@@ -1301,6 +1432,7 @@ fn test_readme_reports_the_round_twenty_nine_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 31 of 100"));
 }
 
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_thirty_obligations() {
     let text = read("CONTRACT.md");
@@ -1347,6 +1479,18 @@ fn test_contract_carries_the_round_thirty_obligations() {
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
     );
+    assert_eq!(
+        subsection_span(&lines, "## Round 30 obligations, full form").join("\n"),
+        "## Round 30 obligations, full form\n\nThis section states the Round 30 obligations in full form. PG-61 carries the section census cure over the obligations pins of Rounds 22 through 29, and PG-62 carries the plant record of the guarded sections. The slice that discharges them stands described in the round's design record.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 30 obligations, full form", "### The Round 30 command line surface").join("\n"),
+        "### The Round 30 command line surface\n\nThe Round 30 slice adds no command. The command line surface stands as the Round 29 section states it, at twenty seven commands with width last in the surface order the usage text and the command surface pins assert, and the binary's name and the forms at version 1 stand as they stood.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 30 obligations, full form", "### The generated fixture family under the section census").join("\n"),
+        "### The generated fixture family under the section census\n\nThe Round 30 slice adds no generated fixture. The generated fixture family stands as the Round 29 section states it, the seeded meet family and its readings' extensions standing as they stood, and the fixture counts of every reading stand as the Round 29 section states them.\n\n"
+    );
 }
 
 #[test]
@@ -1359,6 +1503,7 @@ fn test_readme_reports_the_round_thirty_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 31 of 100"));
 }
 
+// Restated under PG-65, the block below asserts the standing texts of its section whole beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_thirty_one_obligations() {
     let text = read("CONTRACT.md");
@@ -1410,6 +1555,18 @@ PG-64. The round carries the completion record of the plant family of PG-62, the
         .iter()
         .map(|line| line.to_string())
         .collect::<Vec<String>>()
+    );
+    assert_eq!(
+        subsection_span(&lines, "## Round 31 obligations, full form").join("\n"),
+        "## Round 31 obligations, full form\n\nThis section states the Round 31 obligations in full form. PG-63 carries the earned met forms of the standing lines of Rounds 29 and 30, and PG-64 carries the completion record of the plant family of PG-62. The slice that discharges them stands described in the round's design record.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 31 obligations, full form", "### The Round 31 command line surface").join("\n"),
+        "### The Round 31 command line surface\n\nThe Round 31 slice adds no command. The command line surface stands as the Round 30 section states it, at twenty seven commands with width last in the surface order the usage text and the command surface pins assert, and the binary's name and the forms at version 1 stand as they stood.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 31 obligations, full form", "### The generated fixture family under the completion record").join("\n"),
+        "### The generated fixture family under the completion record\n\nThe Round 31 slice adds no generated fixture. The generated fixture family stands as the Round 30 section states it, the seeded meet family and its readings' extensions standing as they stood, and the fixture counts of every reading stand as the Round 30 section states them.\n\n"
     );
 }
 
