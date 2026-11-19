@@ -195,7 +195,12 @@ fn test_readme_reports_the_round_four_status() {
     // in review, so the count stood at one, the slice 32
     // status line, until the Round 31 closure landed slice 32
     // and the count returned to zero.
-    assert_eq!(read("README.md").matches("built and in review").count(), 0);
+    // Adjusted again with the Round 32 slice, as the named
+    // mechanical consequence of slice 33 standing built and
+    // in review, so the count stood at one, the slice 33
+    // status line, until the Round 32 closure landed slice 33
+    // and the count returned to zero.
+    assert_eq!(read("README.md").matches("built and in review").count(), 1);
 }
 
 #[test]
@@ -1576,6 +1581,76 @@ fn test_readme_reports_the_round_thirty_one_status() {
     let standing = "- Contract, PG-63 and PG-64 met, the two standing in full form in CONTRACT.md under the Round 31 obligations, PG-63 standing as the earned met forms of the standing lines of Rounds 29 and 30 and PG-64 as the completion record of the plant family of PG-62 beside it, its relocation leg standing executed at its corrected construction at its priced seat, no leg of the plant family standing carried, the round standing closed under the rule of PG-64 on that execution.";
     assert!(lines.iter().any(|found| found == standing));
     let slice_line = "- Slice 32 has landed. It carries the earned met forms of PG-63, the standing lines of Rounds 29 and 30 standing restated to the standings their executions earned, and the completion record of PG-64 over the plant family of PG-62 standing executed whole at its corrected construction, with no reading and no command added.";
+    assert!(lines.iter().any(|found| found == slice_line));
+    assert!(read("README.md").contains("Closed perfection rounds, 31 of 100"));
+}
+
+#[test]
+fn test_contract_carries_the_round_thirty_two_obligations() {
+    let text = read("CONTRACT.md");
+    for label in ["PG-65", "PG-66"] {
+        assert!(text.contains(label), "the contract carries {}", label);
+    }
+    let lines: Vec<&str> = text.lines().collect();
+    for heading in [
+        "## Round 32 obligations, full form",
+        "### PG-65 full form, the paragraph text extension over the guarded sections",
+        "### PG-66 full form, the extension record of the guarded sections' texts",
+    ] {
+        assert!(
+            lines.contains(&heading),
+            "the contract carries the heading {}",
+            heading
+        );
+    }
+    let lines: Vec<String> = text.lines().map(|line| line.to_string()).collect();
+    assert_eq!(
+        lines
+            .iter()
+            .filter(|line| line.as_str() == "## Round 32 obligations, full form")
+            .count(),
+        1
+    );
+    assert_eq!(
+        subsection_span(&lines, "### PG-65 full form, the paragraph text extension over the guarded sections").join("\n"),
+        "### PG-65 full form, the paragraph text extension over the guarded sections\n\nPG-65. The obligations pins of Rounds 22 through 31 in rust/tests/test_setup.rs stand restated so that each asserts, beside every assertion it already carries, the standing texts of its round's section of this contract that stand outside the section's obligations. Each restated pin gains three assertions over its own section. The first asserts the section's preamble whole, the lines standing from the section heading down to the section's first subheading, taken by the helper subsection_span at the section heading itself, the helper asserting as it goes that the heading stands exactly once among the lines of this contract and returning the lines standing under it down to the next heading of either level. The second asserts the span of the section's command line surface subsection whole and the third asserts the span of the section's generated fixture family subsection whole, the two spans standing taken by the helper section_span in the species of subsection_span, the helper taking the lines of this contract, a section heading, and a subheading, asserting as it goes that the section heading stands exactly once among the lines and the subheading exactly once among the lines of that section, and returning the lines standing under the subheading down to the next heading of either level within the section. The second helper stands seated because the generated fixture family subheading of the sections of Rounds 22 and 27 stands at two places in this contract, once in each of the two sections, a seat the whole file uniqueness of subsection_span cannot take, and the sharing of the helpers stands priced in the open in this round's design record as the rounds before this one priced it, a defect in a shared helper moving every guarded text at once. The obligations pin of Round 32 stands born carrying the same three assertions for its own section beside its whole text assertions over PG-65 and PG-66 and the census assertion of this section, in the form PG-61 set for the born pin of Round 30 as this obligation extends it, the guarded cohort standing at eleven sections at this round's close. A cut of any sentence of the preamble, of the command line surface paragraph, or of the generated fixture family paragraph of a guarded section fails at that section's obligations pin on the assertion the cut text stands under, a subsection planted inside a guarded section or removed from it or renamed inside it fails at the same pin on its census as it stood before this round, and no seat outside the guarded sections moves any assertion of this obligation, a cut in a section of Rounds 1 through 21 passing every pin whole as it stands at this round's base. The preamble paragraph of each guarded section and the texts of its command line surface and generated fixture family subsections stand inside the assertions of this obligation from this round, as they stood outside the spans of PG-57 and PG-59 and outside the censuses of PG-61, and the whole text question over the sections of Rounds 1 through 21 stands priced in this round's design record with its trigger unmet. The enumeration that prices this cure stands in this round's design record, taken over the whole contract at the round's base, and it finds the texts standing outside the obligations of the guarded sections at thirty seats and one hundred sentences, the preamble, the command line surface paragraph, and the generated fixture family paragraph of each of the ten sections of Rounds 22 through 31, no span of any of the thirty standing among the literals of any pin of the setup file and no literal of ten characters or more of any pin of that file standing inside any paragraph of the thirty, the shorter strings standing inside them standing as labels and as the command surface's names alone, the subheadings of the surface and fixture subsections standing named in the census assertions as headings alone, and every other text of the ten sections standing asserted by the spans and the censuses the pins already carry. This round's design record carries the computed directions of the cure against the whole suite in both directions, the cure's own executions standing charged to the warm up of the build as first executions under the stopping rule PG-66 states. No figure, form, or behaviour of any reading moves under this obligation, and no text of this contract moves under it, the restated pins passing over the contract as it stands and failing only where a guarded section's standing texts stand moved. Test, rust/tests/test_setup.rs, the obligations pins of Rounds 22 through 32 as restated and born. The fixture span of the section standing last in this contract closes at the file's end, and a later round's append moves that span's trailing lines alone, the pin's one literal standing refreshed by that round as the append's named mechanical consequence.\n"
+    );
+    assert_eq!(
+        subsection_span(&lines, "### PG-66 full form, the extension record of the guarded sections' texts").join("\n"),
+        "### PG-66 full form, the extension record of the guarded sections' texts\n\nPG-66. The round carries an extension record over the texts PG-65 asserts, sixty five legs of the contract text, each computed seat by seat in this round's design record over every pin that reads the contract, in its own fresh target directory at its execution under the discipline PG-55 states, the failing sets read from assertion failures alone. In the base direction, on the tree the round opens from, a cut of one sentence of each of the thirty texts standing outside the obligations of the guarded sections passes the whole suite, no pin asserting any of those texts and each cut standing outside every span its section's pin asserts and moving no census its section's pin asserts. In the form direction, on the tree the slice assembles, every one of those thirty cuts falls at its own section's obligations pin alone on the assertion the cut text stands under, and a cut of one sentence of each of the three texts of the Round 32 section standing outside its obligations, its preamble, its command line surface paragraph, and its generated fixture family paragraph, falls at the obligations pin of Round 32 alone, the born pin carrying the assertions of PG-65 for its own section from its birth. A cut of one sentence of the command line surface paragraph of the Round 21 section passes the whole suite on the form, that section standing outside the guarded cohort, and a cut of one sentence of PG-64 stands as the family's control, falling at the obligations pin of Round 31 alone on its span equality, its census unmoved and the assertions of PG-65 over its section unmoved. The sixty five legs and their directions stand computed in the design record and carried unexecuted under the write fault, and their execution stands charged to the warm up of the build as first executions in the order the design record states beside the candidate legs of this round, any cut falling anywhere but its computed seat, any cut inside the guarded sections passing whole on the form, the Round 21 cut falling anywhere, or the control cut falling anywhere but the Round 31 pin reopening the round's design before the slice is seated, and the round stands open under the rule of this obligation while that execution stands unexecuted. This paragraph stands restated to the executed form, the legs and their sets standing in it whole, if the build's warm up runs the record whole before the contract commit is assembled, the swap standing named in the build's report. No figure, form, or behaviour of any reading moves under this obligation. Test, the round's records, the executions standing in them.\n"
+    );
+    assert_eq!(
+        section_subheadings(&lines, "## Round 32 obligations, full form"),
+        [
+            "### PG-65 full form, the paragraph text extension over the guarded sections",
+            "### PG-66 full form, the extension record of the guarded sections' texts",
+            "### The Round 32 command line surface",
+            "### The generated fixture family under the paragraph text extension",
+        ]
+        .iter()
+        .map(|line| line.to_string())
+        .collect::<Vec<String>>()
+    );
+    assert_eq!(
+        subsection_span(&lines, "## Round 32 obligations, full form").join("\n"),
+        "## Round 32 obligations, full form\n\nThis section states the Round 32 obligations in full form. PG-65 carries the paragraph text extension over the guarded sections, and PG-66 carries the extension record of the guarded sections' texts. The slice that discharges them stands described in the round's design record.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 32 obligations, full form", "### The Round 32 command line surface").join("\n"),
+        "### The Round 32 command line surface\n\nThe Round 32 slice adds no command. The command line surface stands as the Round 31 section states it, at twenty seven commands with width last in the surface order the usage text and the command surface pins assert, and the binary's name and the forms at version 1 stand as they stood.\n"
+    );
+    assert_eq!(
+        section_span(&lines, "## Round 32 obligations, full form", "### The generated fixture family under the paragraph text extension").join("\n"),
+        "### The generated fixture family under the paragraph text extension\n\nThe Round 32 slice adds no generated fixture. The generated fixture family stands as the Round 31 section states it, the seeded meet family and its readings' extensions standing as they stood, and the fixture counts of every reading stand as the Round 31 section states them.\n"
+    );
+}
+
+#[test]
+fn test_readme_reports_the_round_thirty_two_status() {
+    let lines = readme_lines();
+    let standing = "- Contract, PG-65 met and PG-66 not yet met, the two standing in full form in CONTRACT.md under the Round 32 obligations, PG-65 standing as the paragraph text extension over the guarded sections and PG-66 as the extension record of the guarded sections' texts beside it, its sixty five legs standing carried unexecuted under the write fault, the round standing open under the rule of PG-66 while that execution stands unexecuted.";
+    assert!(lines.iter().any(|found| found == standing));
+    let slice_line = "- Slice 33 is built and in review. It carries the paragraph text extension of PG-65, the obligations pins of Rounds 22 through 31 standing restated to assert their sections' standing texts whole, and the extension record of PG-66 over the guarded sections' texts standing carried under the write fault, with no reading and no command added.";
     assert!(lines.iter().any(|found| found == slice_line));
     assert!(read("README.md").contains("Closed perfection rounds, 31 of 100"));
 }
