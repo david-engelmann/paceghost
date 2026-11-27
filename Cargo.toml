@@ -2,9 +2,37 @@
 name = "paceghost"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.82"
 description = "Paceghost is a command line tool that reads recorded task runs and field days from local files and prints reports over them."
+license = "MIT"
+repository = "https://github.com/david-engelmann/paceghost"
+homepage = "https://github.com/david-engelmann/paceghost"
+documentation = "https://docs.rs/paceghost"
+readme = "README.md"
+keywords = ["cli", "benchmarking", "telemetry", "pacing", "agents"]
+categories = ["command-line-utilities", "development-tools"]
+default-run = "paceghost"
+exclude = [
+  "AGENTS.md",
+  "CONTRACT.md",
+  ".github/**",
+  "docs/**",
+  "examples/**",
+  "rust/src/bin/**",
+  "rust/tests/**",
+]
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/paceghost-v{ version }-{ target }.tar.gz"
+bin-dir = "paceghost-v{ version }-{ target }/{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/paceghost-v{ version }-{ target }.zip"
+pkg-fmt = "zip"
 
 [lib]
+name = "paceghost"
 path = "rust/src/lib.rs"
 
 [[bin]]
@@ -328,7 +356,9 @@ path = "rust/tests/test_examples_round24.rs"
 
 
 [dependencies]
-libc = "0.2"
 num-bigint = "0.4"
 num-rational = "0.4"
 num-traits = "0.2"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
