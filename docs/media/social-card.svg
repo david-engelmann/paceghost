@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img">
+  <title>paceghost - Offline agent window-pacing projections, stolen-record walks, and exact rational meet statistics.</title>
+  <style>
+    .sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+  <rect width="1280" height="640" fill="#0f0e0c"/>
+  <rect x="28" y="28" width="1224" height="584" rx="22" fill="#161512" stroke="#2e2b25" stroke-width="2"/>
+  <g transform="translate(68 74) scale(1.35)"><rect x="4" y="6" width="44" height="38" rx="8" fill="none" stroke="#f2eee6" stroke-width="3"/><line x1="36" y1="10" x2="36" y2="40" stroke="#f59e0b" stroke-width="2.4" stroke-dasharray="3.5 2.5"/><rect x="10" y="15" width="30" height="7" rx="3.5" fill="#f59e0b"/><rect x="10" y="28" width="21" height="7" rx="3.5" fill="#f2eee6" opacity="0.55"/></g>
+  <text x="156" y="128" class="sans" font-size="56" font-weight="700" fill="#f2eee6">paceghost</text>
+  <rect x="68" y="168" width="210" height="32" rx="16" fill="#2b200d"/>
+  <text x="173" y="189" text-anchor="middle" class="mono" font-size="14" font-weight="700" fill="#f59e0b">WINDOW PACING</text>
+  <text x="68" y="252" class="sans" font-size="26" font-weight="600" fill="#f2eee6">Offline agent window-pacing projections, stolen-record</text>
+  <text x="68" y="288" class="sans" font-size="26" font-weight="600" fill="#a6a095">walks, and exact rational meet statistics.</text>
+  <rect x="68" y="346" width="240" height="84" rx="12" fill="#1f1d19" stroke="#2e2b25"/>
+  <text x="88" y="378" class="mono" font-size="13" fill="#a6a095">SURFACE</text>
+  <text x="88" y="410" class="mono" font-size="24" font-weight="700" fill="#f2eee6">27 commands</text>
+  <rect x="328" y="346" width="260" height="84" rx="12" fill="#1f1d19" stroke="#2e2b25"/>
+  <text x="348" y="378" class="mono" font-size="13" fill="#a6a095">THROUGHPUT</text>
+  <text x="348" y="410" class="mono" font-size="24" font-weight="700" fill="#10b981">77,600 reads/sec</text>
+  <rect x="608" y="346" width="220" height="84" rx="12" fill="#1f1d19" stroke="#2e2b25"/>
+  <text x="628" y="378" class="mono" font-size="13" fill="#a6a095">RELEASE BINARY</text>
+  <text x="628" y="410" class="mono" font-size="24" font-weight="700" fill="#f59e0b">1162 KiB</text>
+  <text x="68" y="556" class="mono" font-size="18" fill="#a6a095">github.com/david-engelmann/paceghost  ·  Rust  ·  Linux / macOS / Windows  ·  MIT</text>
+</svg>

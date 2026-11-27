@@ -19,6 +19,5 @@ Every distribution reading computes over the **chaser field behind the record ho
 ## What do the exit codes mean?
 
 - **`0`** Valid input loaded, report preconditions met, and report printed cleanly.
-- **`1`** Malformed input JSON refused with `invalid <kind>` and `defect ...` lines on `stdout`, report-precondition failure on valid JSON (such as `board` on a run missing `budget` or timed `reads`, or cross-run `task` mismatches in `ghost`, `race`, or `season`, printing a plain precondition diagnostic), or a closed `stdout` pipe on large output (`>= 8192` bytes).
+- **`1`** Malformed input JSON refused with `invalid <kind>` and `defect ...` lines on `stdout`, report-precondition failure on valid JSON (such as `board` on a run missing `budget` or timed `reads`, or cross-run `task` mismatches in `ghost`, `race`, or `season`, printing a plain precondition diagnostic), or a closed `stdout` pipe (`PORT-8`).
 - **`2`** Unknown subcommand, unrecognized flags, or wrong argument count on `stderr`.
-- **`120`** Failed `stderr` stream write, or a closed `stdout` pipe on short output (`<= 4096` bytes).
