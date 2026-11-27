@@ -26,4 +26,4 @@ Offline agent window-pacing projections, stolen-record progressions, and exact r
 - **Pure offline execution.** `paceghost` makes zero network calls, schedules no work, and mutates none of the recorded run or meet files handed to it.
 - **Exact rational projections and quantiles.** Full-window burn projections (`usage * window_seconds / elapsed_seconds`), tie-breaks, quartiles, midhinges, and midranges compute over `BigRational` values before formatting.
 - **Whole-input defect reporting.** Any defect in any nested split, checkpoint read, or field day refuses the entire file with a complete defect list before printing a single report line.
-- **Terminal injection fencing.** Task, phase, model, date, and printed runner labels are fenced against embedded newlines across loaders and report entry points.
+- **Single-line output fencing.** Task, phase, model, date, and printed runner labels reject unpaired UTF-16 surrogates and line breaks (`\n` and `\r`) across loaders and report entry points, though untrusted text displayed in a terminal should still pass through a pager or sanitizer.

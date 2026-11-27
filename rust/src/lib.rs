@@ -3,9 +3,10 @@
 //! readings across single runs, seasons, field days, ladders, rematches,
 //! and multi day meets.
 //!
-//! Every loader, progression walk, summary statistic, and report renderer
-//! in this crate is a pure offline function that returns structured defect
-//! lists rather than panicking on malformed input. The command line binary
+//! Every input loader in this crate is a pure offline function that
+//! returns structured defect lists rather than panicking on malformed
+//! JSON, and report renderers execute deterministically once their
+//! documented run or meet preconditions hold. The command line binary
 //! in `cli` is a thin dispatch shell over these modules.
 
 pub mod cli;

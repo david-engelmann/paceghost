@@ -8,7 +8,10 @@ Paceghost reads recorded task runs, timed checkpoint splits, and multi-competito
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/david-engelmann/paceghost/main/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
 ```
+
+Pass `--to <DIR>` to install somewhere other than `$HOME/.local/bin`, and ensure the destination directory stands on `PATH`.
 
 ### Cargo Binstall
 
@@ -28,7 +31,7 @@ cargo install --path . --bin paceghost --locked
 
 ## 60-Second Walkthrough
 
-Inspect a single recorded run, find the fastest standing ghost, race a live run split-by-split against an earlier ghost (`ghost_file` first, `live_file` second), project mid-run token burn against a budget board, and analyze a 3-day multi-runner meet.
+From the root of a `paceghost` repository checkout (`git clone https://github.com/david-engelmann/paceghost.git && cd paceghost`), inspect a single recorded run, find the fastest standing ghost, race a live run split-by-split against an earlier ghost (`ghost_file` first, `live_file` second), project mid-run token burn against a budget board, and analyze a 3-day multi-runner meet.
 
 ```sh
 paceghost show examples/operator-run.json
@@ -103,7 +106,7 @@ An object `{"runs": [ ... ]}` holding one or more recorded run objects sharing t
 }
 ```
 
-At each read with `elapsed_seconds > 0`, the projected full-window burn is `usage * window_seconds / elapsed_seconds` (reads at `elapsed_seconds == 0` are skipped in field days, ladders, rematches, and meets). Lower projections beat higher projections (breaking ties toward the competitor whose standing was set at an earlier mark, and then earlier appearance order under `PG-7`), and `record stolen from <operator>` fires whenever a competitor other than `<operator>` holds the closing record after `<operator>` once held it.
+At each read with `elapsed_seconds > 0`, the projected full-window burn is `usage * window_seconds / elapsed_seconds` (reads at `elapsed_seconds == 0` are skipped in field days, ladders, rematches, and meets). Lower projections beat higher projections. When tied at the minimum projection, the incumbent record holder keeps the record, and only when the incumbent does not stand at that minimum do earliest standing mark and earlier appearance order under `PG-7` and `PG-13` break ties. `record stolen from <operator>` fires whenever a competitor other than `<operator>` holds the closing record after `<operator>` once held it.
 
 ### 4. Window ladder (`ladder <ladder.json>`)
 
@@ -125,6 +128,8 @@ In `paceghost`, every mark-level distribution reading (`mean`, `median`, `quarti
 | --- | --- | --- |
 | `margins` | Nearest chaser less record holder (`c_1 - h = 120 - 100`) | `margin 20` |
 | `spread` | Farthest chaser less record holder (`c_5 - h = 900 - 100`) | `spread 800` |
+| `middle` | Single chaser at 1-based rank `(m + 1) div 2` (`c_3` for `m = 5`, and the lower chaser `c_1` for `m = 2`, distinguishing it from `median`, `PG-35`) | `middle standing 210` |
+| `tails` | Arithmetic means of lowest `ceil(m / 2)` chasers `[120, 150, 210]` and highest `ceil(m / 2)` chasers `[210, 400, 900]` (`PG-37`) | `lower tail standing 160`, `upper tail standing 503.333333` |
 | `width` | Span across the chaser pack behind the holder (`c_5 - c_1 = 900 - 120`, `PG-51`) | `field width 780` |
 | `mean` | Arithmetic mean of the `5` chasers `(120 + 150 + 210 + 400 + 900) / 5` (`PG-39`) | `mean standing 356`, `mean margin 256` |
 | `median` | Middle value of the `5` chasers (`c_3`, `PG-41`) | `median standing 210`, `median margin 110` |
@@ -154,7 +159,7 @@ In `paceghost`, every mark-level distribution reading (`mean`, `median`, `quarti
 | --- | --- | --- |
 | Record progression | `meet`, `table`, `reign`, `days`, `forks`, `marks` | Chronological record walk (`meet`), per-competitor lows/closes (`table`), contiguous leadership spells (`reign`), per-day handovers (`days`), per-competitor event history (`forks`), and mark-by-mark outcomes (`marks`) |
 | Day-close matrices | `standings`, `traces` | Competitor projections at each day's close grouped by day (`standings`) or transposed by competitor (`traces`) |
-| Chaser-field geometry | `margins`, `spread`, `middle`, `tails`, `width` | Holder-to-nearest margin (`margins`), holder-to-farthest span (`spread`), interior chasers between nearest and farthest (`middle`), extreme chaser pair (`tails`), and chaser-pack span (`width`) |
+| Chaser-field geometry | `margins`, `spread`, `middle`, `tails`, `width` | Holder-to-nearest margin (`margins`), holder-to-farthest span (`spread`), single chaser at sorted position `(m + 1) div 2` (`middle`), arithmetic means of the lowest and highest `ceil(m / 2)` chasers (`tails`), and chaser-pack span (`width`) |
 | Chaser-field statistics | `mean`, `median`, `quartiles`, `range`, `midhinge`, `midrange` | Exact rational location and dispersion figures (`range` reporting the interquartile range `Q3 - Q1`) across the chaser field behind the holder at each mark |
 
 ## Multi-Agent Fleet Pacing Recipe (`thirdshift` Companion)
