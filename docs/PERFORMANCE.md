@@ -20,7 +20,7 @@ Measured on Apple Silicon (`cargo build --release --locked`, median wall-clock d
 | Benchmark command | `paceghost quartiles` | Full end-to-end CLI invocation |
 | Synthetic workload | 10-day meet across 12 runners (3,000 checkpoint reads, exact BigRational quartiles) | Validated whole before rendering |
 | Median wall-clock time | `38.66 ms` | Median of 9 cold-process runs |
-| Sustained throughput | `77,600 reads/sec` | Includes JSON parsing and line-break fencing |
+| Median-derived rate | `77,600 reads/sec` | Derived from median of 9 cold-process runs |
 
 ## Spectacle Line Release Comparison
 

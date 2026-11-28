@@ -21,7 +21,9 @@
     "task": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^[^\\r\\n]+$"
+      "not": {
+        "pattern": "[\\r\\n]"
+      }
     },
     "window_seconds": {
       "type": "number",
@@ -51,7 +53,9 @@
     "model": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^[^\\r\\n]+$"
+      "not": {
+        "pattern": "[\\r\\n]"
+      }
     },
     "splits": {
       "type": "array",
@@ -66,7 +70,9 @@
           "phase": {
             "type": "string",
             "minLength": 1,
-            "pattern": "^[^\\r\\n]+$"
+            "not": {
+              "pattern": "[\\r\\n]"
+            }
           },
           "elapsed_seconds": {
             "type": "number",

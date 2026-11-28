@@ -6,7 +6,7 @@ No. `paceghost` is a pure offline reader over recorded JSON files (`AGENTS.md`).
 
 ## Why is there no standalone `FORMATS.md` at the repository root?
 
-Under contract amendment `FIX-PG-13` (`CONTRACT.md`), `paceghost` consolidates its normative version 1 format specifications inside `CONTRACT.md` and `README.md` (`## Input files`), with copy-pasteable examples for all six input shapes provided in [GUIDE.md](GUIDE.md#input-file-schemas).
+Under contract amendment `FIX-PG-13` (`CONTRACT.md`), `paceghost` consolidates its normative version 1 format specifications inside `CONTRACT.md` and `README.md` (`## Input files`), with complete JSON examples for `run` and `fieldday` plus structural templates for `field`, `ladder`, `rematch`, and `meet` in [GUIDE.md](GUIDE.md#input-file-schemas) and machine-validated JSON Schemas under `../schemas/`.
 
 ## How does the pacing projection formula work?
 

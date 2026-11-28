@@ -57,6 +57,7 @@ Install a prebuilt release binary on Linux or macOS with SHA-256 verification, i
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/david-engelmann/paceghost/main/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
 ```sh

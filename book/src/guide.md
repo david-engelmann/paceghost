@@ -122,7 +122,7 @@ An object `{"days": [<field-day-1>, <field-day-2>, <field-day-3>, ...]}` holding
 
 ## Six-Competitor Mark Example Separating Every Summary Statistic
 
-In `paceghost`, every mark-level distribution reading (`mean`, `median`, `quartiles`, `range`, `midhinge`, `midrange`, `width`, `middle`, and `tails`) measures **the field behind the record holder** (`m = active - 1` chasers, excluding the holder `h` under `PG-35` through `PG-52`). With only two or three active competitors (`m = 1` or `2` chasers), symmetric location figures coincide. At a mark where `6` active competitors hold projections `[100, 120, 150, 210, 400, 900]` (record holder `h = 100` and `m = 5` sorted chasers `[120, 150, 210, 400, 900]`), every single reading produces a distinct figure.
+In `paceghost`, every mark-level distribution reading (`mean`, `median`, `quartiles`, `range`, `midhinge`, `midrange`, `width`, `middle`, and `tails`) measures **the field behind the record holder** (`m = active - 1` chasers, excluding the holder `h` under `PG-35` through `PG-52`). With only two or three active competitors (`m = 1` or `2` chasers), symmetric location figures coincide. At a mark where `6` active competitors hold projections `[100, 120, 150, 210, 400, 900]` (record holder `h = 100` and `m = 5` sorted chasers `[120, 150, 210, 400, 900]`), `middle` and `median` both select the odd middle chaser `c_3 = 210` (whereas for `m = 2` chasers `middle` picks `c_1` and `median` averages `(c_1 + c_2) / 2`) while `mean`, `median`, `quartiles`, `range`, `midhinge`, `midrange`, `margins`, `spread`, `width`, and `tails` all separate cleanly.
 
 | Command | Exact `paceghost` definition at the mark (`h = 100`, chasers `c = [120, 150, 210, 400, 900]`) | Standing / figure printed |
 | --- | --- | --- |
