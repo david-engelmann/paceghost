@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use Paceghost in research or engineering benchmarks, please cite this software."
+type: software
+title: "Paceghost"
+abstract: "Paceghost is a Rust library and command line tool that scores recorded agent runs against timed budget windows using exact rational projection math."
+authors:
+  - family-names: "Engelmann"
+    given-names: "David"
+version: "0.1.0"
+license: "MIT"
+repository-code: "https://github.com/david-engelmann/paceghost"
+url: "https://github.com/david-engelmann/paceghost"
+keywords:
+  - "cli"
+  - "benchmarking"
+  - "telemetry"
+  - "pacing"
+  - "agents"

@@ -1,0 +1,40 @@
+#compdef paceghost
+
+_paceghost() {
+  local -a subcommands
+  subcommands=(
+    'show'
+    'ghost'
+    'race'
+    'season'
+    'board'
+    'fieldday'
+    'ladder'
+    'rematch'
+    'meet'
+    'table'
+    'reign'
+    'days'
+    'forks'
+    'marks'
+    'standings'
+    'traces'
+    'margins'
+    'spread'
+    'middle'
+    'tails'
+    'mean'
+    'median'
+    'quartiles'
+    'range'
+    'midhinge'
+    'midrange'
+    'width'
+  )
+  _arguments -C \
+    '(- *)'{-h,--help}'[Print help information]' \
+    '1:command:compadd -a subcommands' \
+    '*:input file:_files'
+}
+
+_paceghost "$@"

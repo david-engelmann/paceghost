@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/david-engelmann/paceghost/main/schemas/ladder.schema.json",
+  "title": "Paceghost Window Ladder (v1)",
+  "description": "Version 1 multi-window cutoff evaluation read by paceghost ladder.",
+  "type": "object",
+  "required": [
+    "day",
+    "windows"
+  ],
+  "properties": {
+    "day": {
+      "$ref": "field-day.schema.json"
+    },
+    "windows": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
+    }
+  }
+}

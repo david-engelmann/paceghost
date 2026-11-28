@@ -1,0 +1,17 @@
+[book]
+title = "Paceghost Handbook"
+authors = ["David Engelmann"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "../target/book"
+create-missing = false
+
+[output.html]
+site-url = "/paceghost/"
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/david-engelmann/paceghost"
+additional-css = ["theme/custom.css"]
+no-section-label = true

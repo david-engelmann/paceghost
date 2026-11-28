@@ -1,10 +1,13 @@
-//! The Rust port of paceghost.
+//! Paceghost scores recorded agent runs against timed budget windows using
+//! exact rational projection math and renders twenty seven deterministic
+//! readings across single runs, seasons, field days, ladders, rematches,
+//! and multi day meets.
 //!
-//! The landed Python implementation is the behavioral spec of this
-//! crate, under the port obligations PORT-1 to PORT-6 in CONTRACT.md.
-//! The library carries the loaders, the readings, and the command
-//! dispatch as pure functions, and the binary is a thin shell over
-//! the dispatch.
+//! Every input loader in this crate is a pure offline function that
+//! returns structured defect lists rather than panicking on malformed
+//! JSON, and report renderers execute deterministically once their
+//! documented run or meet preconditions hold. The command line binary
+//! in `cli` is a thin dispatch shell over these modules.
 
 pub mod cli;
 pub mod fieldday;

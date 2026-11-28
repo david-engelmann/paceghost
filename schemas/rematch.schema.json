@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/david-engelmann/paceghost/main/schemas/rematch.schema.json",
+  "title": "Paceghost Two-Day Rematch (v1)",
+  "description": "Version 1 two-day sequential progression read by paceghost rematch.",
+  "type": "object",
+  "required": [
+    "first",
+    "second"
+  ],
+  "properties": {
+    "first": {
+      "$ref": "field-day.schema.json"
+    },
+    "second": {
+      "$ref": "field-day.schema.json"
+    }
+  }
+}

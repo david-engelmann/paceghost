@@ -1,0 +1,73 @@
+.TH PACEGHOST 1 "2026-11-27" "paceghost 0.1.0" "Spectacle Line Manual"
+.SH NAME
+paceghost \- offline agent window-pacing projector and exact rational meet statistics reader
+.SH SYNOPSIS
+\fBpaceghost\fR [\fB-h\fR | \fB--help\fR] \fICOMMAND\fR \fIFILE\fR ...
+.SH DESCRIPTION
+\fBpaceghost\fR reads recorded agent task runs, fields, single-window field days, window ladders, two-day rematches, and multi-day meets from local JSON files. All full-window projections and chaser-pack order statistics run over exact arbitrary-precision BigRational arithmetic with zero network calls and zero scheduling.
+.SH COMMANDS
+.TP
+\fBshow <run.json>\fR
+Display a recorded run and its phase splits.
+.TP
+\fBghost <run.json> [<run2.json> ...]\fR
+Select the fastest standing ghost across matching runs.
+.TP
+\fBrace <ghost.json> <live.json>\fR
+Compare split-by-split deltas of a live run against a standing ghost.
+.TP
+\fBseason <field.json> <ghost.json>\fR
+Summarize per-model run counts and budget usage across a season field against a standing ghost.
+.TP
+\fBboard <run.json> <ghost.json>\fR
+Project full-window token consumption at each timed checkpoint read against budget and a standing ghost.
+.TP
+\fBfieldday <field-day.json>\fR
+Walk the chronological stolen-record progression across one window.
+.TP
+\fBladder <ladder.json>\fR
+Evaluate record holders across an ordered list of window cutoffs.
+.TP
+\fBrematch <rematch.json>\fR
+Walk a continuous record progression across two consecutive field days.
+.TP
+\fBmeet | table | reign | days | forks | marks | standings | traces | margins | spread | middle | tails | mean | median | quartiles | range | midhinge | midrange | width <meet.json>\fR
+Run the nineteen multi-day meet progression and chaser-field statistical readings.
+.SH EXIT STATUS
+.TP
+\fB0\fR
+Valid JSON loaded, report preconditions met, and report printed cleanly.
+.TP
+\fB1\fR
+Malformed JSON refused with defect lines, unmet report precondition, or closed stdout pipe.
+.TP
+\fB2\fR
+Unknown subcommand, unrecognized option, or wrong argument count.
+.SH EXAMPLES
+Display a recorded run
+.nf
+.RS 4
+paceghost show examples/operator-run.json
+.RE
+.fi
+.PP
+Project checkpoint burn against a budget window and standing ghost
+.nf
+.RS 4
+paceghost board examples/board-run.json examples/ghost-run.json
+.RE
+.fi
+.PP
+Compute exact rational chaser quartiles across a meet
+.nf
+.RS 4
+paceghost quartiles examples/meet.json
+.RE
+.fi
+.SH SEE ALSO
+Project documentation and Draft 2020-12 JSON Schemas at
+.I https://github.com/david-engelmann/paceghost
+and the online operator handbook at
+.I https://david-engelmann.github.io/paceghost/
+.SH AUTHORS
+David Engelmann. Released under the MIT License.

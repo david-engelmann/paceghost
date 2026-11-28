@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/david-engelmann/paceghost/main/schemas/meet.schema.json",
+  "title": "Paceghost Multi-Day Meet (v1)",
+  "description": "Version 1 multi-day meet (3 to 10 days) read by paceghost meet and eighteen sibling commands.",
+  "type": "object",
+  "required": [
+    "days"
+  ],
+  "properties": {
+    "days": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": {
+        "$ref": "field-day.schema.json"
+      }
+    }
+  }
+}
