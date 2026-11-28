@@ -14,6 +14,7 @@ categories = ["command-line-utilities", "development-tools"]
 default-run = "paceghost"
 exclude = [
   "AGENTS.md",
+  "action.yml",
   "CONTRACT.md",
   ".github/**",
   "book/**",
