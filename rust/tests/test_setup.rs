@@ -303,7 +303,6 @@ fn test_readme_reports_the_round_thirteen_status() {
     assert!(read("README.md").contains("Closed perfection rounds, 33 of 100"));
 }
 
-// Restated under PG-67, the block below asserts its section whole in the guarded form beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_one_obligations() {
     let text = read("CONTRACT.md");
@@ -1016,6 +1015,7 @@ fn test_contract_carries_the_round_twelve_obligations() {
     );
 }
 
+// Restated under PG-67, the block below asserts its section whole in the guarded form beside the assertions it already carried.
 #[test]
 fn test_contract_carries_the_round_thirteen_obligations() {
     let text = read("CONTRACT.md");
